@@ -1,0 +1,51 @@
+name: mobile_sikesan_flutter
+description: "Aplikasi Mobile Sistem Keuangan Santri (SIKESAN) Terintegrasi"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # State Management
+  flutter_bloc: ^8.1.6
+  bloc: ^8.1.4
+  equatable: ^2.0.7
+
+  # Routing
+  go_router: ^14.8.0
+
+  # Network & API
+  dio: ^5.8.0+1
+  pretty_dio_logger: ^1.4.0
+  uuid: ^4.5.1
+
+  # Local Storage & Security
+  flutter_secure_storage: ^9.2.4
+  shared_preferences: ^2.5.2
+
+  # UI, Typography & Visuals
+  google_fonts: ^6.2.1
+  intl: ^0.20.2
+  fl_chart: ^0.70.2
+  shimmer: ^3.0.0
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  image_picker: ^1.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.15
+  freezed: ^2.5.8
+  json_serializable: ^6.9.4
+
+flutter:
+  uses-material-design: true
