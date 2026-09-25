@@ -150,28 +150,38 @@ class _MutationScreenState extends State<MutationScreen> {
                     bottom: Radius.circular(24),
                   ),
                 ),
-                padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Mutasi & Transaksi',
-                      style: AppTypography.headerTitle.copyWith(fontSize: 20),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1080),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Mutasi & Transaksi',
+                            style: AppTypography.headerTitle.copyWith(fontSize: 20),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Analisis Keuangan Santri & Operasional',
+                            style: AppTypography.headerSubtitle,
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Analisis Keuangan Santri & Operasional',
-                      style: AppTypography.headerSubtitle,
-                    ),
-                  ],
+                  ),
                 ),
               ),
 
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1080),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     // Segmented Tabs Container
                     Container(
                       padding: const EdgeInsets.all(4),
@@ -704,8 +714,10 @@ class _MutationScreenState extends State<MutationScreen> {
                   ],
                 ),
               ),
-            ],
+            ),
           ),
+        ],
+      ),
         ),
       ),
     );

@@ -30,15 +30,20 @@ class CustomCurvedBottomBar extends StatelessWidget {
         top: false,
         child: SizedBox(
           height: 66,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.home_rounded, 'Beranda'),
-              _buildNavItem(1, Icons.history_rounded, 'Mutasi'),
-              _buildNavItem(2, Icons.info_outline_rounded, 'Informasi'),
-              _buildNavItem(3, Icons.chat_bubble_outline_rounded, 'CS SIKESAN'),
-              _buildNavItem(4, Icons.person_outline_rounded, 'Profil'),
-            ],
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 680),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildNavItem(0, Icons.home_rounded, 'Beranda'),
+                  _buildNavItem(1, Icons.history_rounded, 'Mutasi'),
+                  _buildNavItem(2, Icons.info_outline_rounded, 'Informasi'),
+                  _buildNavItem(3, Icons.chat_bubble_outline_rounded, 'CS SIKESAN'),
+                  _buildNavItem(4, Icons.person_outline_rounded, 'Profil'),
+                ],
+              ),
+            ),
           ),
         ),
       ),

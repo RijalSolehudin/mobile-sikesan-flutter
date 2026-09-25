@@ -47,60 +47,70 @@ class _InformationScreenState extends State<InformationScreen> {
                   bottom: Radius.circular(24),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pusat Informasi',
-                        style: AppTypography.headerTitle.copyWith(fontSize: 20),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Informasi & Pengumuman Pesantren',
-                        style: AppTypography.headerSubtitle,
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(50),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
-                    ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1080),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Icon(Icons.add, color: Colors.white, size: 16),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Pengumuman',
-                          style: AppTypography.badgeText.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Pusat Informasi',
+                              style: AppTypography.headerTitle.copyWith(fontSize: 20),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Informasi & Pengumuman Pesantren',
+                              style: AppTypography.headerSubtitle,
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(50),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.add, color: Colors.white, size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Pengumuman',
+                                style: AppTypography.badgeText.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
 
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1080),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   // 2x2 Metric Cards
                   Row(
                     children: [
@@ -323,7 +333,9 @@ class _InformationScreenState extends State<InformationScreen> {
                 ],
               ),
             ),
-          ],
+          ),
+        ),
+      ],
         ),
       ),
     );

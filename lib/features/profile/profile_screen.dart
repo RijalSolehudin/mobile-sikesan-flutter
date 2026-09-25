@@ -38,9 +38,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   bottom: Radius.circular(32),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
-              child: Column(
-                children: [
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    children: [
                   // Title
                   Center(
                     child: Text(
@@ -107,6 +109,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
+          ),
+        ),
 
             // Profile Menus Section
             Center(

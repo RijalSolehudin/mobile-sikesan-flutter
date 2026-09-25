@@ -112,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       // Top Green Hero Section
                       Container(
+                        width: double.infinity,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             colors: [AppColors.primaryDark, AppColors.primary],
@@ -122,14 +123,18 @@ class _HomeScreenState extends State<HomeScreen> {
                             bottom: Radius.circular(24),
                           ),
                         ),
-                        padding: EdgeInsets.fromLTRB(
-                          isWide ? 32 : 20,
-                          isWide ? 40 : 50,
-                          isWide ? 32 : 20,
-                          20,
-                        ),
-                        child: Column(
-                          children: [
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1080),
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                isWide ? 24 : 20,
+                                isWide ? 36 : 50,
+                                isWide ? 24 : 20,
+                                20,
+                              ),
+                              child: Column(
+                                children: [
                             // User Greetings & Actions Header
                             Row(
                               children: [
@@ -372,16 +377,22 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
+                    ),
+                  ),
+                ),
 
                       // Content Section
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isWide ? 32 : 16,
-                          vertical: 20,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1080),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: isWide ? 24 : 16,
+                              vertical: 20,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                             // Slider Card Saldo Wallet Per-Santri (Khusus Wali Santri)
                             if (userRole.toLowerCase().contains('wali'))
                               _buildStudentWalletSlider(
@@ -542,9 +553,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
+              ),
+            ),
               );
             },
           );
