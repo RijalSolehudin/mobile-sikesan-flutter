@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class ApiEndpoints {
   // Staging Container Gateway (sikesan-staging-gateway mapped to port 8080)
   static const String stagingLocalPort = '8080';
@@ -10,6 +12,9 @@ class ApiEndpoints {
   static String get baseUrl {
     if (customBaseUrl != null && customBaseUrl!.isNotEmpty) {
       return customBaseUrl!;
+    }
+    if (kIsWeb) {
+      return '/api/v1';
     }
     return stagingTunnelUrl;
   }
