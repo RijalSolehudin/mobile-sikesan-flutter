@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import '../../core/network/api_result.dart';
 import '../../core/network/dio_client.dart';
@@ -101,7 +100,8 @@ class SppRepository {
     required int studentId,
     required List<String> billIds,
     required num totalAmount,
-    required File proofFile,
+    required List<int> proofBytes,
+    required String proofFilename,
     String? bankName,
     String? accountHolder,
   }) async {
@@ -111,9 +111,9 @@ class SppRepository {
         'total_amount': totalAmount.toInt(),
         'sender_bank_name': bankName ?? 'Transfer Bank',
         'sender_account_holder': accountHolder ?? 'Wali Santri',
-        'proof': await MultipartFile.fromFile(
-          proofFile.path,
-          filename: proofFile.path.split('/').last,
+        'proof': MultipartFile.fromBytes(
+          proofBytes,
+          filename: proofFilename,
         ),
       });
 

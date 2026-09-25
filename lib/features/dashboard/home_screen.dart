@@ -292,7 +292,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Riwayat Transaksi', style: AppTypography.sectionTitle),
+                            Expanded(
+                              child: Text('Riwayat Transaksi', style: AppTypography.sectionTitle),
+                            ),
                             GestureDetector(
                               onTap: () {
                                 context.go('/mutation');

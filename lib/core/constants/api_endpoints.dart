@@ -1,11 +1,8 @@
-import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
-
 class ApiEndpoints {
   // Staging Container Gateway (sikesan-staging-gateway mapped to port 8080)
   static const String stagingLocalPort = '8080';
   static const String stagingTunnelUrl =
-      'https://sperm-story-prove-contract.trycloudflare.com/api/v1';
+      'https://ears-very-solaris-affecting.trycloudflare.com/api/v1';
 
   // Custom override if needed
   static String? customBaseUrl;
@@ -14,14 +11,7 @@ class ApiEndpoints {
     if (customBaseUrl != null && customBaseUrl!.isNotEmpty) {
       return customBaseUrl!;
     }
-    if (kIsWeb) {
-      return 'http://localhost:$stagingLocalPort/api/v1';
-    }
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:$stagingLocalPort/api/v1';
-    }
-    // iOS Simulator, macOS Desktop, Linux
-    return 'http://127.0.0.1:$stagingLocalPort/api/v1';
+    return stagingTunnelUrl;
   }
 
   // Auth

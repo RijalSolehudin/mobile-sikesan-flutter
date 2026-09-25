@@ -88,12 +88,57 @@ class SikesanMobileApp extends StatelessWidget {
           BlocProvider<DashboardBloc>.value(value: dashboardBloc),
         ],
         child: MaterialApp.router(
-          title: 'SIKESAN Mobile',
+          title: 'SIKESAN - Sistem Keuangan Santri',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           routerConfig: router,
+          builder: (context, child) {
+            return ResponsiveMobileWrapper(
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
         ),
       ),
+    );
+  }
+}
+
+class ResponsiveMobileWrapper extends StatelessWidget {
+  final Widget child;
+
+  const ResponsiveMobileWrapper({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 500) {
+          return Scaffold(
+            backgroundColor: const Color(0xFF0F172A),
+            body: Center(
+              child: Container(
+                constraints: const BoxConstraints(
+                  maxWidth: 440,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.35),
+                      blurRadius: 36,
+                      spreadRadius: 4,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: child,
+              ),
+            ),
+          );
+        }
+        return child;
+      },
     );
   }
 }

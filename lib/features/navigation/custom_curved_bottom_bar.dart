@@ -46,16 +46,16 @@ class CustomCurvedBottomBar extends StatelessWidget {
   Widget _buildNavItem(int index, IconData icon, String label) {
     final bool isSelected = currentIndex == index;
 
-    return GestureDetector(
-      onTap: () => onTap(index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => onTap(index),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
             if (isSelected)
               Container(
                 padding: const EdgeInsets.all(8),
@@ -97,6 +97,7 @@ class CustomCurvedBottomBar extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

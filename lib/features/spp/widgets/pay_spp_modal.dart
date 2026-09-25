@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +21,7 @@ class PaySppModal extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const PaySppModal(),
     );
@@ -39,7 +40,8 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
   final Set<int> _selectedMonths = {};
   String _selectedPaymentMethod = 'TRANSFER'; // 'TRANSFER' or 'CASH'
 
-  File? _proofFile;
+  Uint8List? _proofBytes;
+  String? _proofFilename;
   bool _isLoadingBills = false;
   bool _isSubmitting = false;
   List<SppBillModel> _bills = [];
@@ -196,8 +198,10 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
     try {
       final picked = await _picker.pickImage(source: source, imageQuality: 80);
       if (picked != null) {
+        final bytes = await picked.readAsBytes();
         setState(() {
-          _proofFile = File(picked.path);
+          _proofBytes = bytes;
+          _proofFilename = picked.name;
         });
       }
     } catch (e) {
@@ -387,7 +391,7 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
     final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
 
-    if (isGuardian && _proofFile == null) {
+    if (isGuardian && _proofBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Silakan unggah bukti transfer/pembayaran'), backgroundColor: AppColors.error),
       );
@@ -427,7 +431,8 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
         studentId: _selectedStudentId!,
         billIds: billIds,
         totalAmount: total,
-        proofFile: _proofFile ?? File(''),
+        proofBytes: _proofBytes ?? [],
+        proofFilename: _proofFilename ?? 'proof.jpg',
       );
     }
 
@@ -549,6 +554,13 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
     final userRole = context.watch<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
     final dashboardStudents = context.watch<DashboardBloc>().state.metrics.students;
+    if (_selectedStudentId == null && dashboardStudents.isNotEmpty && isGuardian) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _selectedStudentId == null) {
+          _selectStudent(dashboardStudents.first.id, dashboardStudents.first.name);
+        }
+      });
+    }
 
     final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 750000;
     final num totalAmount = _selectedMonths.length * rate;
@@ -1213,16 +1225,16 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                           color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: _proofFile != null ? const Color(0xFF10B981) : const Color(0xFFCBD5E1),
+                            color: _proofBytes != null ? const Color(0xFF10B981) : const Color(0xFFCBD5E1),
                             style: BorderStyle.solid,
                           ),
                         ),
-                        child: _proofFile != null
+                        child: _proofBytes != null
                             ? Row(
                                 children: [
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(10),
-                                    child: Image.file(_proofFile!, width: 48, height: 48, fit: BoxFit.cover),
+                                    child: Image.memory(_proofBytes!, width: 48, height: 48, fit: BoxFit.cover),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -1232,7 +1244,7 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                                         const Text('Bukti Foto Terpilih', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
                                         const SizedBox(height: 2),
                                         Text(
-                                          _proofFile!.path.split('/').last,
+                                          _proofFilename ?? 'Bukti transfer',
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(fontSize: 10.5, color: Colors.grey),
