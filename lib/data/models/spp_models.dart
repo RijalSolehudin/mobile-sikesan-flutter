@@ -20,10 +20,10 @@ class SppBillModel {
   factory SppBillModel.fromJson(Map<String, dynamic> json) {
     return SppBillModel(
       id: json['id']?.toString() ?? '',
-      studentId: (json['student_id'] as num?)?.toInt() ?? 0,
-      periodMonth: (json['period_month'] as num?)?.toInt() ?? 1,
-      periodYear: (json['period_year'] as num?)?.toInt() ?? DateTime.now().year,
-      amountBilled: (json['amount_billed'] as num?) ?? 0,
+      studentId: int.tryParse(json['student_id']?.toString() ?? '') ?? 0,
+      periodMonth: int.tryParse(json['period_month']?.toString() ?? '') ?? 1,
+      periodYear: int.tryParse(json['period_year']?.toString() ?? '') ?? DateTime.now().year,
+      amountBilled: num.tryParse(json['amount_billed']?.toString() ?? '') ?? 0,
       status: json['status']?.toString() ?? 'UNPAID',
     );
   }
@@ -119,10 +119,12 @@ class SppReceiptBillItem {
 
   factory SppReceiptBillItem.fromJson(Map<String, dynamic> json) {
     return SppReceiptBillItem(
-      month: (json['period_month'] as num?)?.toInt() ?? 1,
+      month: int.tryParse(json['period_month']?.toString() ?? '') ?? 1,
       monthName: json['month_name']?.toString() ?? 'Bulan',
-      year: (json['period_year'] as num?)?.toInt() ?? DateTime.now().year,
-      amount: (json['allocated_amount'] as num?) ?? (json['amount_billed'] as num?) ?? 0,
+      year: int.tryParse(json['period_year']?.toString() ?? '') ?? DateTime.now().year,
+      amount: num.tryParse(json['allocated_amount']?.toString() ?? '') ??
+          num.tryParse(json['amount_billed']?.toString() ?? '') ??
+          0,
     );
   }
 }
@@ -166,7 +168,7 @@ class SppReceiptModel {
       paymentId: json['payment_id']?.toString() ?? '',
       paymentDate: json['payment_date']?.toString() ?? DateTime.now().toIso8601String(),
       paymentTime: json['payment_time']?.toString() ?? '00:00:00',
-      totalPaidAmount: (json['total_paid_amount'] as num?) ?? 0,
+      totalPaidAmount: num.tryParse(json['total_paid_amount']?.toString() ?? '') ?? 0,
       paymentMethod: json['payment_method']?.toString() ?? 'TRANSFER',
       status: json['status']?.toString() ?? 'APPROVED',
       studentName: student?['name']?.toString() ?? 'Santri',

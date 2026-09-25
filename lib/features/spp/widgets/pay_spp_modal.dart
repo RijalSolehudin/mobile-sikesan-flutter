@@ -8,7 +8,6 @@ import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
-import '../../../data/models/dashboard_metric_model.dart';
 import '../../../data/models/spp_models.dart';
 import '../../../data/repositories/spp_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -96,13 +95,13 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
       _searchedStudents.clear();
       _searchController.text = name;
     });
-    _loadBillsForStudent(id);
+    _loadBillsForStudent(id, year: _selectedYear);
   }
 
-  Future<void> _loadBillsForStudent(int studentId) async {
+  Future<void> _loadBillsForStudent(int studentId, {int? year}) async {
     setState(() => _isLoadingBills = true);
     final sppRepo = RepositoryProvider.of<SppRepository>(context);
-    final result = await sppRepo.getStudentBills(studentId);
+    final result = await sppRepo.getStudentBills(studentId, year: year ?? _selectedYear);
 
     if (!mounted) return;
 
@@ -112,11 +111,61 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
         _isLoadingBills = false;
       });
     } else {
+      final msg = result is ApiFailure ? (result as ApiFailure).message : 'Gagal memuat tagihan SPP';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      );
       setState(() {
         _bills = [];
         _isLoadingBills = false;
       });
     }
+  }
+
+  void _onMonthTapped(int monthNumber) {
+    // Kumpulkan seluruh bulan yang belum lunas (UNPAID) untuk tahun yang dipilih
+    final unpaidMonths = <int>[];
+    for (int m = 1; m <= 12; m++) {
+      final bill = _bills.firstWhere(
+        (b) => b.periodYear == _selectedYear && b.periodMonth == m,
+        orElse: () => SppBillModel(
+          id: '',
+          studentId: _selectedStudentId ?? 0,
+          periodMonth: m,
+          periodYear: _selectedYear,
+          amountBilled: 750000,
+          status: 'UNPAID',
+        ),
+      );
+      if (!bill.isPaid) {
+        unpaidMonths.add(m);
+      }
+    }
+
+    if (!unpaidMonths.contains(monthNumber)) return; // Bulan sudah lunas, tidak dapat dipilih
+
+    setState(() {
+      final maxSelected = _selectedMonths.isEmpty ? 0 : _selectedMonths.reduce((a, b) => a > b ? a : b);
+
+      if (_selectedMonths.contains(monthNumber)) {
+        if (monthNumber == maxSelected) {
+          // Klik pada bulan tertinggi yang sedang terpilih -> batalkan bulan ini
+          _selectedMonths.remove(monthNumber);
+        } else {
+          // Klik pada bulan terpilih yang lebih rendah -> pangkas pemilihan di atas bulan ini
+          _selectedMonths.removeWhere((m) => m > monthNumber);
+        }
+      } else {
+        // Klik pada bulan yang belum terpilih:
+        // Terapkan prinsip FIFO: otomatis pilih semua bulan tertua yang belum lunas sampai bulan ini
+        _selectedMonths.clear();
+        for (final m in unpaidMonths) {
+          if (m <= monthNumber) {
+            _selectedMonths.add(m);
+          }
+        }
+      }
+    });
   }
 
   Future<void> _searchGlobalStudents(String query) async {
@@ -345,20 +394,26 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
       return;
     }
 
-    setState(() => _isSubmitting = true);
-    final sppRepo = RepositoryProvider.of<SppRepository>(context);
+    // Map selected months to actual bill IDs from database
+    final selectedBills = _bills
+        .where((b) => b.periodYear == _selectedYear && _selectedMonths.contains(b.periodMonth) && b.id.isNotEmpty)
+        .toList();
+    final List<String> billIds = selectedBills.map((b) => b.id).toList();
 
-    // Map selected months to bill IDs or generate dummy bill id
-    final selectedBills = _bills.where((b) => b.periodYear == _selectedYear && _selectedMonths.contains(b.periodMonth)).toList();
-    List<String> billIds = selectedBills.map((b) => b.id).toList();
-
-    // Fallback if bills not generated yet in database
-    if (billIds.isEmpty) {
-      billIds = _selectedMonths.map((m) => 'TEMP-BILL-$_selectedStudentId-$_selectedYear-$m').toList();
+    if (billIds.isEmpty || billIds.length != _selectedMonths.length) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tagihan SPP untuk sebagian/seluruh periode yang dipilih belum diterbitkan oleh pesantren.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
     }
 
-    final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 750000;
-    final num total = _selectedMonths.length * rate;
+    setState(() => _isSubmitting = true);
+    final sppRepo = RepositoryProvider.of<SppRepository>(context);
+    final num rate = selectedBills.isNotEmpty ? selectedBills.first.amountBilled : 750000;
+    final num total = selectedBills.fold<num>(0, (sum, b) => sum + b.amountBilled);
 
     ApiResult<String> result;
     if (!isGuardian && _selectedPaymentMethod == 'CASH') {
@@ -585,63 +640,128 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                         child: const Text('Belum ada santri terhubung dengan akun Anda', style: TextStyle(fontSize: 12, color: Colors.grey)),
                       )
                     else
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: dashboardStudents.map((st) {
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: dashboardStudents.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: dashboardStudents.length == 1 ? 1 : 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          mainAxisExtent: 64,
+                        ),
+                        itemBuilder: (context, index) {
+                          final st = dashboardStudents[index];
                           final isSelected = _selectedStudentId == st.id;
-                          final hasOtherSelected = _selectedStudentId != null && !isSelected;
 
-                          return Opacity(
-                            opacity: hasOtherSelected ? 0.45 : 1.0,
-                            child: FilterChip(
-                              label: Row(
-                                mainAxisSize: MainAxisSize.min,
+                          return InkWell(
+                            onTap: () {
+                              _selectStudent(st.id, st.name);
+                            },
+                            borderRadius: BorderRadius.circular(14),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isSelected ? const Color(0xFFF5F5FE) : Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFFE2E8F0),
+                                  width: isSelected ? 1.6 : 1.0,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: const Color(0xFF5B58EB).withValues(alpha: 0.12),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.02),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                              ),
+                              child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.school_rounded,
-                                    size: 15,
-                                    color: isSelected ? Colors.white : (hasOtherSelected ? Colors.grey : const Color(0xFF5B58EB)),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '${st.name} (${st.grade})',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                      color: isSelected ? Colors.white : (hasOtherSelected ? Colors.grey : const Color(0xFF1E293B)),
+                                  // Avatar Icon
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFFF1F5F9),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.school_rounded,
+                                      size: 18,
+                                      color: isSelected ? Colors.white : const Color(0xFF64748B),
                                     ),
                                   ),
+                                  const SizedBox(width: 8),
+                                  // Nama & Jenjang
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          st.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 12.5,
+                                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                            color: isSelected ? const Color(0xFF1E293B) : const Color(0xFF334155),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          st.grade,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                            color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  // Indikator Pilihan (Ceklis saat terpilih)
+                                  if (isSelected)
+                                    Container(
+                                      width: 18,
+                                      height: 18,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF5B58EB),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.check,
+                                        size: 12,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  else
+                                    Container(
+                                      width: 18,
+                                      height: 18,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: const Color(0xFFCBD5E1), width: 1.2),
+                                      ),
+                                    ),
                                 ],
                               ),
-                              selected: isSelected,
-                              showCheckmark: false,
-                              selectedColor: const Color(0xFF5B58EB),
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
-                                side: BorderSide(
-                                  color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFFE2E8F0),
-                                  width: 1.2,
-                                ),
-                              ),
-                              onSelected: hasOtherSelected
-                                  ? null // Disabled when other student is chosen
-                                  : (val) {
-                                      if (val) {
-                                        _selectStudent(st.id, st.name);
-                                      } else {
-                                        setState(() {
-                                          _selectedStudentId = null;
-                                          _selectedStudentName = '';
-                                          _selectedMonths.clear();
-                                          _bills.clear();
-                                        });
-                                      }
-                                    },
                             ),
                           );
-                        }).toList(),
+                        },
                       ),
                   ] else ...[
                     // Bendahara / Admin: Input Pencarian Santri Global
@@ -733,11 +853,14 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                                   return DropdownMenuItem(value: y, child: Text('$y', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)));
                                 }).toList(),
                                 onChanged: (newYear) {
-                                  if (newYear != null) {
+                                  if (newYear != null && newYear != _selectedYear) {
                                     setState(() {
                                       _selectedYear = newYear;
                                       _selectedMonths.clear();
                                     });
+                                    if (_selectedStudentId != null) {
+                                      _loadBillsForStudent(_selectedStudentId!, year: newYear);
+                                    }
                                   }
                                 },
                               ),
@@ -754,6 +877,18 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                     children: [
                       Text('Pilihan Bulan', style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13)),
                       const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'Prinsip FIFO (Berurutan)',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                        ),
+                      ),
                       if (_isLoadingBills) ...[
                         const SizedBox(width: 10),
                         const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -820,17 +955,9 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                         );
                       }
 
-                      // Bulan Belum Lunas: Bisa dipilih
+                      // Bulan Belum Lunas: Bisa dipilih dengan prinsip FIFO
                       return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isSelected) {
-                              _selectedMonths.remove(monthNumber);
-                            } else {
-                              _selectedMonths.add(monthNumber);
-                            }
-                          });
-                        },
+                        onTap: () => _onMonthTapped(monthNumber),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           decoration: BoxDecoration(

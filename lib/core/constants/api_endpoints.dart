@@ -5,7 +5,7 @@ class ApiEndpoints {
   // Staging Container Gateway (sikesan-staging-gateway mapped to port 8080)
   static const String stagingLocalPort = '8080';
   static const String stagingTunnelUrl =
-      'https://sperm-story-prove-contract.trycloudflare.com/login/api/v1';
+      'https://sperm-story-prove-contract.trycloudflare.com/api/v1';
 
   // Custom override if needed
   static String? customBaseUrl;

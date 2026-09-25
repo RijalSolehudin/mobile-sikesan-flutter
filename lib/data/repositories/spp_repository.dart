@@ -40,9 +40,12 @@ class SppRepository {
     }
   }
 
-  Future<ApiResult<List<SppBillModel>>> getStudentBills(int studentId) async {
+  Future<ApiResult<List<SppBillModel>>> getStudentBills(int studentId, {int? year}) async {
     try {
-      final response = await dioClient.dio.get('/students/$studentId/bills');
+      final response = await dioClient.dio.get(
+        '/students/$studentId/bills',
+        queryParameters: year != null ? {'year': year} : null,
+      );
       final dynamic rawList = response.data['data'];
       List<dynamic> list = [];
       if (rawList is List) {

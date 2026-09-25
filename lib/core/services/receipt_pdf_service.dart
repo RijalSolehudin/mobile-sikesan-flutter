@@ -8,7 +8,11 @@ import '../../data/models/spp_models.dart';
 class ReceiptPdfService {
   static Future<Uint8List> generateReceiptPdf(SppReceiptModel receipt) async {
     final pdf = pw.Document();
-    final currencyFormatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     pdf.addPage(
       pw.Page(
@@ -36,16 +40,25 @@ class ReceiptPdfService {
                       pw.SizedBox(height: 2),
                       pw.Text(
                         'Sistem Keuangan Santri Terintegrasi',
-                        style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                        style: const pw.TextStyle(
+                          fontSize: 10,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                       pw.Text(
                         'Jl. Pesantren Luhur No. 1, Jawa Barat • Telp: (021) 8899-7711',
-                        style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+                        style: const pw.TextStyle(
+                          fontSize: 8,
+                          color: PdfColors.grey600,
+                        ),
                       ),
                     ],
                   ),
                   pw.Container(
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: pw.BoxDecoration(
                       color: receipt.status.toUpperCase() == 'APPROVED'
                           ? PdfColor.fromHex('#ECFDF5')
@@ -58,7 +71,9 @@ class ReceiptPdfService {
                       ),
                     ),
                     child: pw.Text(
-                      receipt.status.toUpperCase() == 'APPROVED' ? 'LUNAS' : 'MENUNGGU VERIFIKASI',
+                      receipt.status.toUpperCase() == 'APPROVED'
+                          ? 'LUNAS'
+                          : 'MENUNGGU VERIFIKASI',
                       style: pw.TextStyle(
                         fontSize: 11,
                         fontWeight: pw.FontWeight.bold,
@@ -78,7 +93,11 @@ class ReceiptPdfService {
               pw.Center(
                 child: pw.Text(
                   'KWITANSI PEMBAYARAN SPP',
-                  style: pw.TextStyle(fontSize: 15, fontWeight: pw.FontWeight.bold, letterSpacing: 1.1),
+                  style: pw.TextStyle(
+                    fontSize: 15,
+                    fontWeight: pw.FontWeight.bold,
+                    letterSpacing: 1.1,
+                  ),
                 ),
               ),
               pw.Center(
@@ -116,9 +135,17 @@ class ReceiptPdfService {
                         pw.SizedBox(height: 4),
                         _buildInfoRow('Waktu Transaksi', receipt.paymentTime),
                         pw.SizedBox(height: 4),
-                        _buildInfoRow('Metode Pembayaran', receipt.paymentMethod.toUpperCase()),
+                        _buildInfoRow(
+                          'Metode Pembayaran',
+                          receipt.paymentMethod.toUpperCase(),
+                        ),
                         pw.SizedBox(height: 4),
-                        _buildInfoRow('ID Referensi', receipt.paymentId.isNotEmpty ? receipt.paymentId : '-'),
+                        _buildInfoRow(
+                          'ID Referensi',
+                          receipt.paymentId.isNotEmpty
+                              ? receipt.paymentId
+                              : '-',
+                        ),
                       ],
                     ),
                   ),
@@ -129,30 +156,63 @@ class ReceiptPdfService {
               // Tabel Rincian Tagihan
               pw.Text(
                 'Rincian Bulan Tagihan:',
-                style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.SizedBox(height: 6),
               pw.Table(
-                border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.8),
+                border: pw.TableBorder.all(
+                  color: PdfColors.grey300,
+                  width: 0.8,
+                ),
                 children: [
                   pw.TableRow(
-                    decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F1F5F9')),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColor.fromHex('#F1F5F9'),
+                    ),
                     children: [
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(6),
-                        child: pw.Text('No', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                        child: pw.Text(
+                          'No',
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(6),
-                        child: pw.Text('Keterangan Tagihan', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                        child: pw.Text(
+                          'Keterangan Tagihan',
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(6),
-                        child: pw.Text('Periode', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                        child: pw.Text(
+                          'Periode',
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                       pw.Padding(
                         padding: const pw.EdgeInsets.all(6),
-                        child: pw.Text('Nominal', textAlign: pw.TextAlign.right, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                        child: pw.Text(
+                          'Nominal',
+                          textAlign: pw.TextAlign.right,
+                          style: pw.TextStyle(
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 10,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -163,19 +223,32 @@ class ReceiptPdfService {
                       children: [
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(6),
-                          child: pw.Text('$idx', style: const pw.TextStyle(fontSize: 9.5)),
+                          child: pw.Text(
+                            '$idx',
+                            style: const pw.TextStyle(fontSize: 9.5),
+                          ),
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(6),
-                          child: pw.Text('SPP Santri - ${item.monthName}', style: const pw.TextStyle(fontSize: 9.5)),
+                          child: pw.Text(
+                            'SPP Santri - ${item.monthName}',
+                            style: const pw.TextStyle(fontSize: 9.5),
+                          ),
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(6),
-                          child: pw.Text('${item.monthName} ${item.year}', style: const pw.TextStyle(fontSize: 9.5)),
+                          child: pw.Text(
+                            '${item.monthName} ${item.year}',
+                            style: const pw.TextStyle(fontSize: 9.5),
+                          ),
                         ),
                         pw.Padding(
                           padding: const pw.EdgeInsets.all(6),
-                          child: pw.Text(currencyFormatter.format(item.amount), textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 9.5)),
+                          child: pw.Text(
+                            currencyFormatter.format(item.amount),
+                            textAlign: pw.TextAlign.right,
+                            style: const pw.TextStyle(fontSize: 9.5),
+                          ),
                         ),
                       ],
                     );
@@ -199,7 +272,13 @@ class ReceiptPdfService {
                     child: pw.Row(
                       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                       children: [
-                        pw.Text('Total Bayar:', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+                        pw.Text(
+                          'Total Bayar:',
+                          style: pw.TextStyle(
+                            fontSize: 11,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
                         pw.Text(
                           currencyFormatter.format(receipt.totalPaidAmount),
                           style: pw.TextStyle(
@@ -222,17 +301,35 @@ class ReceiptPdfService {
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text('Wali Santri,', style: const pw.TextStyle(fontSize: 9)),
+                      pw.Text(
+                        'Wali Santri,',
+                        style: const pw.TextStyle(fontSize: 9),
+                      ),
                       pw.SizedBox(height: 45),
-                      pw.Text('( ${receipt.guardianName} )', style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                      pw.Text(
+                        '( ${receipt.guardianName} )',
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text('Bendahara Pesantren,', style: const pw.TextStyle(fontSize: 9)),
+                      pw.Text(
+                        'Bendahara Pesantren,',
+                        style: const pw.TextStyle(fontSize: 9),
+                      ),
                       pw.SizedBox(height: 45),
-                      pw.Text('( Bagian Keuangan SIKESAN )', style: const pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                      pw.Text(
+                        '( Bagian Keuangan SIKESAN )',
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -241,7 +338,10 @@ class ReceiptPdfService {
               pw.Center(
                 child: pw.Text(
                   'Dokumen ini dicetak otomatis oleh Aplikasi Mobile SIKESAN dan diakui sah.',
-                  style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500),
+                  style: const pw.TextStyle(
+                    fontSize: 8,
+                    color: PdfColors.grey500,
+                  ),
                 ),
               ),
             ],
@@ -264,7 +364,10 @@ class ReceiptPdfService {
             style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey700),
           ),
         ),
-        pw.Text(': ', style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey700)),
+        pw.Text(
+          ': ',
+          style: const pw.TextStyle(fontSize: 9.5, color: PdfColors.grey700),
+        ),
         pw.Expanded(
           child: pw.Text(
             value,
