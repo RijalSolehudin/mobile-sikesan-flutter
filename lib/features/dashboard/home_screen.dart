@@ -99,9 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? menuList
                         : menuList.take(8).toList());
               final cards = _buildCarouselCards(state, userRole);
-              final displayTransactions = state.transactions.isNotEmpty
-                  ? state.transactions
-                  : TransactionItemModel.dummies();
+              final displayTransactions = state.transactions;
 
               return RefreshIndicator(
                 color: AppColors.primary,
@@ -536,6 +534,56 @@ class _HomeScreenState extends State<HomeScreen> {
                                       borderRadius: 16,
                                     ),
                                   ),
+                                ),
+                              )
+                            else if (displayTransactions.isEmpty)
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 32,
+                                  horizontal: 16,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: const Color(0xFFF1F5F9),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF8FAFC),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.receipt_long_outlined,
+                                        size: 24,
+                                        color: Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      'Belum ada transaksi terbaru',
+                                      style: AppTypography.itemTitle.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        color: const Color(0xFF475569),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Riwayat transaksi santri akan muncul di sini',
+                                      style:
+                                          AppTypography.itemSubtitle.copyWith(
+                                        fontSize: 11,
+                                        color: const Color(0xFF94A3B8),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               )
                             else

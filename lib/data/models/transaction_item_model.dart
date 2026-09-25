@@ -119,19 +119,4 @@ class TransactionItemModel {
       studentClass: '',
     );
   }
-
-  static List<TransactionItemModel> dummies() {
-    return [
-      TransactionItemModel(
-        id: '1',
-        title: 'Top Up Saldo',
-        category: 'Pemasukan Saldo',
-        amount: 2250000,
-        isIncome: true,
-        date: DateTime(2026, 9, 23, 21, 44),
-        studentName: 'Dadung',
-        studentClass: 'Semua Santri',
-      ),
-    ];
-  }
 }

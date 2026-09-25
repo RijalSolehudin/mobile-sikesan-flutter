@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiEndpoints {
-  // Staging Container Gateway (sikesan-staging-gateway mapped to port 8080)
-  static const String stagingLocalPort = '8080';
-  static const String stagingTunnelUrl =
+  // Staging Cloudflare Named Tunnel endpoint
+  static const String envBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static const String defaultStagingUrl =
       'https://ears-very-solaris-affecting.trycloudflare.com/api/v1';
 
   // Custom override if needed
@@ -13,10 +13,13 @@ class ApiEndpoints {
     if (customBaseUrl != null && customBaseUrl!.isNotEmpty) {
       return customBaseUrl!;
     }
+    if (envBaseUrl.isNotEmpty) {
+      return envBaseUrl;
+    }
     if (kIsWeb) {
       return '/api/v1';
     }
-    return stagingTunnelUrl;
+    return defaultStagingUrl;
   }
 
   // Auth

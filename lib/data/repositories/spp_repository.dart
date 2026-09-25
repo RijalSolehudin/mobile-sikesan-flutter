@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/network/api_result.dart';
 import '../../core/network/dio_client.dart';
 import '../models/spp_models.dart';
@@ -78,8 +79,10 @@ class SppRepository {
     required int studentId,
     required List<String> billIds,
     required num totalAmount,
+    String? idempotencyKey,
   }) async {
     try {
+      final key = idempotencyKey ?? const Uuid().v4();
       final response = await dioClient.dio.post(
         '/spp/payments',
         data: {
@@ -88,6 +91,9 @@ class SppRepository {
           'total_amount': totalAmount.toInt(),
           'payment_method': 'CASH',
         },
+        options: Options(
+          headers: {'Idempotency-Key': key},
+        ),
       );
 
       final paymentData = response.data['data'];
@@ -114,8 +120,10 @@ class SppRepository {
     required String proofFilename,
     String? bankName,
     String? accountHolder,
+    String? idempotencyKey,
   }) async {
     try {
+      final key = idempotencyKey ?? const Uuid().v4();
       final formData = FormData.fromMap({
         'student_id': studentId,
         'total_amount': totalAmount.toInt(),
@@ -131,6 +139,9 @@ class SppRepository {
       final response = await dioClient.dio.post(
         '/spp/submit-payment',
         data: formData,
+        options: Options(
+          headers: {'Idempotency-Key': key},
+        ),
       );
 
       final paymentData = response.data['data'];

@@ -99,22 +99,20 @@ class DashboardMetricModel {
     );
   }
 
-  factory DashboardMetricModel.dummy() {
-    return const DashboardMetricModel(
-      totalBalance: 1230500,
-      totalIncome: 3410000,
-      totalExpense: 2179500,
-      totalUnpaidSpp: 150750000,
-      monthlyBill: 750000,
+  factory DashboardMetricModel.empty({String role = 'Wali Santri'}) {
+    final isGuardian = role.toLowerCase().contains('wali');
+    return DashboardMetricModel(
+      totalBalance: 0,
+      totalIncome: 0,
+      totalExpense: 0,
+      totalUnpaidSpp: 0,
+      monthlyBill: 0,
       unpaidStatus: 'Bulan Berjalan',
-      students: [
-        StudentSummaryModel(
-          id: 1,
-          name: 'Muhammad Alfatih',
-          grade: 'SMP - Kelas 7A',
-          walletBalance: 250000,
-        ),
-      ],
+      role: role,
+      metricTitle1: isGuardian ? 'SALDO TABUNGAN' : 'TOTAL TABUNGAN SANTRI',
+      metricTitle2: isGuardian ? 'TOTAL PEMASUKAN' : 'SPP BULAN INI',
+      metricTitle3: isGuardian ? 'TOTAL PENGELUARAN' : 'INFAK BULAN INI',
+      students: const [],
     );
   }
 }

@@ -32,11 +32,11 @@ class DashboardRepository {
         }
       }
 
-      return ApiSuccess(DashboardMetricModel.dummy());
+      return ApiSuccess(DashboardMetricModel.empty(role: role));
     } on DioException catch (e) {
       if (e.response?.statusCode == 403 || e.response?.statusCode == 404) {
         // Fallback for roles that don't have dedicated dashboard metric
-        return ApiSuccess(DashboardMetricModel.dummy());
+        return ApiSuccess(DashboardMetricModel.empty(role: role));
       }
       return ApiFailure(
         e.response?.data?['message'] ?? 'Gagal memuat metrik dashboard',

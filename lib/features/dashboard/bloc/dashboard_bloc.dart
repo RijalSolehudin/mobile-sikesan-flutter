@@ -67,7 +67,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           results[1] as ApiResult<List<TransactionItemModel>>;
       final menuItems = results[2] as List<MenuItemModel>;
 
-      DashboardMetricModel metrics = DashboardMetricModel.dummy();
+      DashboardMetricModel metrics = DashboardMetricModel.empty(role: role);
       if (metricsResult is ApiSuccess<DashboardMetricModel>) {
         metrics = metricsResult.data;
       }

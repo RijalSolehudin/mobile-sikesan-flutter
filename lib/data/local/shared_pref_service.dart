@@ -23,7 +23,11 @@ class SharedPrefService {
     await _prefs.setString(AppConstants.roleKey, role);
   }
 
-  String getUserRole() {
-    return _prefs.getString(AppConstants.roleKey) ?? 'Admin';
+  String? getUserRole() {
+    return _prefs.getString(AppConstants.roleKey);
+  }
+
+  Future<void> clearRole() async {
+    await _prefs.remove(AppConstants.roleKey);
   }
 }
