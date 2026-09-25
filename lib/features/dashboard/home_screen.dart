@@ -73,220 +73,250 @@ class _HomeScreenState extends State<HomeScreen> {
           final menuList = state.menuItems.isNotEmpty ? state.menuItems : MenuItemModel.defaultMenus().where((m) => m.isVisibleForRole(userRole)).toList();
           final displayedMenus = state.isMenuExpanded ? menuList : menuList.take(8).toList();
 
-          return RefreshIndicator(
-            color: AppColors.primary,
-            onRefresh: _handleRefresh,
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                children: [
-                  // Top Green Hero Section
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [AppColors.primaryDark, AppColors.primary],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
-                      borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
-                    child: Column(
-                      children: [
-                        // User Greetings & Actions Header
-                        Row(
-                          children: [
-                            const MosqueAvatar(size: 44),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Assalamu'alaikum,",
-                                    style: AppTypography.headerSubtitle.copyWith(fontSize: 12),
-                                  ),
-                                  Text(
-                                    userName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.headerTitle.copyWith(fontSize: 16),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                userRole.toUpperCase(),
-                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.notifications_rounded, color: Colors.white, size: 20),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 18),
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= 850;
+              final crossAxisCount = constraints.maxWidth > 1100
+                  ? 8
+                  : (constraints.maxWidth > 700 ? 6 : 4);
+              final childAspectRatio = constraints.maxWidth > 1100
+                  ? 1.12
+                  : (constraints.maxWidth > 700 ? 0.95 : 0.78);
 
-                        // Title Center
-                        Text(
-                          'SIKESAN',
-                          style: AppTypography.headerTitle.copyWith(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.2,
+              return RefreshIndicator(
+                color: AppColors.primary,
+                onRefresh: _handleRefresh,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      // Top Green Hero Section
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.primaryDark, AppColors.primary],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
                           ),
+                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Sistem Keuangan Santri',
-                          style: AppTypography.headerSubtitle.copyWith(fontWeight: FontWeight.w600),
+                        padding: EdgeInsets.fromLTRB(
+                          isWide ? 32 : 20,
+                          isWide ? 40 : 50,
+                          isWide ? 32 : 20,
+                          20,
                         ),
-                        Text(
-                          'Pondok Pesantren Pribadi Terintegrasi',
-                          style: AppTypography.headerSubtitle.copyWith(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.8),
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-
-                        // Financial Metric Cards Carousel
-                        isLoading
-                            ? const ShimmerBox(width: double.infinity, height: 140, borderRadius: 16)
-                            : SizedBox(
-                                height: 140,
-                                child: PageView(
-                                  controller: _pageController,
-                                  onPageChanged: (index) {
-                                    context.read<DashboardBloc>().add(DashboardCarouselChanged(index));
-                                  },
-                                  children: _buildCarouselCards(state, userRole),
-                                ),
-                              ),
-                        const SizedBox(height: 12),
-
-                        // Carousel Indicators
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(2, (index) {
-                            final bool isSelected = state.carouselIndex == index;
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              height: 4,
-                              width: isSelected ? 20 : 6,
-                              decoration: BoxDecoration(
-                                color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.4),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Content Section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Slider Card Saldo Wallet Per-Santri (Khusus Wali Santri)
-                        if (userRole.toLowerCase().contains('wali'))
-                          _buildStudentWalletSlider(state.metrics.students),
-
-                        // Menu Utama Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
                           children: [
-                            Text('Menu Utama', style: AppTypography.sectionTitle),
-                            if (menuList.length > 8)
-                              GestureDetector(
-                                onTap: () {
-                                  context.read<DashboardBloc>().add(const DashboardToggleMenuExpanded());
-                                },
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      state.isMenuExpanded ? 'Lihat Lebih Sedikit' : 'Lihat Semua',
-                                      style: AppTypography.itemSubtitle.copyWith(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.w600,
+                            // User Greetings & Actions Header
+                            Row(
+                              children: [
+                                const MosqueAvatar(size: 44),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Assalamu'alaikum,",
+                                        style: AppTypography.headerSubtitle.copyWith(fontSize: 12),
                                       ),
-                                    ),
-                                    Icon(
-                                      state.isMenuExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                                      color: AppColors.primary,
-                                      size: 18,
-                                    ),
-                                  ],
+                                      Text(
+                                        userName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.headerTitle.copyWith(fontSize: 16),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    userRole.toUpperCase(),
+                                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.notifications_rounded, color: Colors.white, size: 20),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 18),
+
+                            // Title Center
+                            Text(
+                              'SIKESAN',
+                              style: AppTypography.headerTitle.copyWith(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.2,
                               ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Sistem Keuangan Santri',
+                              style: AppTypography.headerSubtitle.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            Text(
+                              'Pondok Pesantren Pribadi Terintegrasi',
+                              style: AppTypography.headerSubtitle.copyWith(
+                                fontSize: 11,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+
+                            // Financial Metric Cards Carousel / Side-by-side
+                            isLoading
+                                ? const ShimmerBox(width: double.infinity, height: 140, borderRadius: 16)
+                                : isWide
+                                    ? Row(
+                                        children: _buildCarouselCards(state, userRole)
+                                            .map((card) => Expanded(
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                                                    child: card,
+                                                  ),
+                                                ))
+                                            .toList(),
+                                      )
+                                    : SizedBox(
+                                        height: 140,
+                                        child: PageView(
+                                          controller: _pageController,
+                                          onPageChanged: (index) {
+                                            context.read<DashboardBloc>().add(DashboardCarouselChanged(index));
+                                          },
+                                          children: _buildCarouselCards(state, userRole),
+                                        ),
+                                      ),
+                            if (!isWide) ...[
+                              const SizedBox(height: 12),
+                              // Carousel Indicators
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(2, (index) {
+                                  final bool isSelected = state.carouselIndex == index;
+                                  return AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                                    height: 4,
+                                    width: isSelected ? 20 : 6,
+                                    decoration: BoxDecoration(
+                                      color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.4),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ],
                           ],
                         ),
-                        const SizedBox(height: 16),
+                      ),
 
-                        // Menu Grid
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: displayedMenus.length,
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 8,
-                            childAspectRatio: 0.78,
-                          ),
-                          itemBuilder: (context, index) {
-                            final menu = displayedMenus[index];
-                            return GestureDetector(
-                              onTap: () {
-                                if (menu.title.toLowerCase().contains('spp')) {
-                                  PaySppModal.show(context);
-                                }
-                              },
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: menu.bg,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(menu.icon, color: menu.color, size: 24),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    menu.title,
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.itemTitle.copyWith(
-                                      fontSize: 10.5,
-                                      color: AppColors.textPrimary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                      // Content Section
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isWide ? 32 : 16,
+                          vertical: 20,
                         ),
-                        const SizedBox(height: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Slider Card Saldo Wallet Per-Santri (Khusus Wali Santri)
+                            if (userRole.toLowerCase().contains('wali'))
+                              _buildStudentWalletSlider(state.metrics.students, screenWidth: constraints.maxWidth),
+
+                            // Menu Utama Header
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Menu Utama', style: AppTypography.sectionTitle),
+                                if (menuList.length > 8)
+                                  GestureDetector(
+                                    onTap: () {
+                                      context.read<DashboardBloc>().add(const DashboardToggleMenuExpanded());
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          state.isMenuExpanded ? 'Lihat Lebih Sedikit' : 'Lihat Semua',
+                                          style: AppTypography.itemSubtitle.copyWith(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        Icon(
+                                          state.isMenuExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                          color: AppColors.primary,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+
+                            // Menu Grid
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: displayedMenus.length,
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 10,
+                                childAspectRatio: childAspectRatio,
+                              ),
+                              itemBuilder: (context, index) {
+                                final menu = displayedMenus[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (menu.title.toLowerCase().contains('spp')) {
+                                      PaySppModal.show(context);
+                                    }
+                                  },
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          color: menu.bg,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(menu.icon, color: menu.color, size: 24),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        menu.title,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.itemTitle.copyWith(
+                                          fontSize: 10.5,
+                                          color: AppColors.textPrimary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 20),
 
                         // Riwayat Transaksi Header
                         Row(
@@ -366,12 +396,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           );
         },
-      ),
-    );
+      );
+    },
+  ),
+);
   }
 
-  Widget _buildStudentWalletSlider(List<StudentSummaryModel> students) {
+  Widget _buildStudentWalletSlider(List<StudentSummaryModel> students, {double? screenWidth}) {
     if (students.isEmpty) return const SizedBox.shrink();
+
+    final isWide = (screenWidth ?? 400) > 600;
+    final cardWidth = students.length == 1
+        ? (isWide ? 340.0 : MediaQuery.of(context).size.width - 32)
+        : (isWide ? 260.0 : 230.0);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
             itemBuilder: (context, index) {
               final student = students[index];
               return Container(
-                width: students.length == 1 ? MediaQuery.of(context).size.width - 32 : 230,
+                width: cardWidth,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.surface,

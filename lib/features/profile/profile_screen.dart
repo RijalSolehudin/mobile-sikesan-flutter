@@ -99,11 +99,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
 
             // Profile Menus Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              child: Column(
-                children: [
-                  _buildMenuTile(
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Column(
+                    children: [
+                      _buildMenuTile(
                     icon: Icons.person_outline_rounded,
                     iconBg: AppColors.primarySurface,
                     iconColor: AppColors.primary,
@@ -229,10 +232,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
+      ],
+    ),
+  ),
+);
   }
 
   Widget _buildMenuTile({

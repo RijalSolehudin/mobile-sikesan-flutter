@@ -567,16 +567,19 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
 
     final bankAccounts = BankAccountModel.defaultAccounts();
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 20),
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.92,
-      ),
-      child: Column(
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 720,
+          maxHeight: MediaQuery.of(context).size.height * 0.92,
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          child: Column(
         children: [
           // Header (Title, Subtitle, Close Button)
           Row(
@@ -1390,6 +1393,8 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }
