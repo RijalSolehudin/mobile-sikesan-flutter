@@ -14,8 +14,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   final DashboardRepository _dashboardRepository;
 
   DashboardBloc({required DashboardRepository dashboardRepository})
-      : _dashboardRepository = dashboardRepository,
-        super(const DashboardState()) {
+    : _dashboardRepository = dashboardRepository,
+      super(const DashboardState()) {
     on<DashboardFetchRequested>(_onDashboardFetchRequested);
     on<DashboardRefreshRequested>(_onDashboardRefreshRequested);
     on<DashboardCarouselChanged>(_onDashboardCarouselChanged);
@@ -51,7 +51,10 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     emit(state.copyWith(isMenuExpanded: !state.isMenuExpanded));
   }
 
-  Future<void> _loadDashboardData(String role, Emitter<DashboardState> emit) async {
+  Future<void> _loadDashboardData(
+    String role,
+    Emitter<DashboardState> emit,
+  ) async {
     try {
       final results = await Future.wait([
         _dashboardRepository.getDashboardMetrics(role: role),
@@ -60,7 +63,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       ]);
 
       final metricsResult = results[0] as ApiResult<DashboardMetricModel>;
-      final transactionsResult = results[1] as ApiResult<List<TransactionItemModel>>;
+      final transactionsResult =
+          results[1] as ApiResult<List<TransactionItemModel>>;
       final menuItems = results[2] as List<MenuItemModel>;
 
       DashboardMetricModel metrics = DashboardMetricModel.dummy();

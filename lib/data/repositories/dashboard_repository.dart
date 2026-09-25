@@ -11,11 +11,15 @@ class DashboardRepository {
 
   DashboardRepository(this.dioClient);
 
-  Future<ApiResult<DashboardMetricModel>> getDashboardMetrics({String role = 'Wali Santri'}) async {
+  Future<ApiResult<DashboardMetricModel>> getDashboardMetrics({
+    String role = 'Wali Santri',
+  }) async {
     try {
       final normalizedRole = role.toLowerCase();
       final isGuardian = normalizedRole.contains('wali');
-      final endpoint = isGuardian ? ApiEndpoints.guardianDashboard : ApiEndpoints.treasurerDashboard;
+      final endpoint = isGuardian
+          ? ApiEndpoints.guardianDashboard
+          : ApiEndpoints.treasurerDashboard;
 
       final response = await dioClient.dio.get(endpoint);
       final dynamic rawData = response.data['data'] ?? response.data;
@@ -43,7 +47,9 @@ class DashboardRepository {
     }
   }
 
-  Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({int perPage = 5}) async {
+  Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({
+    int perPage = 5,
+  }) async {
     try {
       final response = await dioClient.dio.get(
         ApiEndpoints.walletTransactions,
@@ -81,7 +87,9 @@ class DashboardRepository {
     }
   }
 
-  Future<ApiResult<List<TransactionItemModel>>> getSppTransactions({bool isGuardian = true}) async {
+  Future<ApiResult<List<TransactionItemModel>>> getSppTransactions({
+    bool isGuardian = true,
+  }) async {
     try {
       final response = await dioClient.dio.get(
         '/transactions/spp',
@@ -102,7 +110,10 @@ class DashboardRepository {
 
       final transactions = items
           .whereType<Map<String, dynamic>>()
-          .map((item) => TransactionItemModel.fromSppJson(item, isGuardian: isGuardian))
+          .map(
+            (item) =>
+                TransactionItemModel.fromSppJson(item, isGuardian: isGuardian),
+          )
           .toList();
 
       return ApiSuccess(transactions);
@@ -111,7 +122,9 @@ class DashboardRepository {
     }
   }
 
-  Future<ApiResult<List<TransactionItemModel>>> getInfaqTransactions({bool isGuardian = true}) async {
+  Future<ApiResult<List<TransactionItemModel>>> getInfaqTransactions({
+    bool isGuardian = true,
+  }) async {
     try {
       final response = await dioClient.dio.get(
         '/transactions/infaq',
@@ -132,7 +145,12 @@ class DashboardRepository {
 
       final transactions = items
           .whereType<Map<String, dynamic>>()
-          .map((item) => TransactionItemModel.fromInfaqJson(item, isGuardian: isGuardian))
+          .map(
+            (item) => TransactionItemModel.fromInfaqJson(
+              item,
+              isGuardian: isGuardian,
+            ),
+          )
           .toList();
 
       return ApiSuccess(transactions);
@@ -158,7 +176,9 @@ class DashboardRepository {
         }
 
         if (remoteList.isNotEmpty) {
-          final defaultMap = {for (var m in MenuItemModel.defaultMenus()) m.id: m};
+          final defaultMap = {
+            for (var m in MenuItemModel.defaultMenus()) m.id: m,
+          };
           final List<MenuItemModel> result = [];
 
           for (var item in remoteList) {

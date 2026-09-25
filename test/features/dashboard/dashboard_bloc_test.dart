@@ -13,10 +13,12 @@ class MockDashboardRepository extends DashboardRepository {
   ApiResult<List<TransactionItemModel>>? txResult;
 
   MockDashboardRepository()
-      : super(DioClient(secureStorage: SecureStorageService()));
+    : super(DioClient(secureStorage: SecureStorageService()));
 
   @override
-  Future<ApiResult<DashboardMetricModel>> getDashboardMetrics({String role = 'Wali Santri'}) async {
+  Future<ApiResult<DashboardMetricModel>> getDashboardMetrics({
+    String role = 'Wali Santri',
+  }) async {
     return metricResult ??
         const ApiSuccess(
           DashboardMetricModel(
@@ -31,7 +33,9 @@ class MockDashboardRepository extends DashboardRepository {
   }
 
   @override
-  Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({int perPage = 5}) async {
+  Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({
+    int perPage = 5,
+  }) async {
     return txResult ??
         ApiSuccess([
           TransactionItemModel(
@@ -48,7 +52,9 @@ class MockDashboardRepository extends DashboardRepository {
 
   @override
   Future<List<MenuItemModel>> getMenuItemsForRole(String role) async {
-    return MenuItemModel.defaultMenus().where((m) => m.isVisibleForRole(role)).toList();
+    return MenuItemModel.defaultMenus()
+        .where((m) => m.isVisibleForRole(role))
+        .toList();
   }
 }
 
@@ -74,29 +80,42 @@ void main() {
 
     test('DashboardCarouselChanged updates carouselIndex', () {
       dashboardBloc.add(const DashboardCarouselChanged(1));
-      expect(dashboardBloc.stream, emits(predicate<DashboardState>((state) => state.carouselIndex == 1)));
+      expect(
+        dashboardBloc.stream,
+        emits(predicate<DashboardState>((state) => state.carouselIndex == 1)),
+      );
     });
 
     test('DashboardToggleMenuExpanded toggles isMenuExpanded', () {
       dashboardBloc.add(const DashboardToggleMenuExpanded());
-      expect(dashboardBloc.stream, emits(predicate<DashboardState>((state) => state.isMenuExpanded == false)));
-    });
-
-    test('DashboardFetchRequested loads metrics, transactions, and menus', () async {
-      dashboardBloc.add(const DashboardFetchRequested(role: 'Wali Santri'));
-
-      await expectLater(
+      expect(
         dashboardBloc.stream,
-        emitsInOrder([
-          predicate<DashboardState>((s) => s.status == DashboardStatus.loading),
-          predicate<DashboardState>((s) {
-            return s.status == DashboardStatus.loaded &&
-                s.metrics.totalBalance == 500000 &&
-                s.transactions.length == 1 &&
-                s.menuItems.isNotEmpty;
-          }),
-        ]),
+        emits(
+          predicate<DashboardState>((state) => state.isMenuExpanded == false),
+        ),
       );
     });
+
+    test(
+      'DashboardFetchRequested loads metrics, transactions, and menus',
+      () async {
+        dashboardBloc.add(const DashboardFetchRequested(role: 'Wali Santri'));
+
+        await expectLater(
+          dashboardBloc.stream,
+          emitsInOrder([
+            predicate<DashboardState>(
+              (s) => s.status == DashboardStatus.loading,
+            ),
+            predicate<DashboardState>((s) {
+              return s.status == DashboardStatus.loaded &&
+                  s.metrics.totalBalance == 500000 &&
+                  s.transactions.length == 1 &&
+                  s.menuItems.isNotEmpty;
+            }),
+          ]),
+        );
+      },
+    );
   });
 }

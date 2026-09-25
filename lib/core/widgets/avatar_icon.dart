@@ -5,11 +5,7 @@ class MosqueAvatar extends StatelessWidget {
   final double size;
   final bool hasBorder;
 
-  const MosqueAvatar({
-    super.key,
-    this.size = 44,
-    this.hasBorder = true,
-  });
+  const MosqueAvatar({super.key, this.size = 44, this.hasBorder = true});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +15,9 @@ class MosqueAvatar extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
-        border: hasBorder ? Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2) : null,
+        border: hasBorder
+            ? Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2)
+            : null,
       ),
       child: Center(
         child: Icon(

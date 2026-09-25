@@ -35,7 +35,7 @@ class FilterPill extends StatelessWidget {
                     color: selectedColor.withValues(alpha: 0.25),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
-                  )
+                  ),
                 ]
               : null,
         ),

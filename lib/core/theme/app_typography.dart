@@ -39,10 +39,8 @@ class AppTypography {
     color: AppColors.textSecondary,
   );
 
-  static TextStyle get badgeText => GoogleFonts.plusJakartaSans(
-    fontSize: 11,
-    fontWeight: FontWeight.w600,
-  );
+  static TextStyle get badgeText =>
+      GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w600);
 
   static TextStyle get inputHint => GoogleFonts.plusJakartaSans(
     fontSize: 13,

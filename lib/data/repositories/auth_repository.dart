@@ -18,10 +18,7 @@ class AuthRepository {
     try {
       final response = await _dioClient.dio.post(
         ApiEndpoints.login,
-        data: {
-          'username': username.trim(),
-          'password': password,
-        },
+        data: {'username': username.trim(), 'password': password},
       );
 
       final token = response.data['access_token'];
@@ -40,7 +37,7 @@ class AuthRepository {
           'Tidak dapat terhubung ke server backend SIKESAN. Pastikan server lokal/API aktif di alamat yang ditentukan.',
         );
       }
-      
+
       final dynamic responseData = e.response?.data;
       String errorMsg = 'Gagal masuk. Periksa username dan password Anda.';
       if (responseData is Map<String, dynamic>) {
@@ -48,7 +45,9 @@ class AuthRepository {
           errorMsg = responseData['message'].toString();
         } else if (responseData['errors'] != null) {
           final errors = responseData['errors'] as Map<String, dynamic>;
-          errorMsg = errors.values.map((v) => (v is List) ? v.join(', ') : v.toString()).join('\n');
+          errorMsg = errors.values
+              .map((v) => (v is List) ? v.join(', ') : v.toString())
+              .join('\n');
         }
       }
       return ApiFailure(errorMsg, statusCode: e.response?.statusCode);

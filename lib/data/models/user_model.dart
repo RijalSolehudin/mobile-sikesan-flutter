@@ -39,7 +39,7 @@ class UserModel {
       'username': username,
       'email': email,
       'roles': [
-        {'id': 1, 'name': role}
+        {'id': 1, 'name': role},
       ],
     };
   }

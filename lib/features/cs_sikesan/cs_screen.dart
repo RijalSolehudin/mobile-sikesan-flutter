@@ -39,11 +39,18 @@ class _CsScreenState extends State<CsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('CS SIKESAN', style: AppTypography.headerTitle.copyWith(fontSize: 20)),
+                Text(
+                  'CS SIKESAN',
+                  style: AppTypography.headerTitle.copyWith(fontSize: 20),
+                ),
                 const SizedBox(height: 12),
                 const CustomTextField(
                   hintText: 'Cari nama, username, ID santri, No. WA...',
-                  prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted, size: 20),
+                  prefixIcon: Icon(
+                    Icons.search_rounded,
+                    color: AppColors.textMuted,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -51,12 +58,14 @@ class _CsScreenState extends State<CsScreen> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: _filters.length,
-                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       return FilterPill(
                         label: _filters[index],
                         isSelected: _selectedFilterIndex == index,
-                        onTap: () => setState(() => _selectedFilterIndex = index),
+                        onTap: () =>
+                            setState(() => _selectedFilterIndex = index),
                       );
                     },
                   ),
@@ -95,7 +104,10 @@ class _CsScreenState extends State<CsScreen> {
                     Text(
                       'Layanan pesan & CS SIKESAN sedang dalam tahap pengembangan dan akan segera hadir pada pembaruan mendatang.',
                       textAlign: TextAlign.center,
-                      style: AppTypography.itemSubtitle.copyWith(fontSize: 13, height: 1.5),
+                      style: AppTypography.itemSubtitle.copyWith(
+                        fontSize: 13,
+                        height: 1.5,
+                      ),
                     ),
                   ],
                 ),

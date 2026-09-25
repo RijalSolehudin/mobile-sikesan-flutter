@@ -26,7 +26,10 @@ class MenuItemModel {
     if (!isEnabled) return false;
     if (allowedRoles.isEmpty) return true;
     final normalized = role.toLowerCase();
-    return allowedRoles.any((r) => r.toLowerCase() == normalized || normalized.contains(r.toLowerCase()));
+    return allowedRoles.any(
+      (r) =>
+          r.toLowerCase() == normalized || normalized.contains(r.toLowerCase()),
+    );
   }
 
   // Pre-configured default list of all available menus in SIKESAN Mobile
@@ -38,15 +41,21 @@ class MenuItemModel {
         icon: Icons.arrow_upward_rounded,
         color: AppColors.primary,
         bg: AppColors.primarySurface,
-        allowedRoles: ['Wali Santri', 'Super Admin', 'Admin', 'Bendahara', 'Kasir'],
+        allowedRoles: [
+          'Wali Santri',
+          'Super Admin',
+          'Admin',
+          'Bendahara',
+          'Kasir',
+        ],
       ),
       const MenuItemModel(
-        id: 'bayar_spp',
-        title: 'Bayar SPP',
-        icon: Icons.account_balance_wallet_rounded,
-        color: Color(0xFF0D9488),
-        bg: Color(0xFFCCFBF1),
-        allowedRoles: ['Wali Santri', 'Super Admin', 'Admin', 'Bendahara'],
+        id: 'rek_wali_asrama',
+        title: 'Rekening Wali Asrama',
+        icon: Icons.apartment_rounded,
+        color: AppColors.iconBlue,
+        bg: Color(0xFFDBEAFE),
+        allowedRoles: ['Staff Kesantrian', 'Super Admin', 'Admin', 'Bendahara'],
       ),
       const MenuItemModel(
         id: 'infak',
@@ -57,20 +66,12 @@ class MenuItemModel {
         allowedRoles: ['Wali Santri', 'Super Admin', 'Admin', 'Bendahara'],
       ),
       const MenuItemModel(
-        id: 'kwitansi',
-        title: 'Kwitansi Digital',
-        icon: Icons.receipt_long_rounded,
-        color: Color(0xFF059669),
-        bg: Color(0xFFD1FAE5),
-        allowedRoles: ['Wali Santri', 'Kasir', 'Super Admin', 'Admin', 'Bendahara'],
-      ),
-      const MenuItemModel(
-        id: 'sistem_kasir',
-        title: 'Sistem Kasir',
-        icon: Icons.shopping_cart_rounded,
-        color: Color(0xFF0D9488),
-        bg: Color(0xFFCCFBF1),
-        allowedRoles: ['Kasir', 'Super Admin', 'Admin'],
+        id: 'rek_kesantrian',
+        title: 'Rekening Kesantrian',
+        icon: Icons.account_balance_rounded,
+        color: AppColors.iconPurple,
+        bg: Color(0xFFEDE9FE),
+        allowedRoles: ['Staff Kesantrian', 'Super Admin', 'Admin', 'Bendahara'],
       ),
       const MenuItemModel(
         id: 'uang_keluar',
@@ -89,20 +90,34 @@ class MenuItemModel {
         allowedRoles: ['Staff Kesantrian', 'Super Admin', 'Admin', 'Bendahara'],
       ),
       const MenuItemModel(
-        id: 'rek_wali_asrama',
-        title: 'Rekening Wali Asrama',
-        icon: Icons.apartment_rounded,
-        color: AppColors.iconBlue,
-        bg: Color(0xFFDBEAFE),
-        allowedRoles: ['Staff Kesantrian', 'Super Admin', 'Admin', 'Bendahara'],
+        id: 'sistem_kasir',
+        title: 'Sistem Kasir',
+        icon: Icons.shopping_cart_rounded,
+        color: Color(0xFF0D9488),
+        bg: Color(0xFFCCFBF1),
+        allowedRoles: ['Kasir', 'Super Admin', 'Admin'],
       ),
       const MenuItemModel(
-        id: 'rek_kesantrian',
-        title: 'Rekening Kesantrian',
-        icon: Icons.account_balance_rounded,
-        color: AppColors.iconPurple,
-        bg: Color(0xFFEDE9FE),
-        allowedRoles: ['Staff Kesantrian', 'Super Admin', 'Admin', 'Bendahara'],
+        id: 'kwitansi',
+        title: 'Kwitansi Digital',
+        icon: Icons.receipt_long_rounded,
+        color: Color(0xFF059669),
+        bg: Color(0xFFD1FAE5),
+        allowedRoles: [
+          'Wali Santri',
+          'Kasir',
+          'Super Admin',
+          'Admin',
+          'Bendahara',
+        ],
+      ),
+      const MenuItemModel(
+        id: 'bayar_spp',
+        title: 'Bayar SPP',
+        icon: Icons.account_balance_wallet_rounded,
+        color: Color(0xFF0D9488),
+        bg: Color(0xFFCCFBF1),
+        allowedRoles: ['Wali Santri', 'Super Admin', 'Admin', 'Bendahara'],
       ),
       const MenuItemModel(
         id: 'akun_staff',

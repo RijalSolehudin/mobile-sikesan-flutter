@@ -20,7 +20,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authState = context.watch<AuthBloc>().state;
     final user = authState.user;
     final userName = user?.name.isNotEmpty == true ? user!.name : 'Pengguna';
-    final userRole = user?.role.isNotEmpty == true ? user!.role.toUpperCase() : 'WALI SANTRI';
+    final userRole = user?.role.isNotEmpty == true
+        ? user!.role.toUpperCase()
+        : 'WALI SANTRI';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -32,7 +34,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: AppColors.primary,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(32),
+                ),
               ),
               padding: const EdgeInsets.fromLTRB(20, 50, 20, 30),
               child: Column(
@@ -78,10 +82,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 12),
 
                   // User name & Role badge
-                  Text(userName, style: AppTypography.headerTitle.copyWith(fontSize: 20)),
+                  Text(
+                    userName,
+                    style: AppTypography.headerTitle.copyWith(fontSize: 20),
+                  ),
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(50),
@@ -103,141 +113,174 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 800),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 20,
+                  ),
                   child: Column(
                     children: [
                       _buildMenuTile(
-                    icon: Icons.person_outline_rounded,
-                    iconBg: AppColors.primarySurface,
-                    iconColor: AppColors.primary,
-                    title: 'Informasi Akun',
-                    subtitle: 'Lihat dan ubah informasi akun',
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
+                        icon: Icons.person_outline_rounded,
+                        iconBg: AppColors.primarySurface,
+                        iconColor: AppColors.primary,
+                        title: 'Informasi Akun',
+                        subtitle: 'Lihat dan ubah informasi akun',
+                        onTap: () {},
+                      ),
+                      const SizedBox(height: 12),
 
-                  _buildMenuTile(
-                    icon: Icons.lock_outline_rounded,
-                    iconBg: const Color(0xFFF3E8FF),
-                    iconColor: AppColors.iconPurple,
-                    title: 'Ubah Password',
-                    subtitle: 'Perbarui password akun',
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
+                      _buildMenuTile(
+                        icon: Icons.lock_outline_rounded,
+                        iconBg: const Color(0xFFF3E8FF),
+                        iconColor: AppColors.iconPurple,
+                        title: 'Ubah Password',
+                        subtitle: 'Perbarui password akun',
+                        onTap: () {},
+                      ),
+                      const SizedBox(height: 12),
 
-                  _buildMenuTile(
-                    icon: Icons.help_outline_rounded,
-                    iconBg: const Color(0xFFE0F2FE),
-                    iconColor: AppColors.iconBlue,
-                    title: 'Bantuan',
-                    subtitle: 'Panduan penggunaan aplikasi',
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
+                      _buildMenuTile(
+                        icon: Icons.help_outline_rounded,
+                        iconBg: const Color(0xFFE0F2FE),
+                        iconColor: AppColors.iconBlue,
+                        title: 'Bantuan',
+                        subtitle: 'Panduan penggunaan aplikasi',
+                        onTap: () {},
+                      ),
+                      const SizedBox(height: 12),
 
-                  // Mode Tampilan Toggle Card
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.borderLight),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFEF3C7),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.wb_sunny_outlined, color: AppColors.iconOrange, size: 22),
+                      // Mode Tampilan Toggle Card
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppColors.borderLight),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF3C7),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.wb_sunny_outlined,
+                                color: AppColors.iconOrange,
+                                size: 22,
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Mode Tampilan',
+                                    style: AppTypography.itemTitle,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _isDarkMode ? 'Mode Gelap' : 'Mode Terang',
+                                    style: AppTypography.itemSubtitle,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Switch(
+                              value: _isDarkMode,
+                              activeThumbColor: AppColors.primary,
+                              onChanged: (val) =>
+                                  setState(() => _isDarkMode = val),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Solid Red Logout Button Card
+                      GestureDetector(
+                        onTap: () {
+                          _showLogoutDialog(context);
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 16,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.expense,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.expense.withValues(alpha: 0.3),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Row(
                             children: [
-                              Text('Mode Tampilan', style: AppTypography.itemTitle),
-                              const SizedBox(height: 2),
-                              Text(
-                                _isDarkMode ? 'Mode Gelap' : 'Mode Terang',
-                                style: AppTypography.itemSubtitle,
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.logout_rounded,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Logout',
+                                      style: AppTypography.itemTitle.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Keluar dari akun Anda',
+                                      style: AppTypography.itemSubtitle
+                                          .copyWith(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.8,
+                                            ),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                color: Colors.white,
+                                size: 24,
                               ),
                             ],
                           ),
                         ),
-                        Switch(
-                          value: _isDarkMode,
-                          activeThumbColor: AppColors.primary,
-                          onChanged: (val) => setState(() => _isDarkMode = val),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Solid Red Logout Button Card
-                  GestureDetector(
-                    onTap: () {
-                      _showLogoutDialog(context);
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.expense,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.expense.withValues(alpha: 0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.logout_rounded, color: Colors.white, size: 20),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Logout',
-                                  style: AppTypography.itemTitle.copyWith(color: Colors.white, fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Keluar dari akun Anda',
-                                  style: AppTypography.itemSubtitle.copyWith(color: Colors.white.withValues(alpha: 0.8)),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.chevron_right_rounded, color: Colors.white, size: 24),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ),
-  ),
-);
+      ),
+    );
   }
 
   Widget _buildMenuTile({
@@ -278,7 +321,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 20),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textMuted,
+              size: 20,
+            ),
           ],
         ),
       ),
@@ -291,17 +338,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Konfirmasi Logout'),
-        content: const Text('Apakah Anda yakin ingin keluar dari aplikasi SIKESAN?'),
+        content: const Text(
+          'Apakah Anda yakin ingin keluar dari aplikasi SIKESAN?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text(
+              'Batal',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.expense,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () {
               Navigator.pop(ctx);

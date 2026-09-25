@@ -26,7 +26,7 @@ void main() async {
 
   // Initialize Core Services
   final secureStorage = SecureStorageService();
-  
+
   late final AuthBloc authBloc;
   final dioClient = DioClient(
     secureStorage: secureStorage,
@@ -39,7 +39,8 @@ void main() async {
   final dashboardRepository = DashboardRepository(dioClient);
   final sppRepository = SppRepository(dioClient);
 
-  authBloc = AuthBloc(authRepository: authRepository)..add(const AuthCheckRequested());
+  authBloc = AuthBloc(authRepository: authRepository)
+    ..add(const AuthCheckRequested());
   final dashboardBloc = DashboardBloc(dashboardRepository: dashboardRepository);
 
   final router = AppRouter.createRouter(authBloc);
@@ -79,7 +80,9 @@ class SikesanMobileApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthRepository>.value(value: authRepository),
-        RepositoryProvider<DashboardRepository>.value(value: dashboardRepository),
+        RepositoryProvider<DashboardRepository>.value(
+          value: dashboardRepository,
+        ),
         RepositoryProvider<SppRepository>.value(value: sppRepository),
       ],
       child: MultiBlocProvider(

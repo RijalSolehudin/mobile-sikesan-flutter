@@ -17,7 +17,7 @@ class CustomCurvedBottomBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.primary,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         boxShadow: [
           BoxShadow(
             color: AppColors.primaryDark.withValues(alpha: 0.3),
@@ -26,22 +26,19 @@ class CustomCurvedBottomBar extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.only(top: 10, bottom: 12),
       child: SafeArea(
         top: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 860),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(0, Icons.home_rounded, 'Beranda'),
-                _buildNavItem(1, Icons.history_rounded, 'Mutasi'),
-                _buildNavItem(2, Icons.info_outline_rounded, 'Informasi'),
-                _buildNavItem(3, Icons.chat_bubble_outline_rounded, 'CS SIKESAN'),
-                _buildNavItem(4, Icons.person_outline_rounded, 'Profil'),
-              ],
-            ),
+        child: SizedBox(
+          height: 66,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, Icons.home_rounded, 'Beranda'),
+              _buildNavItem(1, Icons.history_rounded, 'Mutasi'),
+              _buildNavItem(2, Icons.info_outline_rounded, 'Informasi'),
+              _buildNavItem(3, Icons.chat_bubble_outline_rounded, 'CS SIKESAN'),
+              _buildNavItem(4, Icons.person_outline_rounded, 'Profil'),
+            ],
           ),
         ),
       ),
@@ -55,15 +52,13 @@ class CustomCurvedBottomBar extends StatelessWidget {
       child: GestureDetector(
         onTap: () => onTap(index),
         behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             if (isSelected)
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(7),
                 decoration: const BoxDecoration(
                   color: AppColors.surface,
                   shape: BoxShape.circle,
@@ -75,34 +70,25 @@ class CustomCurvedBottomBar extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Icon(
-                  icon,
-                  color: AppColors.primary,
-                  size: 22,
-                ),
+                child: Icon(icon, color: AppColors.primary, size: 20),
               )
             else
               Padding(
-                padding: const EdgeInsets.all(6),
-                child: Icon(
-                  icon,
-                  color: AppColors.textWhite,
-                  size: 24,
-                ),
+                padding: const EdgeInsets.all(4),
+                child: Icon(icon, color: AppColors.textWhite, size: 22),
               ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Text(
               label,
               style: AppTypography.badgeText.copyWith(
-                color: isSelected ? AppColors.textWhite : AppColors.textWhite.withValues(alpha: 0.9),
+                color: AppColors.textWhite,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                fontSize: 11,
+                fontSize: 10.5,
               ),
             ),
           ],
         ),
       ),
-    ),
     );
   }
 }

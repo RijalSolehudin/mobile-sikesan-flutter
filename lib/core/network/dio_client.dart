@@ -9,10 +9,7 @@ class DioClient {
   final SecureStorageService secureStorage;
   final void Function()? onUnauthorized;
 
-  DioClient({
-    required this.secureStorage,
-    this.onUnauthorized,
-  }) {
+  DioClient({required this.secureStorage, this.onUnauthorized}) {
     dio = Dio(
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,

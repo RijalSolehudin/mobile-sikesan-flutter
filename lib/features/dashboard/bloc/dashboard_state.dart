@@ -3,12 +3,7 @@ import '../../../data/models/dashboard_metric_model.dart';
 import '../../../data/models/menu_item_model.dart';
 import '../../../data/models/transaction_item_model.dart';
 
-enum DashboardStatus {
-  initial,
-  loading,
-  loaded,
-  failure,
-}
+enum DashboardStatus { initial, loading, loaded, failure }
 
 class DashboardState extends Equatable {
   final DashboardStatus status;
@@ -61,12 +56,12 @@ class DashboardState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        metrics,
-        transactions,
-        menuItems,
-        carouselIndex,
-        isMenuExpanded,
-        errorMessage,
-      ];
+    status,
+    metrics,
+    transactions,
+    menuItems,
+    carouselIndex,
+    isMenuExpanded,
+    errorMessage,
+  ];
 }

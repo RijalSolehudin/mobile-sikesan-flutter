@@ -29,8 +29,19 @@ class _MutationScreenState extends State<MutationScreen> {
   bool _isLoading = false;
   bool _hasInitialLoaded = false;
 
-  final List<String> _tabs = ['Uang Saku', 'Pembayaran SPP', 'Infak Kesantrian'];
-  final List<String> _classes = ['Semua Kelas', 'Kelas 7', 'Kelas 8', 'Kelas 9', 'Kelas 10', 'Kelas 11'];
+  final List<String> _tabs = [
+    'Uang Saku',
+    'Pembayaran SPP',
+    'Infak Kesantrian',
+  ];
+  final List<String> _classes = [
+    'Semua Kelas',
+    'Kelas 7',
+    'Kelas 8',
+    'Kelas 9',
+    'Kelas 10',
+    'Kelas 11',
+  ];
   final List<String> _filterTypes = ['Semua', 'Pemasukan', 'Pengeluaran'];
 
   List<TransactionItemModel> _transactions = [];
@@ -86,7 +97,9 @@ class _MutationScreenState extends State<MutationScreen> {
         final name = (tx.studentName ?? '').toLowerCase();
         final title = tx.title.toLowerCase();
         final cat = tx.category.toLowerCase();
-        if (!name.contains(query) && !title.contains(query) && !cat.contains(query)) {
+        if (!name.contains(query) &&
+            !title.contains(query) &&
+            !cat.contains(query)) {
           return false;
         }
       }
@@ -95,7 +108,8 @@ class _MutationScreenState extends State<MutationScreen> {
       if (_selectedClassIndex > 0) {
         final selectedClass = _classes[_selectedClassIndex].toLowerCase();
         final txClass = (tx.studentClass ?? '').toLowerCase();
-        if (txClass.isNotEmpty && !txClass.contains(selectedClass.replaceAll('kelas ', ''))) {
+        if (txClass.isNotEmpty &&
+            !txClass.contains(selectedClass.replaceAll('kelas ', ''))) {
           return false;
         }
       }
@@ -107,8 +121,12 @@ class _MutationScreenState extends State<MutationScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredList = _getFilteredTransactions();
-    final totalMasuk = _transactions.where((t) => t.isIncome).fold<num>(0, (s, t) => s + t.amount);
-    final totalKeluar = _transactions.where((t) => !t.isIncome).fold<num>(0, (s, t) => s + t.amount);
+    final totalMasuk = _transactions
+        .where((t) => t.isIncome)
+        .fold<num>(0, (s, t) => s + t.amount);
+    final totalKeluar = _transactions
+        .where((t) => !t.isIncome)
+        .fold<num>(0, (s, t) => s + t.amount);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -128,15 +146,23 @@ class _MutationScreenState extends State<MutationScreen> {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(24),
+                  ),
                 ),
                 padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Mutasi & Transaksi', style: AppTypography.headerTitle.copyWith(fontSize: 20)),
+                    Text(
+                      'Mutasi & Transaksi',
+                      style: AppTypography.headerTitle.copyWith(fontSize: 20),
+                    ),
                     const SizedBox(height: 2),
-                    Text('Analisis Keuangan Santri & Operasional', style: AppTypography.headerSubtitle),
+                    Text(
+                      'Analisis Keuangan Santri & Operasional',
+                      style: AppTypography.headerSubtitle,
+                    ),
                   ],
                 ),
               ),
@@ -165,14 +191,20 @@ class _MutationScreenState extends State<MutationScreen> {
                                 }
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isSelected ? Colors.white : Colors.transparent,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : Colors.transparent,
                                   borderRadius: BorderRadius.circular(50),
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: Colors.black.withValues(alpha: 0.05),
+                                            color: Colors.black.withValues(
+                                              alpha: 0.05,
+                                            ),
                                             blurRadius: 4,
                                             offset: const Offset(0, 2),
                                           ),
@@ -184,8 +216,12 @@ class _MutationScreenState extends State<MutationScreen> {
                                   textAlign: TextAlign.center,
                                   style: AppTypography.badgeText.copyWith(
                                     fontSize: 11,
-                                    color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.textSecondary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
                                   ),
                                 ),
                               ),
@@ -202,7 +238,11 @@ class _MutationScreenState extends State<MutationScreen> {
                         Expanded(
                           child: CustomTextField(
                             hintText: 'Cari Nama Santri / Keterangan...',
-                            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted, size: 20),
+                            prefixIcon: const Icon(
+                              Icons.search_rounded,
+                              color: AppColors.textMuted,
+                              size: 20,
+                            ),
                             onChanged: (val) {
                               setState(() => _searchQuery = val);
                             },
@@ -216,7 +256,11 @@ class _MutationScreenState extends State<MutationScreen> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: AppColors.border),
                           ),
-                          child: const Icon(Icons.calendar_month_outlined, color: AppColors.textSecondary, size: 22),
+                          child: const Icon(
+                            Icons.calendar_month_outlined,
+                            color: AppColors.textSecondary,
+                            size: 22,
+                          ),
                         ),
                       ],
                     ),
@@ -228,12 +272,14 @@ class _MutationScreenState extends State<MutationScreen> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _classes.length,
-                        separatorBuilder: (context, index) => const SizedBox(width: 8),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: 8),
                         itemBuilder: (context, index) {
                           return FilterPill(
                             label: _classes[index],
                             isSelected: _selectedClassIndex == index,
-                            onTap: () => setState(() => _selectedClassIndex = index),
+                            onTap: () =>
+                                setState(() => _selectedClassIndex = index),
                           );
                         },
                       ),
@@ -256,7 +302,9 @@ class _MutationScreenState extends State<MutationScreen> {
                               children: [
                                 Text(
                                   'Total Masuk',
-                                  style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
+                                  style: AppTypography.itemSubtitle.copyWith(
+                                    fontSize: 11,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -285,7 +333,9 @@ class _MutationScreenState extends State<MutationScreen> {
                               children: [
                                 Text(
                                   'Total Keluar',
-                                  style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
+                                  style: AppTypography.itemSubtitle.copyWith(
+                                    fontSize: 11,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -317,9 +367,17 @@ class _MutationScreenState extends State<MutationScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Statistik Transaksi', style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700)),
+                              Text(
+                                'Statistik Transaksi',
+                                style: AppTypography.itemTitle.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF1F5F9),
                                   borderRadius: BorderRadius.circular(50),
@@ -328,9 +386,16 @@ class _MutationScreenState extends State<MutationScreen> {
                                   children: [
                                     Text(
                                       _timeRange,
-                                      style: AppTypography.badgeText.copyWith(color: AppColors.textSecondary, fontSize: 11),
+                                      style: AppTypography.badgeText.copyWith(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 11,
+                                      ),
                                     ),
-                                    const Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.textSecondary),
+                                    const Icon(
+                                      Icons.keyboard_arrow_down,
+                                      size: 16,
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -348,8 +413,12 @@ class _MutationScreenState extends State<MutationScreen> {
                                 ),
                                 titlesData: FlTitlesData(
                                   show: true,
-                                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                                  rightTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  topTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
                                   leftTitles: AxisTitles(
                                     sideTitles: SideTitles(
                                       showTitles: true,
@@ -357,15 +426,45 @@ class _MutationScreenState extends State<MutationScreen> {
                                       getTitlesWidget: (value, meta) {
                                         switch (value.toInt()) {
                                           case 0:
-                                            return const Text('0k', style: TextStyle(fontSize: 9, color: AppColors.textMuted));
+                                            return const Text(
+                                              '0k',
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                color: AppColors.textMuted,
+                                              ),
+                                            );
                                           case 7:
-                                            return const Text('7.5k', style: TextStyle(fontSize: 9, color: AppColors.textMuted));
+                                            return const Text(
+                                              '7.5k',
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                color: AppColors.textMuted,
+                                              ),
+                                            );
                                           case 15:
-                                            return const Text('15k', style: TextStyle(fontSize: 9, color: AppColors.textMuted));
+                                            return const Text(
+                                              '15k',
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                color: AppColors.textMuted,
+                                              ),
+                                            );
                                           case 22:
-                                            return const Text('22.5k', style: TextStyle(fontSize: 9, color: AppColors.textMuted));
+                                            return const Text(
+                                              '22.5k',
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                color: AppColors.textMuted,
+                                              ),
+                                            );
                                           case 30:
-                                            return const Text('30k', style: TextStyle(fontSize: 9, color: AppColors.textMuted));
+                                            return const Text(
+                                              '30k',
+                                              style: TextStyle(
+                                                fontSize: 9,
+                                                color: AppColors.textMuted,
+                                              ),
+                                            );
                                         }
                                         return const SizedBox();
                                       },
@@ -377,7 +476,10 @@ class _MutationScreenState extends State<MutationScreen> {
                                       interval: 1,
                                       getTitlesWidget: (val, meta) => Text(
                                         val.toInt().toString(),
-                                        style: const TextStyle(fontSize: 9, color: AppColors.textSecondary),
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          color: AppColors.textSecondary,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -410,8 +512,12 @@ class _MutationScreenState extends State<MutationScreen> {
                                       show: true,
                                       gradient: LinearGradient(
                                         colors: [
-                                          AppColors.expense.withValues(alpha: 0.35),
-                                          AppColors.expense.withValues(alpha: 0.0),
+                                          AppColors.expense.withValues(
+                                            alpha: 0.35,
+                                          ),
+                                          AppColors.expense.withValues(
+                                            alpha: 0.0,
+                                          ),
                                         ],
                                         begin: Alignment.topCenter,
                                         end: Alignment.bottomCenter,
@@ -431,10 +537,15 @@ class _MutationScreenState extends State<MutationScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Riwayat Transaksi', style: AppTypography.sectionTitle),
+                        Text(
+                          'Riwayat Transaksi',
+                          style: AppTypography.sectionTitle,
+                        ),
                         Text(
                           '${filteredList.length} Transaksi',
-                          style: AppTypography.badgeText.copyWith(color: AppColors.primary),
+                          style: AppTypography.badgeText.copyWith(
+                            color: AppColors.primary,
+                          ),
                         ),
                       ],
                     ),
@@ -446,7 +557,8 @@ class _MutationScreenState extends State<MutationScreen> {
                           child: FilterPill(
                             label: _filterTypes[index],
                             isSelected: _selectedFilterType == index,
-                            onTap: () => setState(() => _selectedFilterType = index),
+                            onTap: () =>
+                                setState(() => _selectedFilterType = index),
                           ),
                         );
                       }),
@@ -460,7 +572,11 @@ class _MutationScreenState extends State<MutationScreen> {
                           4,
                           (i) => Padding(
                             padding: const EdgeInsets.only(bottom: 8),
-                            child: ShimmerBox(width: double.infinity, height: 64, borderRadius: 16),
+                            child: ShimmerBox(
+                              width: double.infinity,
+                              height: 64,
+                              borderRadius: 16,
+                            ),
                           ),
                         ),
                       )
@@ -475,11 +591,17 @@ class _MutationScreenState extends State<MutationScreen> {
                         ),
                         child: Column(
                           children: [
-                            const Icon(Icons.receipt_long_outlined, size: 36, color: AppColors.textMuted),
+                            const Icon(
+                              Icons.receipt_long_outlined,
+                              size: 36,
+                              color: AppColors.textMuted,
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               'Tidak ada data transaksi ditemukan',
-                              style: AppTypography.itemTitle.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.itemTitle.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ],
                         ),
@@ -489,13 +611,19 @@ class _MutationScreenState extends State<MutationScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: filteredList.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 8),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 8),
                         itemBuilder: (context, index) {
                           final tx = filteredList[index];
-                          final dateStr = DateFormat('dd MMM, HH:mm').format(tx.date);
+                          final dateStr = DateFormat(
+                            'dd MMM, HH:mm',
+                          ).format(tx.date);
 
                           return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
                               borderRadius: BorderRadius.circular(16),
@@ -507,28 +635,39 @@ class _MutationScreenState extends State<MutationScreen> {
                                   width: 38,
                                   height: 38,
                                   decoration: BoxDecoration(
-                                    color: tx.isIncome ? AppColors.incomeSurface : AppColors.expenseSurface,
+                                    color: tx.isIncome
+                                        ? AppColors.incomeSurface
+                                        : AppColors.expenseSurface,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    tx.isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
-                                    color: tx.isIncome ? AppColors.income : AppColors.expense,
+                                    tx.isIncome
+                                        ? Icons.arrow_downward_rounded
+                                        : Icons.arrow_upward_rounded,
+                                    color: tx.isIncome
+                                        ? AppColors.income
+                                        : AppColors.expense,
                                     size: 18,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         tx.title,
-                                        style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13),
+                                        style: AppTypography.itemTitle.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                        ),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
                                         '${tx.studentName ?? 'Santri'}${tx.studentClass != null && tx.studentClass!.isNotEmpty ? ' · ${tx.studentClass}' : ''}',
-                                        style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
+                                        style: AppTypography.itemSubtitle
+                                            .copyWith(fontSize: 11),
                                       ),
                                     ],
                                   ),
@@ -537,17 +676,23 @@ class _MutationScreenState extends State<MutationScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      CurrencyFormatter.formatWithSign(tx.amount, tx.isIncome),
+                                      CurrencyFormatter.formatWithSign(
+                                        tx.amount,
+                                        tx.isIncome,
+                                      ),
                                       style: AppTypography.itemTitle.copyWith(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 13,
-                                        color: tx.isIncome ? AppColors.income : AppColors.expense,
+                                        color: tx.isIncome
+                                            ? AppColors.income
+                                            : AppColors.expense,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       dateStr,
-                                      style: AppTypography.itemSubtitle.copyWith(fontSize: 10),
+                                      style: AppTypography.itemSubtitle
+                                          .copyWith(fontSize: 10),
                                     ),
                                   ],
                                 ),
@@ -567,9 +712,6 @@ class _MutationScreenState extends State<MutationScreen> {
   }
 
   static FlLine _getLine(double value) {
-    return const FlLine(
-      color: AppColors.borderLight,
-      strokeWidth: 1,
-    );
+    return const FlLine(color: AppColors.borderLight, strokeWidth: 1);
   }
 }

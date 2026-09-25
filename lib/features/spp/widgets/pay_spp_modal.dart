@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,7 +30,8 @@ class PaySppModal extends StatefulWidget {
   State<PaySppModal> createState() => _PaySppModalState();
 }
 
-class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStateMixin {
+class _PaySppModalState extends State<PaySppModal>
+    with SingleTickerProviderStateMixin {
   final ImagePicker _picker = ImagePicker();
 
   int? _selectedStudentId;
@@ -52,8 +52,18 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
   bool _isSearchingStudent = false;
 
   final List<String> _monthNamesShort = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Mei',
+    'Jun',
+    'Jul',
+    'Agu',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Des',
   ];
 
   final List<int> _availableYears = [
@@ -103,7 +113,10 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
   Future<void> _loadBillsForStudent(int studentId, {int? year}) async {
     setState(() => _isLoadingBills = true);
     final sppRepo = RepositoryProvider.of<SppRepository>(context);
-    final result = await sppRepo.getStudentBills(studentId, year: year ?? _selectedYear);
+    final result = await sppRepo.getStudentBills(
+      studentId,
+      year: year ?? _selectedYear,
+    );
 
     if (!mounted) return;
 
@@ -113,7 +126,9 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
         _isLoadingBills = false;
       });
     } else {
-      final msg = result is ApiFailure ? (result as ApiFailure).message : 'Gagal memuat tagihan SPP';
+      final msg = result is ApiFailure
+          ? (result as ApiFailure).message
+          : 'Gagal memuat tagihan SPP';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: AppColors.error),
       );
@@ -144,10 +159,14 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
       }
     }
 
-    if (!unpaidMonths.contains(monthNumber)) return; // Bulan sudah lunas, tidak dapat dipilih
+    if (!unpaidMonths.contains(monthNumber)) {
+      return; // Bulan sudah lunas, tidak dapat dipilih
+    }
 
     setState(() {
-      final maxSelected = _selectedMonths.isEmpty ? 0 : _selectedMonths.reduce((a, b) => a > b ? a : b);
+      final maxSelected = _selectedMonths.isEmpty
+          ? 0
+          : _selectedMonths.reduce((a, b) => a > b ? a : b);
 
       if (_selectedMonths.contains(monthNumber)) {
         if (monthNumber == maxSelected) {
@@ -207,7 +226,10 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal memilih gambar: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Gagal memilih gambar: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -217,12 +239,17 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (ctx) => SafeArea(
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera_rounded, color: AppColors.primary),
+              leading: const Icon(
+                Icons.photo_camera_rounded,
+                color: AppColors.primary,
+              ),
               title: const Text('Ambil Foto dari Kamera'),
               onTap: () {
                 Navigator.of(ctx).pop();
@@ -230,7 +257,10 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_rounded, color: AppColors.primary),
+              leading: const Icon(
+                Icons.photo_library_rounded,
+                color: AppColors.primary,
+              ),
               title: const Text('Pilih dari Galeri'),
               onTap: () {
                 Navigator.of(ctx).pop();
@@ -258,11 +288,18 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                 children: [
                   Text(
                     'QRIS Pondok Pesantren',
-                    style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: AppTypography.itemTitle.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                   GestureDetector(
                     onTap: () => Navigator.of(ctx).pop(),
-                    child: const Icon(Icons.close, size: 20, color: AppColors.textSecondary),
+                    child: const Icon(
+                      Icons.close,
+                      size: 20,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -284,7 +321,10 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEF4444).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -311,14 +351,22 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          Icon(Icons.qr_code_2_rounded, size: 180, color: Colors.grey.shade800),
+                          Icon(
+                            Icons.qr_code_2_rounded,
+                            size: 180,
+                            color: Colors.grey.shade800,
+                          ),
                           Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Icon(Icons.school_rounded, size: 24, color: Color(0xFF5B58EB)),
+                            child: const Icon(
+                              Icons.school_rounded,
+                              size: 24,
+                              color: Color(0xFF5B58EB),
+                            ),
                           ),
                         ],
                       ),
@@ -326,7 +374,10 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                     const SizedBox(height: 12),
                     Text(
                       'Pondok Pesantren SIKESAN',
-                      style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13),
+                      style: AppTypography.itemTitle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -349,9 +400,17 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
                   onPressed: () => Navigator.of(ctx).pop(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5B58EB),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                   ),
-                  child: const Text('Tutup', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Tutup',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -376,14 +435,20 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
   Future<void> _handlePayment() async {
     if (_selectedStudentId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih santri terlebih dahulu'), backgroundColor: AppColors.error),
+        const SnackBar(
+          content: Text('Silakan pilih santri terlebih dahulu'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
 
     if (_selectedMonths.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan pilih minimal 1 bulan tagihan'), backgroundColor: AppColors.error),
+        const SnackBar(
+          content: Text('Silakan pilih minimal 1 bulan tagihan'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
@@ -393,21 +458,31 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
 
     if (isGuardian && _proofBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Silakan unggah bukti transfer/pembayaran'), backgroundColor: AppColors.error),
+        const SnackBar(
+          content: Text('Silakan unggah bukti transfer/pembayaran'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
 
     // Map selected months to actual bill IDs from database
     final selectedBills = _bills
-        .where((b) => b.periodYear == _selectedYear && _selectedMonths.contains(b.periodMonth) && b.id.isNotEmpty)
+        .where(
+          (b) =>
+              b.periodYear == _selectedYear &&
+              _selectedMonths.contains(b.periodMonth) &&
+              b.id.isNotEmpty,
+        )
         .toList();
     final List<String> billIds = selectedBills.map((b) => b.id).toList();
 
     if (billIds.isEmpty || billIds.length != _selectedMonths.length) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Tagihan SPP untuk sebagian/seluruh periode yang dipilih belum diterbitkan oleh pesantren.'),
+          content: Text(
+            'Tagihan SPP untuk sebagian/seluruh periode yang dipilih belum diterbitkan oleh pesantren.',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -416,8 +491,13 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
 
     setState(() => _isSubmitting = true);
     final sppRepo = RepositoryProvider.of<SppRepository>(context);
-    final num rate = selectedBills.isNotEmpty ? selectedBills.first.amountBilled : 750000;
-    final num total = selectedBills.fold<num>(0, (sum, b) => sum + b.amountBilled);
+    final num rate = selectedBills.isNotEmpty
+        ? selectedBills.first.amountBilled
+        : 750000;
+    final num total = selectedBills.fold<num>(
+      0,
+      (sum, b) => sum + b.amountBilled,
+    );
 
     ApiResult<String> result;
     if (!isGuardian && _selectedPaymentMethod == 'CASH') {
@@ -455,7 +535,8 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
         } else {
           // Fallback receipt preview
           final fallbackReceipt = SppReceiptModel(
-            receiptNumber: 'KW-SPP-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}',
+            receiptNumber:
+                'KW-SPP-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}',
             paymentId: paymentId,
             paymentDate: DateFormat('yyyy-MM-dd').format(DateTime.now()),
             paymentTime: DateFormat('HH:mm:ss').format(DateTime.now()),
@@ -465,13 +546,18 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
             studentName: _selectedStudentName,
             studentNis: 'NIS-2026',
             studentClass: 'Kelas Santri',
-            guardianName: context.read<AuthBloc>().state.user?.name ?? 'Wali Santri',
-            bills: _selectedMonths.map((m) => SppReceiptBillItem(
-              month: m,
-              monthName: _monthNamesShort[m - 1],
-              year: _selectedYear,
-              amount: rate,
-            )).toList(),
+            guardianName:
+                context.read<AuthBloc>().state.user?.name ?? 'Wali Santri',
+            bills: _selectedMonths
+                .map(
+                  (m) => SppReceiptBillItem(
+                    month: m,
+                    monthName: _monthNamesShort[m - 1],
+                    year: _selectedYear,
+                    amount: rate,
+                  ),
+                )
+                .toList(),
           );
           ReceiptPreviewModal.show(context, fallbackReceipt);
         }
@@ -531,7 +617,10 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
               const SizedBox(height: 16),
               Text(
                 'Pembayaran Berhasil!',
-                style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.bold, fontSize: 16),
+                style: AppTypography.itemTitle.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
@@ -542,22 +631,35 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
           ),
         ),
       ),
-    ).timeout(const Duration(milliseconds: 1400), onTimeout: () {
-      if (mounted && Navigator.of(context, rootNavigator: true).canPop()) {
-        Navigator.of(context, rootNavigator: true).pop();
-      }
-    });
+    ).timeout(
+      const Duration(milliseconds: 1400),
+      onTimeout: () {
+        if (mounted && Navigator.of(context, rootNavigator: true).canPop()) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final userRole = context.watch<AuthBloc>().state.user?.role ?? 'Wali Santri';
+    final userRole =
+        context.watch<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
-    final dashboardStudents = context.watch<DashboardBloc>().state.metrics.students;
-    if (_selectedStudentId == null && dashboardStudents.isNotEmpty && isGuardian) {
+    final dashboardStudents = context
+        .watch<DashboardBloc>()
+        .state
+        .metrics
+        .students;
+    if (_selectedStudentId == null &&
+        dashboardStudents.isNotEmpty &&
+        isGuardian) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _selectedStudentId == null) {
-          _selectStudent(dashboardStudents.first.id, dashboardStudents.first.name);
+          _selectStudent(
+            dashboardStudents.first.id,
+            dashboardStudents.first.name,
+          );
         }
       });
     }
@@ -578,823 +680,1169 @@ class _PaySppModalState extends State<PaySppModal> with SingleTickerProviderStat
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           ),
-          padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          padding: EdgeInsets.fromLTRB(
+            20,
+            16,
+            20,
+            MediaQuery.of(context).viewInsets.bottom + 20,
+          ),
           child: Column(
-        children: [
-          // Header (Title, Subtitle, Close Button)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
+              // Header (Title, Subtitle, Close Button)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Bayar SPP',
-                    style: AppTypography.headerTitle.copyWith(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1E293B),
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Bayar SPP',
+                        style: AppTypography.headerTitle.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: const Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Pembayaran SPP bulanan santri',
+                        style: AppTypography.itemSubtitle.copyWith(
+                          fontSize: 12,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Pembayaran SPP bulanan santri',
-                    style: AppTypography.itemSubtitle.copyWith(
-                      fontSize: 12,
-                      color: const Color(0xFF64748B),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        size: 18,
+                        color: Color(0xFF64748B),
+                      ),
                     ),
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.close_rounded, size: 18, color: Color(0xFF64748B)),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-          // Scrollable Content
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 1. Pemilihan Nama Santri
-                  Row(
+              // Scrollable Content
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Nama Santri',
-                        style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13),
+                      // 1. Pemilihan Nama Santri
+                      Row(
+                        children: [
+                          Text(
+                            'Nama Santri',
+                            style: AppTypography.itemTitle.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const Text(
+                            ' *',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                  if (isGuardian) ...[
-                    // Wali Santri: Tags / Chips Santri Asuhan
-                    if (dashboardStudents.isEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                      if (isGuardian) ...[
+                        // Wali Santri: Tags / Chips Santri Asuhan
+                        if (dashboardStudents.isEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: const Text(
+                              'Belum ada santri terhubung dengan akun Anda',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          )
+                        else
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: dashboardStudents.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: dashboardStudents.length == 1
+                                      ? 1
+                                      : 2,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                  mainAxisExtent: 64,
+                                ),
+                            itemBuilder: (context, index) {
+                              final st = dashboardStudents[index];
+                              final isSelected = _selectedStudentId == st.id;
+
+                              return InkWell(
+                                onTap: () {
+                                  _selectStudent(st.id, st.name);
+                                },
+                                borderRadius: BorderRadius.circular(14),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? const Color(0xFFF5F5FE)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? const Color(0xFF5B58EB)
+                                          : const Color(0xFFE2E8F0),
+                                      width: isSelected ? 1.6 : 1.0,
+                                    ),
+                                    boxShadow: isSelected
+                                        ? [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFF5B58EB,
+                                              ).withValues(alpha: 0.12),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ]
+                                        : [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.02,
+                                              ),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 1),
+                                            ),
+                                          ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // Avatar Icon
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? const Color(0xFF5B58EB)
+                                              : const Color(0xFFF1F5F9),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.school_rounded,
+                                          size: 18,
+                                          color: isSelected
+                                              ? Colors.white
+                                              : const Color(0xFF64748B),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      // Nama & Jenjang
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              st.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w700
+                                                    : FontWeight.w600,
+                                                color: isSelected
+                                                    ? const Color(0xFF1E293B)
+                                                    : const Color(0xFF334155),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              st.grade,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.w600
+                                                    : FontWeight.w400,
+                                                color: isSelected
+                                                    ? const Color(0xFF5B58EB)
+                                                    : const Color(0xFF64748B),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      // Indikator Pilihan (Ceklis saat terpilih)
+                                      if (isSelected)
+                                        Container(
+                                          width: 18,
+                                          height: 18,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFF5B58EB),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.check,
+                                            size: 12,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      else
+                                        Container(
+                                          width: 18,
+                                          height: 18,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: const Color(0xFFCBD5E1),
+                                              width: 1.2,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                      ] else ...[
+                        // Bendahara / Admin: Input Pencarian Santri Global
+                        TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Cari nama atau NIS santri...',
+                            prefixIcon: const Icon(
+                              Icons.person_outline_rounded,
+                              color: Color(0xFF94A3B8),
+                            ),
+                            suffixIcon: _isSearchingStudent
+                                ? const Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF5B58EB),
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          onChanged: _searchGlobalStudents,
                         ),
-                        child: const Text('Belum ada santri terhubung dengan akun Anda', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                      )
-                    else
+                        if (_searchedStudents.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Container(
+                            constraints: const BoxConstraints(maxHeight: 160),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.05),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                            child: ListView.separated(
+                              shrinkWrap: true,
+                              itemCount: _searchedStudents.length,
+                              separatorBuilder: (context, index) =>
+                                  const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final st = _searchedStudents[index];
+                                return ListTile(
+                                  dense: true,
+                                  title: Text(
+                                    st.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    '${st.nis} • ${st.grade}',
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                  onTap: () => _selectStudent(st.id, st.name),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ],
+                      const SizedBox(height: 16),
+
+                      // 2. Tahun Tagihan
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Tahun',
+                                style: AppTypography.itemTitle.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const Text(
+                                ' *',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.calendar_month_outlined,
+                                  size: 16,
+                                  color: Color(0xFF64748B),
+                                ),
+                                const SizedBox(width: 8),
+                                DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    value: _selectedYear,
+                                    isDense: true,
+                                    icon: const Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      size: 18,
+                                    ),
+                                    items: _availableYears.map((y) {
+                                      return DropdownMenuItem(
+                                        value: y,
+                                        child: Text(
+                                          '$y',
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (newYear) {
+                                      if (newYear != null &&
+                                          newYear != _selectedYear) {
+                                        setState(() {
+                                          _selectedYear = newYear;
+                                          _selectedMonths.clear();
+                                        });
+                                        if (_selectedStudentId != null) {
+                                          _loadBillsForStudent(
+                                            _selectedStudentId!,
+                                            year: newYear,
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 3. Grid Pilihan 12 Bulan (3 kolom x 4 baris)
+                      Row(
+                        children: [
+                          Text(
+                            'Pilihan Bulan',
+                            style: AppTypography.itemTitle.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const Text(
+                            ' *',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'Prinsip FIFO (Berurutan)',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ),
+                          if (_isLoadingBills) ...[
+                            const SizedBox(width: 10),
+                            const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: dashboardStudents.length,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: dashboardStudents.length == 1 ? 1 : 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          mainAxisExtent: 64,
-                        ),
+                        itemCount: 12,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
+                              childAspectRatio: 2.6,
+                            ),
                         itemBuilder: (context, index) {
-                          final st = dashboardStudents[index];
-                          final isSelected = _selectedStudentId == st.id;
+                          final monthNumber = index + 1;
+                          final monthName = _monthNamesShort[index];
 
-                          return InkWell(
-                            onTap: () {
-                              _selectStudent(st.id, st.name);
-                            },
-                            borderRadius: BorderRadius.circular(14),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          // Check if already paid
+                          final bill = _bills.firstWhere(
+                            (b) =>
+                                b.periodYear == _selectedYear &&
+                                b.periodMonth == monthNumber,
+                            orElse: () => SppBillModel(
+                              id: '',
+                              studentId: _selectedStudentId ?? 0,
+                              periodMonth: monthNumber,
+                              periodYear: _selectedYear,
+                              amountBilled: 750000,
+                              status: 'UNPAID',
+                            ),
+                          );
+
+                          final isPaid = bill.isPaid;
+                          final isSelected = _selectedMonths.contains(
+                            monthNumber,
+                          );
+
+                          if (isPaid) {
+                            // Bulan Lunas: Hijau muda, border hijau, centang hijau, disabled
+                            return Container(
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFFF5F5FE) : Colors.white,
+                                color: const Color(0xFFECFDF5),
                                 borderRadius: BorderRadius.circular(14),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFFE2E8F0),
-                                  width: isSelected ? 1.6 : 1.0,
+                                  color: const Color(0xFF10B981),
+                                  width: 1.2,
+                                ),
+                              ),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Text(
+                                    monthName,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF047857),
+                                    ),
+                                  ),
+                                  const Positioned(
+                                    right: 8,
+                                    child: Icon(
+                                      Icons.check_circle_rounded,
+                                      size: 16,
+                                      color: Color(0xFF10B981),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          // Bulan Belum Lunas: Bisa dipilih dengan prinsip FIFO
+                          return GestureDetector(
+                            onTap: () => _onMonthTapped(monthNumber),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFF5B58EB)
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFF5B58EB)
+                                      : const Color(0xFFE2E8F0),
+                                  width: 1.2,
                                 ),
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
-                                          color: const Color(0xFF5B58EB).withValues(alpha: 0.12),
+                                          color: const Color(
+                                            0xFF5B58EB,
+                                          ).withValues(alpha: 0.25),
                                           blurRadius: 6,
                                           offset: const Offset(0, 2),
                                         ),
                                       ]
-                                    : [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.02),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
+                                    : null,
                               ),
-                              child: Row(
-                                children: [
-                                  // Avatar Icon
-                                  Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFFF1F5F9),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Icon(
-                                      Icons.school_rounded,
-                                      size: 18,
-                                      color: isSelected ? Colors.white : const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  // Nama & Jenjang
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          st.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 12.5,
-                                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                            color: isSelected ? const Color(0xFF1E293B) : const Color(0xFF334155),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          st.grade,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                                            color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFF64748B),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  // Indikator Pilihan (Ceklis saat terpilih)
-                                  if (isSelected)
-                                    Container(
-                                      width: 18,
-                                      height: 18,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFF5B58EB),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.check,
-                                        size: 12,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  else
-                                    Container(
-                                      width: 18,
-                                      height: 18,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(color: const Color(0xFFCBD5E1), width: 1.2),
-                                      ),
-                                    ),
-                                ],
+                              alignment: Alignment.center,
+                              child: Text(
+                                monthName,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w600,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : const Color(0xFF1E293B),
+                                ),
                               ),
                             ),
                           );
                         },
                       ),
-                  ] else ...[
-                    // Bendahara / Admin: Input Pencarian Santri Global
-                    TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Cari nama atau NIS santri...',
-                        prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF94A3B8)),
-                        suffixIcon: _isSearchingStudent
-                            ? const Padding(
-                                padding: EdgeInsets.all(12),
-                                child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
-                              )
-                            : null,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: Color(0xFF5B58EB), width: 1.5),
-                        ),
-                      ),
-                      onChanged: _searchGlobalStudents,
-                    ),
-                    if (_searchedStudents.isNotEmpty) ...[
-                      const SizedBox(height: 6),
-                      Container(
-                        constraints: const BoxConstraints(maxHeight: 160),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 6),
-                          ],
-                        ),
-                        child: ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: _searchedStudents.length,
-                          separatorBuilder: (context, index) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final st = _searchedStudents[index];
-                            return ListTile(
-                              dense: true,
-                              title: Text(st.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                              subtitle: Text('${st.nis} • ${st.grade}', style: const TextStyle(fontSize: 11)),
-                              onTap: () => _selectStudent(st.id, st.name),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ],
-                  const SizedBox(height: 16),
+                      const SizedBox(height: 8),
 
-                  // 2. Tahun Tagihan
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
+                      // Keterangan Info Biru
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Tahun', style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13)),
-                          const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                          const Icon(
+                            Icons.info_outline_rounded,
+                            size: 14,
+                            color: Color(0xFF3B82F6),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Pilih satu atau lebih bulan. Bulan dengan centang hijau sudah lunas.',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.blue.shade700,
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
+                      const SizedBox(height: 14),
+
+                      // 4. Card Total Tagihan
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          color: const Color(0xFFF0F1FE),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE0E3FD)),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Icon(Icons.calendar_month_outlined, size: 16, color: Color(0xFF64748B)),
-                            const SizedBox(width: 8),
-                            DropdownButtonHideUnderline(
-                              child: DropdownButton<int>(
-                                value: _selectedYear,
-                                isDense: true,
-                                icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-                                items: _availableYears.map((y) {
-                                  return DropdownMenuItem(value: y, child: Text('$y', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)));
-                                }).toList(),
-                                onChanged: (newYear) {
-                                  if (newYear != null && newYear != _selectedYear) {
-                                    setState(() {
-                                      _selectedYear = newYear;
-                                      _selectedMonths.clear();
-                                    });
-                                    if (_selectedStudentId != null) {
-                                      _loadBillsForStudent(_selectedStudentId!, year: newYear);
-                                    }
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 3. Grid Pilihan 12 Bulan (3 kolom x 4 baris)
-                  Row(
-                    children: [
-                      Text('Pilihan Bulan', style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13)),
-                      const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Text(
-                          'Prinsip FIFO (Berurutan)',
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
-                        ),
-                      ),
-                      if (_isLoadingBills) ...[
-                        const SizedBox(width: 10),
-                        const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: 12,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      childAspectRatio: 2.6,
-                    ),
-                    itemBuilder: (context, index) {
-                      final monthNumber = index + 1;
-                      final monthName = _monthNamesShort[index];
-
-                      // Check if already paid
-                      final bill = _bills.firstWhere(
-                        (b) => b.periodYear == _selectedYear && b.periodMonth == monthNumber,
-                        orElse: () => SppBillModel(
-                          id: '',
-                          studentId: _selectedStudentId ?? 0,
-                          periodMonth: monthNumber,
-                          periodYear: _selectedYear,
-                          amountBilled: 750000,
-                          status: 'UNPAID',
-                        ),
-                      );
-
-                      final isPaid = bill.isPaid;
-                      final isSelected = _selectedMonths.contains(monthNumber);
-
-                      if (isPaid) {
-                        // Bulan Lunas: Hijau muda, border hijau, centang hijau, disabled
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFECFDF5),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFF10B981), width: 1.2),
-                          ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Text(
-                                monthName,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF047857),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Total Tagihan',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.indigo.shade900,
+                                  ),
                                 ),
-                              ),
-                              const Positioned(
-                                right: 8,
-                                child: Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF10B981)),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      // Bulan Belum Lunas: Bisa dipilih dengan prinsip FIFO
-                      return GestureDetector(
-                        onTap: () => _onMonthTapped(monthNumber),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF5B58EB) : Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isSelected ? const Color(0xFF5B58EB) : const Color(0xFFE2E8F0),
-                              width: 1.2,
-                            ),
-                            boxShadow: isSelected
-                                ? [
-                                    BoxShadow(
-                                      color: const Color(0xFF5B58EB).withValues(alpha: 0.25),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ]
-                                : null,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            monthName,
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                              color: isSelected ? Colors.white : const Color(0xFF1E293B),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Keterangan Info Biru
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.info_outline_rounded, size: 14, color: Color(0xFF3B82F6)),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          'Pilih satu atau lebih bulan. Bulan dengan centang hijau sudah lunas.',
-                          style: TextStyle(fontSize: 11, color: Colors.blue.shade700, height: 1.3),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-
-                  // 4. Card Total Tagihan
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F1FE),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE0E3FD)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Total Tagihan',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.indigo.shade900),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _selectedMonths.isEmpty
-                                  ? 'Belum ada bulan dipilih'
-                                  : '${_selectedMonths.length} bulan x ${CurrencyFormatter.format(rate)}',
-                              style: TextStyle(fontSize: 11, color: Colors.indigo.shade600),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          CurrencyFormatter.format(totalAmount),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF5B58EB),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // 5. Bagian Metode Pembayaran
-                  Row(
-                    children: [
-                      Text('Metode Pembayaran', style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13)),
-                      const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  if (isGuardian) ...[
-                    // KHUSUS WALI SANTRI:
-                    // A. Grid 3 Card Rekening Bank
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: bankAccounts.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 8,
-                        childAspectRatio: 1.1,
-                      ),
-                      itemBuilder: (context, index) {
-                        final acc = bankAccounts[index];
-                        return GestureDetector(
-                          onTap: () => _copyToClipboard(acc.accountNumber, acc.bankName),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.02),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 1),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _selectedMonths.isEmpty
+                                      ? 'Belum ada bulan dipilih'
+                                      : '${_selectedMonths.length} bulan x ${CurrencyFormatter.format(rate)}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.indigo.shade600,
+                                  ),
                                 ),
                               ],
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF5B58EB).withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(6),
+                            Text(
+                              CurrencyFormatter.format(totalAmount),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF5B58EB),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 5. Bagian Metode Pembayaran
+                      Row(
+                        children: [
+                          Text(
+                            'Metode Pembayaran',
+                            style: AppTypography.itemTitle.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const Text(
+                            ' *',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+
+                      if (isGuardian) ...[
+                        // KHUSUS WALI SANTRI:
+                        // A. Grid 3 Card Rekening Bank
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: bankAccounts.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                                childAspectRatio: 1.1,
+                              ),
+                          itemBuilder: (context, index) {
+                            final acc = bankAccounts[index];
+                            return GestureDetector(
+                              onTap: () => _copyToClipboard(
+                                acc.accountNumber,
+                                acc.bankName,
+                              ),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFE2E8F0),
                                   ),
-                                  child: Text(
-                                    acc.bankName,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 11,
-                                      color: Color(0xFF5B58EB),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.02,
+                                      ),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
                                     ),
-                                  ),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  acc.accountNumber,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  acc.accountHolder,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 9, color: Colors.grey),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Icon(Icons.copy_rounded, size: 10, color: Color(0xFF5B58EB)),
-                                    SizedBox(width: 2),
-                                    Text('Salin', style: TextStyle(fontSize: 8.5, color: Color(0xFF5B58EB), fontWeight: FontWeight.bold)),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Garis Pemisah (Divider)
-                    Row(
-                      children: const [
-                        Expanded(child: Divider(color: Color(0xFFE2E8F0))),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Text('atau bayar via QRIS', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                        ),
-                        Expanded(child: Divider(color: Color(0xFFE2E8F0))),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-
-                    // B. Card Layout Grid 1 (QRIS)
-                    GestureDetector(
-                      onTap: _showQrisDialog,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: const Color(0xFFCBD5E1)),
-                              ),
-                              child: const Icon(Icons.qr_code_scanner_rounded, size: 24, color: Color(0xFFDC2626)),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
-                                    'QRIS Pesantren SIKESAN',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    'Klik untuk scan barcode dari BCA, Mandiri, GoPay, Dana, dll.',
-                                    style: TextStyle(fontSize: 10.5, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right_rounded, color: Colors.grey),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // C. Upload Bukti Pembayaran
-                    Row(
-                      children: [
-                        Text('Bukti Pembayaran', style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700, fontSize: 13)),
-                        const Text(' *', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    GestureDetector(
-                      onTap: _showImagePickerOptions,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: _proofBytes != null ? const Color(0xFF10B981) : const Color(0xFFCBD5E1),
-                            style: BorderStyle.solid,
-                          ),
-                        ),
-                        child: _proofBytes != null
-                            ? Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: Image.memory(_proofBytes!, width: 48, height: 48, fit: BoxFit.cover),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text('Bukti Foto Terpilih', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5)),
-                                        const SizedBox(height: 2),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 3,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xFF5B58EB,
+                                        ).withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        acc.bankName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 11,
+                                          color: Color(0xFF5B58EB),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      acc.accountNumber,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      acc.accountHolder,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 9,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: const [
+                                        Icon(
+                                          Icons.copy_rounded,
+                                          size: 10,
+                                          color: Color(0xFF5B58EB),
+                                        ),
+                                        SizedBox(width: 2),
                                         Text(
-                                          _proofFilename ?? 'Bukti transfer',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontSize: 10.5, color: Colors.grey),
+                                          'Salin',
+                                          style: TextStyle(
+                                            fontSize: 8.5,
+                                            color: Color(0xFF5B58EB),
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, size: 18, color: Color(0xFF5B58EB)),
-                                    onPressed: _showImagePickerOptions,
-                                  ),
-                                ],
-                              )
-                            : Column(
-                                children: const [
-                                  Icon(Icons.cloud_upload_outlined, size: 30, color: Color(0xFF5B58EB)),
-                                  SizedBox(height: 6),
-                                  Text(
-                                    'Unggah Bukti Transfer / Struk',
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF1E293B)),
-                                  ),
-                                  SizedBox(height: 2),
-                                  Text(
-                                    'Format JPG, PNG, atau Screenshot (Maks. 5MB)',
-                                    style: TextStyle(fontSize: 10, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ] else ...[
-                    // Role Bendahara / Staf Kasir: Toggle Tunai & Transfer
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _selectedPaymentMethod = 'TRANSFER'),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: _selectedPaymentMethod == 'TRANSFER' ? const Color(0xFFF0F1FE) : Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: _selectedPaymentMethod == 'TRANSFER' ? const Color(0xFF5B58EB) : const Color(0xFFE2E8F0),
-                                  width: 1.5,
+                                  ],
                                 ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.swap_horiz_rounded,
-                                    size: 18,
-                                    color: _selectedPaymentMethod == 'TRANSFER' ? const Color(0xFF5B58EB) : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Transfer',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: _selectedPaymentMethod == 'TRANSFER' ? const Color(0xFF5B58EB) : Colors.grey.shade700,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Garis Pemisah (Divider)
+                        Row(
+                          children: const [
+                            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: Text(
+                                'atau bayar via QRIS',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+
+                        // B. Card Layout Grid 1 (QRIS)
+                        GestureDetector(
+                          onTap: _showQrisDialog,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: const Color(0xFFCBD5E1),
                                     ),
                                   ),
-                                ],
-                              ),
+                                  child: const Icon(
+                                    Icons.qr_code_scanner_rounded,
+                                    size: 24,
+                                    color: Color(0xFFDC2626),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'QRIS Pesantren SIKESAN',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        'Klik untuk scan barcode dari BCA, Mandiri, GoPay, Dana, dll.',
+                                        style: TextStyle(
+                                          fontSize: 10.5,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: Colors.grey,
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _selectedPaymentMethod = 'CASH'),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: _selectedPaymentMethod == 'CASH' ? const Color(0xFFF0F1FE) : Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: _selectedPaymentMethod == 'CASH' ? const Color(0xFF5B58EB) : const Color(0xFFE2E8F0),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.point_of_sale_rounded,
-                                    size: 18,
-                                    color: _selectedPaymentMethod == 'CASH' ? const Color(0xFF5B58EB) : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Tunai',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                      color: _selectedPaymentMethod == 'CASH' ? const Color(0xFF5B58EB) : Colors.grey.shade700,
-                                    ),
-                                  ),
-                                ],
+                        const SizedBox(height: 16),
+
+                        // C. Upload Bukti Pembayaran
+                        Row(
+                          children: [
+                            Text(
+                              'Bukti Pembayaran',
+                              style: AppTypography.itemTitle.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
                               ),
                             ),
+                            const Text(
+                              ' *',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        GestureDetector(
+                          onTap: _showImagePickerOptions,
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: _proofBytes != null
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFCBD5E1),
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                            child: _proofBytes != null
+                                ? Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.memory(
+                                          _proofBytes!,
+                                          width: 48,
+                                          height: 48,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const Text(
+                                              'Bukti Foto Terpilih',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12.5,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              _proofFilename ??
+                                                  'Bukti transfer',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 10.5,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          size: 18,
+                                          color: Color(0xFF5B58EB),
+                                        ),
+                                        onPressed: _showImagePickerOptions,
+                                      ),
+                                    ],
+                                  )
+                                : Column(
+                                    children: const [
+                                      Icon(
+                                        Icons.cloud_upload_outlined,
+                                        size: 30,
+                                        color: Color(0xFF5B58EB),
+                                      ),
+                                      SizedBox(height: 6),
+                                      Text(
+                                        'Unggah Bukti Transfer / Struk',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Color(0xFF1E293B),
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        'Format JPG, PNG, atau Screenshot (Maks. 5MB)',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           ),
+                        ),
+                      ] else ...[
+                        // Role Bendahara / Staf Kasir: Toggle Tunai & Transfer
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                  () => _selectedPaymentMethod = 'TRANSFER',
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _selectedPaymentMethod == 'TRANSFER'
+                                        ? const Color(0xFFF0F1FE)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color:
+                                          _selectedPaymentMethod == 'TRANSFER'
+                                          ? const Color(0xFF5B58EB)
+                                          : const Color(0xFFE2E8F0),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.swap_horiz_rounded,
+                                        size: 18,
+                                        color:
+                                            _selectedPaymentMethod == 'TRANSFER'
+                                            ? const Color(0xFF5B58EB)
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Transfer',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color:
+                                              _selectedPaymentMethod ==
+                                                  'TRANSFER'
+                                              ? const Color(0xFF5B58EB)
+                                              : Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                  () => _selectedPaymentMethod = 'CASH',
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _selectedPaymentMethod == 'CASH'
+                                        ? const Color(0xFFF0F1FE)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: _selectedPaymentMethod == 'CASH'
+                                          ? const Color(0xFF5B58EB)
+                                          : const Color(0xFFE2E8F0),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.point_of_sale_rounded,
+                                        size: 18,
+                                        color: _selectedPaymentMethod == 'CASH'
+                                            ? const Color(0xFF5B58EB)
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Tunai',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color:
+                                              _selectedPaymentMethod == 'CASH'
+                                              ? const Color(0xFF5B58EB)
+                                              : Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                ],
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-          // 6. Tombol Submit Bayar (Rounded Full-Width)
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: _isSubmitting || _selectedMonths.isEmpty ? null : _handlePayment,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5B58EB),
-                disabledBackgroundColor: const Color(0xFFCBD5E1),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
-              ),
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                    )
-                  : Text(
-                      _selectedMonths.isEmpty ? 'Pilih Bulan Tagihan' : 'Bayar ${CurrencyFormatter.format(totalAmount)}',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
+              // 6. Tombol Submit Bayar (Rounded Full-Width)
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isSubmitting || _selectedMonths.isEmpty
+                      ? null
+                      : _handlePayment,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF5B58EB),
+                    disabledBackgroundColor: const Color(0xFFCBD5E1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-            ),
+                    elevation: 0,
+                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : Text(
+                          _selectedMonths.isEmpty
+                              ? 'Pilih Bulan Tagihan'
+                              : 'Bayar ${CurrencyFormatter.format(totalAmount)}',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ),
-  ),
-);
+    );
   }
 }

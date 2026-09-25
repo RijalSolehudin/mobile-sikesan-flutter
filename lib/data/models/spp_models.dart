@@ -22,7 +22,9 @@ class SppBillModel {
       id: json['id']?.toString() ?? '',
       studentId: int.tryParse(json['student_id']?.toString() ?? '') ?? 0,
       periodMonth: int.tryParse(json['period_month']?.toString() ?? '') ?? 1,
-      periodYear: int.tryParse(json['period_year']?.toString() ?? '') ?? DateTime.now().year,
+      periodYear:
+          int.tryParse(json['period_year']?.toString() ?? '') ??
+          DateTime.now().year,
       amountBilled: num.tryParse(json['amount_billed']?.toString() ?? '') ?? 0,
       status: json['status']?.toString() ?? 'UNPAID',
     );
@@ -121,8 +123,11 @@ class SppReceiptBillItem {
     return SppReceiptBillItem(
       month: int.tryParse(json['period_month']?.toString() ?? '') ?? 1,
       monthName: json['month_name']?.toString() ?? 'Bulan',
-      year: int.tryParse(json['period_year']?.toString() ?? '') ?? DateTime.now().year,
-      amount: num.tryParse(json['allocated_amount']?.toString() ?? '') ??
+      year:
+          int.tryParse(json['period_year']?.toString() ?? '') ??
+          DateTime.now().year,
+      amount:
+          num.tryParse(json['allocated_amount']?.toString() ?? '') ??
           num.tryParse(json['amount_billed']?.toString() ?? '') ??
           0,
     );
@@ -166,9 +171,11 @@ class SppReceiptModel {
     return SppReceiptModel(
       receiptNumber: json['receipt_number']?.toString() ?? 'KW-SPP-0000',
       paymentId: json['payment_id']?.toString() ?? '',
-      paymentDate: json['payment_date']?.toString() ?? DateTime.now().toIso8601String(),
+      paymentDate:
+          json['payment_date']?.toString() ?? DateTime.now().toIso8601String(),
       paymentTime: json['payment_time']?.toString() ?? '00:00:00',
-      totalPaidAmount: num.tryParse(json['total_paid_amount']?.toString() ?? '') ?? 0,
+      totalPaidAmount:
+          num.tryParse(json['total_paid_amount']?.toString() ?? '') ?? 0,
       paymentMethod: json['payment_method']?.toString() ?? 'TRANSFER',
       status: json['status']?.toString() ?? 'APPROVED',
       studentName: student?['name']?.toString() ?? 'Santri',

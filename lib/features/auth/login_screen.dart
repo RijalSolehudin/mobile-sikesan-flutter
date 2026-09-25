@@ -18,7 +18,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   String _selectedRole = 'Admin';
 
-  final Map<String, ({String title, String description, IconData icon})> _rolesData = {
+  final Map<String, ({String title, String description, IconData icon})>
+  _rolesData = {
     'Admin': (
       title: 'Admin',
       description: 'Akses penuh ke seluruh fitur dan pengaturan sistem.',
@@ -26,17 +27,20 @@ class _LoginScreenState extends State<LoginScreen> {
     ),
     'Bendahara': (
       title: 'Bendahara',
-      description: 'Pengelolaan keuangan, kasir, verifikasi SPP, dan laporan pembukuan.',
+      description:
+          'Pengelolaan keuangan, kasir, verifikasi SPP, dan laporan pembukuan.',
       icon: Icons.account_balance_rounded,
     ),
     'Wali Santri': (
       title: 'Wali Santri',
-      description: 'Akses informasi keuangan santri, pembayaran SPP, dan saldo dompet santri.',
+      description:
+          'Akses informasi keuangan santri, pembayaran SPP, dan saldo dompet santri.',
       icon: Icons.family_restroom_rounded,
     ),
     'Kasir': (
       title: 'Kasir',
-      description: 'Layanan kasir langsung untuk pembayaran SPP dan tabungan santri.',
+      description:
+          'Layanan kasir langsung untuk pembayaran SPP dan tabungan santri.',
       icon: Icons.point_of_sale_rounded,
     ),
   };
@@ -64,11 +68,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     context.read<AuthBloc>().add(
-          AuthLoginRequested(
-            username: username,
-            password: password,
-          ),
-        );
+      AuthLoginRequested(username: username, password: password),
+    );
   }
 
   void _showForgotPasswordDialog() {
@@ -82,20 +83,30 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(width: 8),
             Text(
               'Lupa Password?',
-              style: GoogleFonts.plusJakartaSans(fontSize: 16, fontWeight: FontWeight.w700),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
         content: Text(
           'Untuk alasan keamanan, silakan hubungi bagian Administrasi Pesantren untuk melakukan reset password akun Anda.',
-          style: GoogleFonts.plusJakartaSans(fontSize: 13, color: const Color(0xFF475569), height: 1.4),
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            color: const Color(0xFF475569),
+            height: 1.4,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
               'Mengerti',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700, color: const Color(0xFF059669)),
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF059669),
+              ),
             ),
           ),
         ],
@@ -118,7 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 20,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +149,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF64748B)),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            size: 20,
+                            color: Color(0xFF64748B),
+                          ),
                           onPressed: () => Navigator.of(ctx).pop(),
                         ),
                       ],
@@ -143,7 +161,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 6),
                     Text(
                       'Pilih peran akun yang ingin Anda gunakan untuk masuk',
-                      style: GoogleFonts.plusJakartaSans(fontSize: 12, color: const Color(0xFF64748B)),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12,
+                        color: const Color(0xFF64748B),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ..._rolesData.entries.map((entry) {
@@ -159,10 +180,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
+                              color: isSelected
+                                  ? const Color(0xFFF0FDF4)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? const Color(0xFF059669) : const Color(0xFFE2E8F0),
+                                color: isSelected
+                                    ? const Color(0xFF059669)
+                                    : const Color(0xFFE2E8F0),
                                 width: isSelected ? 1.6 : 1.0,
                               ),
                             ),
@@ -172,26 +197,35 @@ class _LoginScreenState extends State<LoginScreen> {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: isSelected ? const Color(0xFF059669) : const Color(0xFFF1F5F9),
+                                    color: isSelected
+                                        ? const Color(0xFF059669)
+                                        : const Color(0xFFF1F5F9),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
                                     entry.value.icon,
-                                    color: isSelected ? Colors.white : const Color(0xFF64748B),
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFF64748B),
                                     size: 22,
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         entry.value.title,
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 13.5,
-                                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF334155),
+                                          fontWeight: isSelected
+                                              ? FontWeight.w800
+                                              : FontWeight.w600,
+                                          color: isSelected
+                                              ? const Color(0xFF0F172A)
+                                              : const Color(0xFF334155),
                                         ),
                                       ),
                                       const SizedBox(height: 2),
@@ -208,7 +242,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 if (isSelected)
-                                  const Icon(Icons.check_circle_rounded, color: Color(0xFF059669), size: 20),
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Color(0xFF059669),
+                                    size: 20,
+                                  ),
                               ],
                             ),
                           ),
@@ -306,7 +344,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.verified_user_rounded, color: Color(0xFF059669), size: 20),
+                  const Icon(
+                    Icons.verified_user_rounded,
+                    color: Color(0xFF059669),
+                    size: 20,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -410,10 +452,17 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginFormCard(({String description, IconData icon, String title}) currentRoleData, bool isLoading, {bool isWide = false}) {
+  Widget _buildLoginFormCard(
+    ({String description, IconData icon, String title}) currentRoleData,
+    bool isLoading, {
+    bool isWide = false,
+  }) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: isWide ? 32 : 22, vertical: isWide ? 32 : 26),
+      padding: EdgeInsets.symmetric(
+        horizontal: isWide ? 32 : 22,
+        vertical: isWide ? 32 : 26,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
@@ -507,8 +556,14 @@ class _LoginScreenState extends State<LoginScreen> {
             style: GoogleFonts.plusJakartaSans(fontSize: 14),
             decoration: InputDecoration(
               hintText: 'Masukkan username atau email',
-              hintStyle: GoogleFonts.plusJakartaSans(color: const Color(0xFF94A3B8), fontSize: 13.5),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              hintStyle: GoogleFonts.plusJakartaSans(
+                color: const Color(0xFF94A3B8),
+                fontSize: 13.5,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -519,7 +574,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFF059669), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF059669),
+                  width: 1.5,
+                ),
               ),
             ),
           ),
@@ -542,15 +600,24 @@ class _LoginScreenState extends State<LoginScreen> {
             style: GoogleFonts.plusJakartaSans(fontSize: 14),
             decoration: InputDecoration(
               hintText: 'Masukkan password',
-              hintStyle: GoogleFonts.plusJakartaSans(color: const Color(0xFF94A3B8), fontSize: 13.5),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              hintStyle: GoogleFonts.plusJakartaSans(
+                color: const Color(0xFF94A3B8),
+                fontSize: 13.5,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  _obscurePassword
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                   color: const Color(0xFF94A3B8),
                   size: 20,
                 ),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -562,7 +629,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFF059669), width: 1.5),
+                borderSide: const BorderSide(
+                  color: Color(0xFF059669),
+                  width: 1.5,
+                ),
               ),
             ),
           ),
@@ -602,7 +672,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
                     )
                   : Text(
                       'Masuk',
@@ -655,7 +728,8 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       builder: (context, state) {
         final isLoading = state.isLoading;
-        final currentRoleData = _rolesData[_selectedRole] ?? _rolesData['Admin']!;
+        final currentRoleData =
+            _rolesData[_selectedRole] ?? _rolesData['Admin']!;
 
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -667,7 +741,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 body: SafeArea(
                   child: Center(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 36),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 48,
+                        vertical: 36,
+                      ),
                       physics: const BouncingScrollPhysics(),
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 1080),
@@ -681,7 +758,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(width: 32),
                             Expanded(
                               flex: 6,
-                              child: _buildLoginFormCard(currentRoleData, isLoading, isWide: true),
+                              child: _buildLoginFormCard(
+                                currentRoleData,
+                                isLoading,
+                                isWide: true,
+                              ),
                             ),
                           ],
                         ),
@@ -702,7 +783,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       _buildBrandingCard(isWide: false),
                       const SizedBox(height: 14),
-                      _buildLoginFormCard(currentRoleData, isLoading, isWide: false),
+                      _buildLoginFormCard(
+                        currentRoleData,
+                        isLoading,
+                        isWide: false,
+                      ),
                     ],
                   ),
                 ),
@@ -714,4 +799,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

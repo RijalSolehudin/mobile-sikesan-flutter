@@ -15,10 +15,7 @@ class AuthLoginRequested extends AuthEvent {
   final String username;
   final String password;
 
-  const AuthLoginRequested({
-    required this.username,
-    required this.password,
-  });
+  const AuthLoginRequested({required this.username, required this.password});
 
   @override
   List<Object?> get props => [username, password];

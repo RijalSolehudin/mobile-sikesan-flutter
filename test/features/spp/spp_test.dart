@@ -52,9 +52,7 @@ void main() {
           'nis': '12345',
           'classroom': 'Kelas 11',
         },
-        'guardian': {
-          'name': 'H. Ahmad',
-        },
+        'guardian': {'name': 'H. Ahmad'},
         'bills': [
           {
             'period_month': 1,
@@ -80,62 +78,70 @@ void main() {
       expect(receipt.bills.first.monthName, 'Januari');
     });
 
-    test('SppBillModel parses MySQL YEAR string format safely without cast error', () {
-      final jsonFromString = {
-        'id': '01m33vbmzdpnnz9epp5cnk0sjs',
-        'student_id': '1',
-        'period_month': '8',
-        'period_year': '2026',
-        'amount_billed': '500000',
-        'status': 'UNPAID',
-      };
-      final bill = SppBillModel.fromJson(jsonFromString);
-      expect(bill.id, '01m33vbmzdpnnz9epp5cnk0sjs');
-      expect(bill.studentId, 1);
-      expect(bill.periodMonth, 8);
-      expect(bill.periodYear, 2026);
-      expect(bill.amountBilled, 500000);
-      expect(bill.isPaid, false);
-    });
+    test(
+      'SppBillModel parses MySQL YEAR string format safely without cast error',
+      () {
+        final jsonFromString = {
+          'id': '01m33vbmzdpnnz9epp5cnk0sjs',
+          'student_id': '1',
+          'period_month': '8',
+          'period_year': '2026',
+          'amount_billed': '500000',
+          'status': 'UNPAID',
+        };
+        final bill = SppBillModel.fromJson(jsonFromString);
+        expect(bill.id, '01m33vbmzdpnnz9epp5cnk0sjs');
+        expect(bill.studentId, 1);
+        expect(bill.periodMonth, 8);
+        expect(bill.periodYear, 2026);
+        expect(bill.amountBilled, 500000);
+        expect(bill.isPaid, false);
+      },
+    );
 
-    test('FIFO selection: selecting month 10 automatically selects months 8 and 9 if 1-7 are paid', () {
-      final unpaidMonths = [8, 9, 10, 11, 12];
-      final selectedMonths = <int>[];
+    test(
+      'FIFO selection: selecting month 10 automatically selects months 8 and 9 if 1-7 are paid',
+      () {
+        final unpaidMonths = [8, 9, 10, 11, 12];
+        final selectedMonths = <int>[];
 
-      void onMonthTapped(int monthNumber) {
-        if (!unpaidMonths.contains(monthNumber)) return;
-        final maxSelected = selectedMonths.isEmpty ? 0 : selectedMonths.reduce((a, b) => a > b ? a : b);
-        if (selectedMonths.contains(monthNumber)) {
-          if (monthNumber == maxSelected) {
-            selectedMonths.remove(monthNumber);
+        void onMonthTapped(int monthNumber) {
+          if (!unpaidMonths.contains(monthNumber)) return;
+          final maxSelected = selectedMonths.isEmpty
+              ? 0
+              : selectedMonths.reduce((a, b) => a > b ? a : b);
+          if (selectedMonths.contains(monthNumber)) {
+            if (monthNumber == maxSelected) {
+              selectedMonths.remove(monthNumber);
+            } else {
+              selectedMonths.removeWhere((m) => m > monthNumber);
+            }
           } else {
-            selectedMonths.removeWhere((m) => m > monthNumber);
-          }
-        } else {
-          selectedMonths.clear();
-          for (final m in unpaidMonths) {
-            if (m <= monthNumber) {
-              selectedMonths.add(m);
+            selectedMonths.clear();
+            for (final m in unpaidMonths) {
+              if (m <= monthNumber) {
+                selectedMonths.add(m);
+              }
             }
           }
         }
-      }
 
-      // Tap month 10 -> should select [8, 9, 10]
-      onMonthTapped(10);
-      expect(selectedMonths, [8, 9, 10]);
+        // Tap month 10 -> should select [8, 9, 10]
+        onMonthTapped(10);
+        expect(selectedMonths, [8, 9, 10]);
 
-      // Tap month 9 -> should shrink to [8, 9]
-      onMonthTapped(9);
-      expect(selectedMonths, [8, 9]);
+        // Tap month 9 -> should shrink to [8, 9]
+        onMonthTapped(9);
+        expect(selectedMonths, [8, 9]);
 
-      // Tap month 9 again (it is maxSelected) -> should remove 9, leaving [8]
-      onMonthTapped(9);
-      expect(selectedMonths, [8]);
+        // Tap month 9 again (it is maxSelected) -> should remove 9, leaving [8]
+        onMonthTapped(9);
+        expect(selectedMonths, [8]);
 
-      // Tap month 8 again (it is maxSelected) -> should clear
-      onMonthTapped(8);
-      expect(selectedMonths, isEmpty);
-    });
+        // Tap month 8 again (it is maxSelected) -> should clear
+        onMonthTapped(8);
+        expect(selectedMonths, isEmpty);
+      },
+    );
   });
 }

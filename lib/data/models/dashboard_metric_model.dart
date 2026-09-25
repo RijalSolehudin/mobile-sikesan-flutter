@@ -77,7 +77,10 @@ class DashboardMetricModel {
   }
 
   factory DashboardMetricModel.fromTreasurerJson(Map<String, dynamic> json) {
-    final globalBalance = (json['global_wallet_balance'] as num?) ?? (json['total_savings'] as num?) ?? 0;
+    final globalBalance =
+        (json['global_wallet_balance'] as num?) ??
+        (json['total_savings'] as num?) ??
+        0;
     final monthlySpp = (json['monthly_spp_collected'] as num?) ?? 0;
     final monthlyInfaq = (json['monthly_infaq_collected'] as num?) ?? 0;
 

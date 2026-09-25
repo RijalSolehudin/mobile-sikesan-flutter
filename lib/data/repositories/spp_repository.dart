@@ -8,11 +8,15 @@ class SppRepository {
 
   SppRepository(this.dioClient);
 
-  Future<ApiResult<List<StudentLookupModel>>> getStudents({String? search}) async {
+  Future<ApiResult<List<StudentLookupModel>>> getStudents({
+    String? search,
+  }) async {
     try {
       final response = await dioClient.dio.get(
         '/students',
-        queryParameters: search != null && search.isNotEmpty ? {'search': search} : null,
+        queryParameters: search != null && search.isNotEmpty
+            ? {'search': search}
+            : null,
       );
 
       final dynamic dataField = response.data['data'];
@@ -39,7 +43,10 @@ class SppRepository {
     }
   }
 
-  Future<ApiResult<List<SppBillModel>>> getStudentBills(int studentId, {int? year}) async {
+  Future<ApiResult<List<SppBillModel>>> getStudentBills(
+    int studentId, {
+    int? year,
+  }) async {
     try {
       final response = await dioClient.dio.get(
         '/students/$studentId/bills',
@@ -85,7 +92,10 @@ class SppRepository {
 
       final paymentData = response.data['data'];
       final paymentId = paymentData?['id']?.toString() ?? '';
-      return ApiSuccess(paymentId, message: response.data['message']?.toString());
+      return ApiSuccess(
+        paymentId,
+        message: response.data['message']?.toString(),
+      );
     } on DioException catch (e) {
       return ApiFailure(
         e.response?.data?['message'] ?? 'Gagal memproses pembayaran kasir',
@@ -111,10 +121,7 @@ class SppRepository {
         'total_amount': totalAmount.toInt(),
         'sender_bank_name': bankName ?? 'Transfer Bank',
         'sender_account_holder': accountHolder ?? 'Wali Santri',
-        'proof': MultipartFile.fromBytes(
-          proofBytes,
-          filename: proofFilename,
-        ),
+        'proof': MultipartFile.fromBytes(proofBytes, filename: proofFilename),
       });
 
       for (int i = 0; i < billIds.length; i++) {
@@ -128,7 +135,10 @@ class SppRepository {
 
       final paymentData = response.data['data'];
       final paymentId = paymentData?['id']?.toString() ?? '';
-      return ApiSuccess(paymentId, message: response.data['message']?.toString());
+      return ApiSuccess(
+        paymentId,
+        message: response.data['message']?.toString(),
+      );
     } on DioException catch (e) {
       return ApiFailure(
         e.response?.data?['message'] ?? 'Gagal mengirim pembayaran transfer',
@@ -141,7 +151,9 @@ class SppRepository {
 
   Future<ApiResult<SppReceiptModel>> getReceipt(String paymentId) async {
     try {
-      final response = await dioClient.dio.get('/spp/payments/$paymentId/receipt');
+      final response = await dioClient.dio.get(
+        '/spp/payments/$paymentId/receipt',
+      );
       final dynamic raw = response.data['data'];
       if (raw is Map<String, dynamic>) {
         return ApiSuccess(SppReceiptModel.fromJson(raw));

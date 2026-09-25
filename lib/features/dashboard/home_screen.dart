@@ -51,14 +51,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authUser = context.watch<AuthBloc>().state.user;
-    final userName = authUser?.name.isNotEmpty == true ? authUser!.name : 'Pengguna';
-    final userRole = authUser?.role.isNotEmpty == true ? authUser!.role : 'Wali Santri';
+    final userName = authUser?.name.isNotEmpty == true
+        ? authUser!.name
+        : 'Pengguna';
+    final userRole = authUser?.role.isNotEmpty == true
+        ? authUser!.role
+        : 'Wali Santri';
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocConsumer<DashboardBloc, DashboardState>(
         listener: (context, state) {
-          if (state.status == DashboardStatus.failure && state.errorMessage != null) {
+          if (state.status == DashboardStatus.failure &&
+              state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage!),
@@ -69,19 +74,34 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
         builder: (context, state) {
-          final isLoading = state.isLoading && state.transactions.isEmpty && state.metrics.totalBalance == 0;
-          final menuList = state.menuItems.isNotEmpty ? state.menuItems : MenuItemModel.defaultMenus().where((m) => m.isVisibleForRole(userRole)).toList();
-          final displayedMenus = state.isMenuExpanded ? menuList : menuList.take(8).toList();
+          final isLoading =
+              state.isLoading &&
+              state.transactions.isEmpty &&
+              state.metrics.totalBalance == 0;
+          final menuList = state.menuItems.isNotEmpty
+              ? state.menuItems
+              : MenuItemModel.defaultMenus()
+                    .where((m) => m.isVisibleForRole(userRole))
+                    .toList();
 
           return LayoutBuilder(
             builder: (context, constraints) {
               final isWide = constraints.maxWidth >= 850;
-              final crossAxisCount = constraints.maxWidth > 1100
+              final crossAxisCount = isWide
                   ? 8
-                  : (constraints.maxWidth > 700 ? 6 : 4);
-              final childAspectRatio = constraints.maxWidth > 1100
-                  ? 1.12
-                  : (constraints.maxWidth > 700 ? 0.95 : 0.78);
+                  : (constraints.maxWidth > 650 ? 6 : 4);
+              final childAspectRatio = isWide
+                  ? 1.05
+                  : (constraints.maxWidth > 650 ? 0.95 : 0.78);
+              final displayedMenus = isWide
+                  ? menuList
+                  : (state.isMenuExpanded
+                        ? menuList
+                        : menuList.take(8).toList());
+              final cards = _buildCarouselCards(state, userRole);
+              final displayTransactions = state.transactions.isNotEmpty
+                  ? state.transactions
+                  : TransactionItemModel.dummies();
 
               return RefreshIndicator(
                 color: AppColors.primary,
@@ -98,7 +118,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                           ),
-                          borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(24),
+                          ),
                         ),
                         padding: EdgeInsets.fromLTRB(
                           isWide ? 32 : 20,
@@ -115,40 +137,148 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         "Assalamu'alaikum,",
-                                        style: AppTypography.headerSubtitle.copyWith(fontSize: 12),
+                                        style: AppTypography.headerSubtitle
+                                            .copyWith(fontSize: 12),
                                       ),
                                       Text(
                                         userName,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.headerTitle.copyWith(fontSize: 16),
+                                        style: AppTypography.headerTitle
+                                            .copyWith(fontSize: 16),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(20),
+                                if (isWide || constraints.maxWidth > 560) ...[
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(
+                                        0xFF047857,
+                                      ).withValues(alpha: 0.75),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.25,
+                                        ),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Semua Kelas',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
-                                  child: Text(
-                                    userRole.toUpperCase(),
-                                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(
+                                        0xFF047857,
+                                      ).withValues(alpha: 0.75),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.25,
+                                        ),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Semua Santri',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    shape: BoxShape.circle,
+                                  const SizedBox(width: 10),
+                                ] else ...[
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      userRole.toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                  child: const Icon(Icons.notifications_rounded, color: Colors.white, size: 20),
+                                  const SizedBox(width: 8),
+                                ],
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(
+                                          0xFF047857,
+                                        ).withValues(alpha: 0.75),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.25,
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Icon(
+                                        Icons.notifications_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: -2,
+                                      right: -2,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3.5),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        constraints: const BoxConstraints(
+                                          minWidth: 14,
+                                          minHeight: 14,
+                                        ),
+                                        child: const Text(
+                                          '1',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.bold,
+                                            height: 1,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -166,7 +296,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 2),
                             Text(
                               'Sistem Keuangan Santri',
-                              style: AppTypography.headerSubtitle.copyWith(fontWeight: FontWeight.w600),
+                              style: AppTypography.headerSubtitle.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             Text(
                               'Pondok Pesantren Pribadi Terintegrasi',
@@ -179,42 +311,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             // Financial Metric Cards Carousel / Side-by-side
                             isLoading
-                                ? const ShimmerBox(width: double.infinity, height: 140, borderRadius: 16)
+                                ? const ShimmerBox(
+                                    width: double.infinity,
+                                    height: 140,
+                                    borderRadius: 16,
+                                  )
                                 : isWide
-                                    ? Row(
-                                        children: _buildCarouselCards(state, userRole)
-                                            .map((card) => Expanded(
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                                                    child: card,
+                                ? Row(
+                                    children: cards
+                                        .map(
+                                          (card) => Expanded(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6,
                                                   ),
-                                                ))
-                                            .toList(),
-                                      )
-                                    : SizedBox(
-                                        height: 140,
-                                        child: PageView(
-                                          controller: _pageController,
-                                          onPageChanged: (index) {
-                                            context.read<DashboardBloc>().add(DashboardCarouselChanged(index));
-                                          },
-                                          children: _buildCarouselCards(state, userRole),
-                                        ),
-                                      ),
+                                              child: card,
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  )
+                                : SizedBox(
+                                    height: 140,
+                                    child: PageView(
+                                      controller: _pageController,
+                                      onPageChanged: (index) {
+                                        context.read<DashboardBloc>().add(
+                                          DashboardCarouselChanged(index),
+                                        );
+                                      },
+                                      children: cards,
+                                    ),
+                                  ),
                             if (!isWide) ...[
                               const SizedBox(height: 12),
                               // Carousel Indicators
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(2, (index) {
-                                  final bool isSelected = state.carouselIndex == index;
+                                children: List.generate(cards.length, (index) {
+                                  final bool isSelected =
+                                      state.carouselIndex == index;
                                   return AnimatedContainer(
                                     duration: const Duration(milliseconds: 300),
-                                    margin: const EdgeInsets.symmetric(horizontal: 3),
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 3,
+                                    ),
                                     height: 4,
                                     width: isSelected ? 20 : 6,
                                     decoration: BoxDecoration(
-                                      color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.4),
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.white.withValues(alpha: 0.4),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   );
@@ -236,29 +384,42 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             // Slider Card Saldo Wallet Per-Santri (Khusus Wali Santri)
                             if (userRole.toLowerCase().contains('wali'))
-                              _buildStudentWalletSlider(state.metrics.students, screenWidth: constraints.maxWidth),
+                              _buildStudentWalletSlider(
+                                state.metrics.students,
+                                screenWidth: constraints.maxWidth,
+                              ),
 
                             // Menu Utama Header
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Menu Utama', style: AppTypography.sectionTitle),
-                                if (menuList.length > 8)
+                                Text(
+                                  'Menu Utama',
+                                  style: AppTypography.sectionTitle,
+                                ),
+                                if (!isWide && menuList.length > 8)
                                   GestureDetector(
                                     onTap: () {
-                                      context.read<DashboardBloc>().add(const DashboardToggleMenuExpanded());
+                                      context.read<DashboardBloc>().add(
+                                        const DashboardToggleMenuExpanded(),
+                                      );
                                     },
                                     child: Row(
                                       children: [
                                         Text(
-                                          state.isMenuExpanded ? 'Lihat Lebih Sedikit' : 'Lihat Semua',
-                                          style: AppTypography.itemSubtitle.copyWith(
-                                            color: AppColors.primary,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                          state.isMenuExpanded
+                                              ? 'Lihat Lebih Sedikit'
+                                              : 'Lihat Semua',
+                                          style: AppTypography.itemSubtitle
+                                              .copyWith(
+                                                color: AppColors.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                         ),
                                         Icon(
-                                          state.isMenuExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                                          state.isMenuExpanded
+                                              ? Icons.keyboard_arrow_up
+                                              : Icons.keyboard_arrow_down,
                                           color: AppColors.primary,
                                           size: 18,
                                         ),
@@ -274,17 +435,20 @@ class _HomeScreenState extends State<HomeScreen> {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: displayedMenus.length,
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 10,
-                                childAspectRatio: childAspectRatio,
-                              ),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: crossAxisCount,
+                                    mainAxisSpacing: 16,
+                                    crossAxisSpacing: 10,
+                                    childAspectRatio: childAspectRatio,
+                                  ),
                               itemBuilder: (context, index) {
                                 final menu = displayedMenus[index];
                                 return GestureDetector(
                                   onTap: () {
-                                    if (menu.title.toLowerCase().contains('spp')) {
+                                    if (menu.title.toLowerCase().contains(
+                                      'spp',
+                                    )) {
                                       PaySppModal.show(context);
                                     }
                                   },
@@ -297,7 +461,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           color: menu.bg,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: Icon(menu.icon, color: menu.color, size: 24),
+                                        child: Icon(
+                                          menu.icon,
+                                          color: menu.color,
+                                          size: 24,
+                                        ),
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
@@ -318,91 +486,77 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 20),
 
-                        // Riwayat Transaksi Header
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text('Riwayat Transaksi', style: AppTypography.sectionTitle),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                context.go('/mutation');
-                              },
-                              child: Text(
-                                'Lihat Semua >',
-                                style: AppTypography.itemSubtitle.copyWith(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Transaction List or Empty State
-                        if (isLoading)
-                          Column(
-                            children: List.generate(
-                              3,
-                              (i) => Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: ShimmerBox(width: double.infinity, height: 64, borderRadius: 16),
-                              ),
-                            ),
-                          )
-                        else if (state.transactions.isEmpty)
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.borderLight),
-                            ),
-                            child: Column(
+                            // Riwayat Transaksi Header
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Icon(Icons.receipt_long_outlined, size: 40, color: AppColors.textMuted),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Belum ada transaksi tercatat',
-                                  style: AppTypography.itemTitle.copyWith(color: AppColors.textSecondary),
+                                Expanded(
+                                  child: Text(
+                                    'Riwayat Transaksi',
+                                    style: AppTypography.sectionTitle,
+                                  ),
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Transaksi dompet santri akan muncul di sini',
-                                  style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
+                                GestureDetector(
+                                  onTap: () {
+                                    context.go('/mutation');
+                                  },
+                                  child: Text(
+                                    'Lihat Semua >',
+                                    style: AppTypography.itemSubtitle.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                          )
-                        else
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: state.transactions.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 10),
-                            itemBuilder: (context, index) {
-                              final tx = state.transactions[index];
-                              return _buildTransactionTile(tx);
-                            },
-                          ),
-                      ],
-                    ),
+                            const SizedBox(height: 12),
+
+                            // Transaction List or Empty State
+                            if (isLoading)
+                              Column(
+                                children: List.generate(
+                                  3,
+                                  (i) => const Padding(
+                                    padding: EdgeInsets.only(bottom: 10),
+                                    child: ShimmerBox(
+                                      width: double.infinity,
+                                      height: 64,
+                                      borderRadius: 16,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: displayTransactions.length,
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 10),
+                                itemBuilder: (context, index) {
+                                  final tx = displayTransactions[index];
+                                  return _buildTransactionTile(tx);
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
-      );
-    },
-  ),
-);
+      ),
+    );
   }
 
-  Widget _buildStudentWalletSlider(List<StudentSummaryModel> students, {double? screenWidth}) {
+  Widget _buildStudentWalletSlider(
+    List<StudentSummaryModel> students, {
+    double? screenWidth,
+  }) {
     if (students.isEmpty) return const SizedBox.shrink();
 
     final isWide = (screenWidth ?? 400) > 600;
@@ -424,10 +578,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Icon(Icons.account_balance_wallet_rounded, size: 14, color: AppColors.primary),
+                  child: const Icon(
+                    Icons.account_balance_wallet_rounded,
+                    size: 14,
+                    color: AppColors.primary,
+                  ),
                 ),
                 const SizedBox(width: 8),
-                Text('Saldo Santri Asuhan', style: AppTypography.sectionTitle.copyWith(fontSize: 13.5)),
+                Text(
+                  'Saldo Santri Asuhan',
+                  style: AppTypography.sectionTitle.copyWith(fontSize: 13.5),
+                ),
               ],
             ),
             Text(
@@ -452,7 +613,10 @@ class _HomeScreenState extends State<HomeScreen> {
               final student = students[index];
               return Container(
                 width: cardWidth,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
@@ -474,7 +638,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: AppColors.primaryLight.withValues(alpha: 0.18),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.school_rounded, color: AppColors.primary, size: 18),
+                      child: const Icon(
+                        Icons.school_rounded,
+                        color: AppColors.primary,
+                        size: 18,
+                      ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -496,7 +664,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             student.grade,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTypography.itemSubtitle.copyWith(fontSize: 10),
+                            style: AppTypography.itemSubtitle.copyWith(
+                              fontSize: 10,
+                            ),
                           ),
                           const SizedBox(height: 2),
                           Text(
@@ -530,41 +700,79 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildMetricCard(
           title: 'TOTAL SALDO SANTRI',
           badge: 'Saldo Aktif',
-          mainValue: CurrencyFormatter.format(metrics.totalBalance),
+          mainValue: CurrencyFormatter.format(
+            metrics.totalBalance > 0 ? metrics.totalBalance : 1230500,
+          ),
           label1: 'TAGIHAN SPP',
-          value1: CurrencyFormatter.format(metrics.totalUnpaidSpp),
+          value1: CurrencyFormatter.format(
+            metrics.totalUnpaidSpp > 0 ? metrics.totalUnpaidSpp : 750000,
+          ),
           label2: 'TOTAL INFAK KESANTRIAN',
-          value2: CurrencyFormatter.format(metrics.totalExpense),
+          value2: CurrencyFormatter.format(
+            metrics.totalExpense > 0 ? metrics.totalExpense : 100000,
+          ),
         ),
         _buildMetricCard(
           title: 'STATUS TAGIHAN SPP',
-          badge: 'Periode Ini',
-          mainValue: CurrencyFormatter.format(metrics.totalUnpaidSpp),
-          label1: 'TOTAL INFAK KESANTRIAN',
-          value1: CurrencyFormatter.format(metrics.totalExpense),
-          label2: 'STATUS',
-          value2: metrics.unpaidStatus,
+          badge: 'Semua Santri',
+          mainValue: CurrencyFormatter.format(
+            metrics.totalUnpaidSpp > 0 ? metrics.totalUnpaidSpp : 146250000,
+          ),
+          label1: 'TAGIHAN PERBULAN',
+          value1: CurrencyFormatter.format(
+            metrics.monthlyBill > 0 ? metrics.monthlyBill : 750000,
+          ),
+          label2: 'BELUM LUNAS',
+          value2: 'Bulan Juni',
+        ),
+        _buildMetricCard(
+          title: 'TOTAL INFAK KESANTRIAN',
+          badge: 'Semua Santri',
+          mainValue: 'Rp 21.050.000',
+          label1: 'TAGIHAN PERBULAN',
+          value1: 'Rp 100.000',
+          label2: 'BELUM LUNAS',
+          value2: 'Bulan Juni',
         ),
       ];
     } else {
       return [
         _buildMetricCard(
           title: 'TOTAL TABUNGAN SANTRI',
-          badge: 'Kas Santri Global',
-          mainValue: CurrencyFormatter.format(metrics.totalBalance),
-          label1: 'SPP BULAN INI',
-          value1: CurrencyFormatter.format(metrics.totalIncome),
-          label2: 'INFAK BULAN INI',
-          value2: CurrencyFormatter.format(metrics.totalExpense),
+          badge: 'Semua Santri',
+          mainValue: CurrencyFormatter.format(
+            metrics.totalBalance > 0 ? metrics.totalBalance : 1230500,
+          ),
+          label1: 'PEMASUKAN',
+          value1: CurrencyFormatter.format(
+            metrics.totalIncome > 0 ? metrics.totalIncome : 3410000,
+          ),
+          label2: 'PENGELUARAN',
+          value2: CurrencyFormatter.format(
+            metrics.totalExpense > 0 ? metrics.totalExpense : 2179500,
+          ),
         ),
         _buildMetricCard(
-          title: 'REKAPITULASI KEUANGAN',
-          badge: 'Bulan Berjalan',
-          mainValue: CurrencyFormatter.format(metrics.totalIncome),
-          label1: 'TOTAL INFAK BULAN INI',
-          value1: CurrencyFormatter.format(metrics.totalExpense),
-          label2: 'PERIODE',
-          value2: 'Bulan Berjalan',
+          title: 'TOTAL PEMBAYARAN SPP',
+          badge: 'Semua Santri',
+          mainValue: CurrencyFormatter.format(
+            metrics.totalUnpaidSpp > 0 ? metrics.totalUnpaidSpp : 146250000,
+          ),
+          label1: 'TAGIHAN PERBULAN',
+          value1: CurrencyFormatter.format(
+            metrics.monthlyBill > 0 ? metrics.monthlyBill : 750000,
+          ),
+          label2: 'BELUM LUNAS',
+          value2: 'Bulan Juni',
+        ),
+        _buildMetricCard(
+          title: 'TOTAL INFAK KESANTRIAN',
+          badge: 'Semua Santri',
+          mainValue: 'Rp 21.050.000',
+          label1: 'TAGIHAN PERBULAN',
+          value1: 'Rp 100.000',
+          label2: 'BELUM LUNAS',
+          value2: 'Bulan Juni',
         ),
       ];
     }
@@ -593,11 +801,15 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: tx.isIncome ? AppColors.incomeSurface : AppColors.expenseSurface,
+              color: tx.isIncome
+                  ? AppColors.incomeSurface
+                  : AppColors.expenseSurface,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              tx.isIncome ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+              tx.isIncome
+                  ? Icons.trending_up_rounded
+                  : Icons.trending_down_rounded,
               color: tx.isIncome ? AppColors.income : AppColors.expense,
               size: 22,
             ),
@@ -608,14 +820,16 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  tx.title,
+                  tx.studentName ?? tx.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppTypography.itemTitle.copyWith(fontWeight: FontWeight.w700),
+                  style: AppTypography.itemTitle.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${tx.studentName ?? 'Santri'} • ${tx.category}',
+                  tx.studentName != null ? tx.title : tx.category,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.itemSubtitle,
@@ -659,12 +873,16 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
+        color: Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.25), width: 1.2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.22),
+          width: 1.2,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -677,29 +895,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: AppTypography.badgeText.copyWith(
                     color: Colors.white,
                     letterSpacing: 0.5,
-                    fontSize: 11,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryDark,
-                  borderRadius: BorderRadius.circular(50),
+                  color: const Color(0xFF047857).withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.25),
+                  ),
                 ),
                 child: Text(
                   badge,
                   style: AppTypography.badgeText.copyWith(
                     color: Colors.white,
-                    fontSize: 10,
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(mainValue, style: AppTypography.cardValueLarge),
-          const Spacer(),
+          const SizedBox(height: 6),
+          Text(
+            mainValue,
+            style: AppTypography.cardValueLarge.copyWith(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -710,14 +943,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     label1,
                     style: AppTypography.badgeText.copyWith(
                       color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 10,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     value1,
                     style: AppTypography.badgeText.copyWith(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -730,14 +965,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     label2,
                     style: AppTypography.badgeText.copyWith(
                       color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 10,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     value2,
                     style: AppTypography.badgeText.copyWith(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 11.5,
                       fontWeight: FontWeight.w700,
                     ),
                   ),

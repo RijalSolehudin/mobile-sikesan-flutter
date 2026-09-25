@@ -43,7 +43,9 @@ class _InformationScreenState extends State<InformationScreen> {
               width: double.infinity,
               decoration: const BoxDecoration(
                 color: AppColors.primary,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(24),
+                ),
               ),
               padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
               child: Row(
@@ -52,17 +54,28 @@ class _InformationScreenState extends State<InformationScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Pusat Informasi', style: AppTypography.headerTitle.copyWith(fontSize: 20)),
+                      Text(
+                        'Pusat Informasi',
+                        style: AppTypography.headerTitle.copyWith(fontSize: 20),
+                      ),
                       const SizedBox(height: 2),
-                      Text('Informasi & Pengumuman Pesantren', style: AppTypography.headerSubtitle),
+                      Text(
+                        'Informasi & Pengumuman Pesantren',
+                        style: AppTypography.headerSubtitle,
+                      ),
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(50),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -104,7 +117,10 @@ class _InformationScreenState extends State<InformationScreen> {
                             children: [
                               Text(
                                 'Total Informasi',
-                                style: AppTypography.badgeText.copyWith(color: Colors.white, fontSize: 11),
+                                style: AppTypography.badgeText.copyWith(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Text('0', style: AppTypography.cardValueLarge),
@@ -127,12 +143,17 @@ class _InformationScreenState extends State<InformationScreen> {
                             children: [
                               Text(
                                 'Belum Dibaca',
-                                style: AppTypography.badgeText.copyWith(color: AppColors.textSecondary, fontSize: 11),
+                                style: AppTypography.badgeText.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 '0',
-                                style: AppTypography.cardValueLarge.copyWith(color: AppColors.expense),
+                                style: AppTypography.cardValueLarge.copyWith(
+                                  color: AppColors.expense,
+                                ),
                               ),
                             ],
                           ),
@@ -157,12 +178,17 @@ class _InformationScreenState extends State<InformationScreen> {
                             children: [
                               Text(
                                 'Sudah Dibaca',
-                                style: AppTypography.badgeText.copyWith(color: AppColors.textSecondary, fontSize: 11),
+                                style: AppTypography.badgeText.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 '0',
-                                style: AppTypography.cardValueLarge.copyWith(color: AppColors.income),
+                                style: AppTypography.cardValueLarge.copyWith(
+                                  color: AppColors.income,
+                                ),
                               ),
                             ],
                           ),
@@ -183,12 +209,17 @@ class _InformationScreenState extends State<InformationScreen> {
                             children: [
                               Text(
                                 'Informasi Sangat Penting',
-                                style: AppTypography.badgeText.copyWith(color: AppColors.textSecondary, fontSize: 11),
+                                style: AppTypography.badgeText.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 '0',
-                                style: AppTypography.cardValueLarge.copyWith(color: AppColors.expense),
+                                style: AppTypography.cardValueLarge.copyWith(
+                                  color: AppColors.expense,
+                                ),
                               ),
                             ],
                           ),
@@ -201,7 +232,11 @@ class _InformationScreenState extends State<InformationScreen> {
                   // Search Bar
                   const CustomTextField(
                     hintText: 'Cari informasi...',
-                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted, size: 20),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(height: 12),
 
@@ -211,12 +246,14 @@ class _InformationScreenState extends State<InformationScreen> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: _categories.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 8),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         return FilterPill(
                           label: _categories[index],
                           isSelected: _selectedCategoryIndex == index,
-                          onTap: () => setState(() => _selectedCategoryIndex = index),
+                          onTap: () =>
+                              setState(() => _selectedCategoryIndex = index),
                         );
                       },
                     ),
@@ -229,13 +266,15 @@ class _InformationScreenState extends State<InformationScreen> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: _statuses.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 8),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
                       itemBuilder: (context, index) {
                         return FilterPill(
                           label: _statuses[index],
                           isSelected: _selectedStatusIndex == index,
                           selectedColor: AppColors.darkSlate,
-                          onTap: () => setState(() => _selectedStatusIndex = index),
+                          onTap: () =>
+                              setState(() => _selectedStatusIndex = index),
                         );
                       },
                     ),
@@ -245,7 +284,10 @@ class _InformationScreenState extends State<InformationScreen> {
                   // Empty State Card
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 40,
+                      horizontal: 20,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
