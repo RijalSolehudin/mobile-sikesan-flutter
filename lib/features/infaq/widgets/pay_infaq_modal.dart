@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/widgets/dashed_upload_box.dart';
 import '../../../data/models/spp_models.dart';
 import '../../../data/models/infaq_models.dart';
 import '../../../data/repositories/infaq_repository.dart';
@@ -37,7 +38,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
 
   int? _selectedStudentId;
   String _selectedStudentName = '';
-  int _selectedYear = DateTime.now().year;
+  final int _selectedYear = DateTime.now().year;
   final Set<int> _selectedMonths = {};
   String _selectedPaymentMethod = 'TRANSFER'; // 'TRANSFER' or 'CASH'
 
@@ -65,12 +66,6 @@ class _PayInfaqModalState extends State<PayInfaqModal>
     'Okt',
     'Nov',
     'Des',
-  ];
-
-  final List<int> _availableYears = [
-    DateTime.now().year - 1,
-    DateTime.now().year,
-    DateTime.now().year + 1,
   ];
 
   @override
@@ -151,7 +146,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
           studentId: _selectedStudentId ?? 0,
           periodMonth: m,
           periodYear: _selectedYear,
-          amountBilled: 350000,
+          amountBilled: 50000,
           status: 'UNPAID',
         ),
       );
@@ -246,9 +241,12 @@ class _PayInfaqModalState extends State<PayInfaqModal>
             ListTile(
               leading: const Icon(
                 Icons.photo_camera_rounded,
-                color: AppColors.primary,
+                color: Color(0xFFF59E0B),
               ),
-              title: const Text('Ambil Foto dari Kamera'),
+              title: Text(
+                'Ambil Foto dari Kamera',
+                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              ),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _pickImage(ImageSource.camera);
@@ -257,9 +255,12 @@ class _PayInfaqModalState extends State<PayInfaqModal>
             ListTile(
               leading: const Icon(
                 Icons.photo_library_rounded,
-                color: AppColors.primary,
+                color: Color(0xFFF59E0B),
               ),
-              title: const Text('Pilih dari Galeri'),
+              title: Text(
+                'Pilih dari Galeri',
+                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              ),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _pickImage(ImageSource.gallery);
@@ -286,9 +287,10 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                 children: [
                   Text(
                     'QRIS Infak Kesantrian',
-                    style: AppTypography.itemTitle.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.w800,
                       fontSize: 16,
+                      color: const Color(0xFF0F172A),
                     ),
                   ),
                   GestureDetector(
@@ -296,18 +298,19 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                     child: const Icon(
                       Icons.close,
                       size: 20,
-                      color: AppColors.textSecondary,
+                      color: Color(0xFF64748B),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
               Container(
-                padding: const EdgeInsets.all(16),
+                width: 220,
+                height: 220,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
@@ -316,87 +319,51 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                     ),
                   ],
                 ),
+                padding: const EdgeInsets.all(12),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        'QRIS STANDAR NASIONAL',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFFDC2626),
-                        ),
-                      ),
+                    const Icon(
+                      Icons.qr_code_2_rounded,
+                      size: 150,
+                      color: Color(0xFF0F172A),
                     ),
-                    const SizedBox(height: 12),
-                    Container(
-                      width: 200,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8FAFC),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Icon(
-                            Icons.qr_code_2_rounded,
-                            size: 180,
-                            color: Colors.grey.shade800,
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Icon(
-                              Icons.favorite_rounded,
-                              size: 24,
-                              color: Color(0xFF059669),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
                     Text(
-                      'Pondok Pesantren SIKESAN',
-                      style: AppTypography.itemTitle.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                      'NMID: ID102003920192',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF64748B),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'NMID: ID1020304050607',
-                      style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Buka aplikasi m-Banking atau e-Wallet (BSI, BCA, Livin, GoPay, OVO, Dana) lalu scan QRIS di atas.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+              Text(
+                'Pondok Pesantren SIKESAN',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  color: const Color(0xFF1E293B),
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 4),
+              Text(
+                'Mendukung semua aplikasi bank & e-wallet',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: const Color(0xFF64748B),
+                ),
+              ),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(ctx).pop(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF059669),
+                    backgroundColor: const Color(0xFFF59E0B),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -423,7 +390,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       SnackBar(
         content: Text('Nomor rekening $label ($text) berhasil disalin'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.primaryDark,
+        backgroundColor: const Color(0xFF0F172A),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -453,7 +420,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
     final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
 
-    if (isGuardian && _proofBytes == null) {
+    if (isGuardian && _selectedPaymentMethod == 'TRANSFER' && _proofBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Silakan unggah bukti transfer/pembayaran'),
@@ -539,7 +506,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       }
 
       // Fallback preview
-      final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 350000;
+      final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 50000;
       final fallbackReceipt = SppReceiptModel(
         receiptNumber:
             'KW-INF-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}',
@@ -621,7 +588,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
               const SizedBox(height: 16),
               Text(
                 'Pembayaran Berhasil!',
-                style: AppTypography.itemTitle.copyWith(
+                style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -629,7 +596,10 @@ class _PayInfaqModalState extends State<PayInfaqModal>
               const SizedBox(height: 4),
               Text(
                 'Kwitansi pembayaran sedang diproses...',
-                style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  color: const Color(0xFF64748B),
+                ),
               ),
             ],
           ),
@@ -669,16 +639,15 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       });
     }
 
-    final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 350000;
+    final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 50000;
     final num totalAmount = _selectedMonths.length * rate;
-
     final bankAccounts = BankAccountModel.defaultAccounts();
 
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 720,
-          maxHeight: MediaQuery.of(context).size.height * 0.92,
+          maxHeight: MediaQuery.of(context).size.height * 0.94,
         ),
         child: Container(
           decoration: const BoxDecoration(
@@ -693,7 +662,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
           ),
           child: Column(
             children: [
-              // Header
+              // Header matching design
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -702,18 +671,19 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bayar Infak Kesantrian',
-                        style: AppTypography.headerTitle.copyWith(
+                        'Infak Kesantrian',
+                        style: GoogleFonts.plusJakartaSans(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: const Color(0xFF1E293B),
+                          color: const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Pembayaran Infak Kesantrian bulanan santri',
-                        style: AppTypography.itemSubtitle.copyWith(
-                          fontSize: 12,
+                        'Pembayaran infak bulanan santri',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w400,
                           color: const Color(0xFF64748B),
                         ),
                       ),
@@ -722,8 +692,8 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
-                      width: 32,
-                      height: 32,
+                      width: 36,
+                      height: 36,
                       decoration: const BoxDecoration(
                         color: Color(0xFFF1F5F9),
                         shape: BoxShape.circle,
@@ -746,172 +716,22 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 1. Pemilihan Nama Santri
-                      Row(
-                        children: [
-                          Text(
-                            'Nama Santri',
-                            style: AppTypography.itemTitle.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const Text(
-                            ' *',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-
-                      if (isGuardian) ...[
-                        if (dashboardStudents.isEmpty)
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            child: const Text(
-                              'Belum ada santri terhubung dengan akun Anda',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          )
-                        else
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: dashboardStudents.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: dashboardStudents.length == 1
-                                      ? 1
-                                      : 2,
-                                  crossAxisSpacing: 10,
-                                  mainAxisSpacing: 10,
-                                  mainAxisExtent: 64,
-                                ),
-                            itemBuilder: (context, index) {
-                              final st = dashboardStudents[index];
-                              final isSelected = _selectedStudentId == st.id;
-
-                              return InkWell(
-                                onTap: () => _selectStudent(st.id, st.name),
-                                borderRadius: BorderRadius.circular(14),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(0xFFECFDF5)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? const Color(0xFF059669)
-                                          : const Color(0xFFE2E8F0),
-                                      width: isSelected ? 1.6 : 1.0,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? const Color(0xFF059669)
-                                              : const Color(0xFFF1F5F9),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                        child: Icon(
-                                          Icons.school_rounded,
-                                          size: 18,
-                                          color: isSelected
-                                              ? Colors.white
-                                              : const Color(0xFF64748B),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              st.name,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 12.5,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.w700
-                                                    : FontWeight.w600,
-                                                color: isSelected
-                                                    ? const Color(0xFF065F46)
-                                                    : const Color(0xFF334155),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              st.grade,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: isSelected
-                                                    ? const Color(0xFF059669)
-                                                    : const Color(0xFF64748B),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (isSelected)
-                                        Container(
-                                          width: 18,
-                                          height: 18,
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF059669),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.check,
-                                            size: 12,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                      ] else ...[
-                        // Bendahara Search
+                      // 1. Kolom Paling Atas: Search Bar untuk Bendahara / Card Santri untuk Wali Santri
+                      if (!isGuardian) ...[
+                        // Bendahara Search Bar
                         TextField(
                           controller: _searchController,
+                          style: GoogleFonts.plusJakartaSans(fontSize: 13),
                           decoration: InputDecoration(
                             hintText: 'Cari nama atau NIS santri...',
+                            hintStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 12.5,
+                              color: const Color(0xFF94A3B8),
+                            ),
                             prefixIcon: const Icon(
-                              Icons.person_outline_rounded,
-                              color: Color(0xFF94A3B8),
+                              Icons.search_rounded,
+                              color: Color(0xFF64748B),
+                              size: 20,
                             ),
                             suffixIcon: _isSearchingStudent
                                 ? const Padding(
@@ -924,12 +744,38 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                       ),
                                     ),
                                   )
-                                : null,
+                                : _searchController.text.isNotEmpty
+                                    ? IconButton(
+                                        icon: const Icon(
+                                          Icons.clear,
+                                          size: 16,
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() {
+                                            _selectedStudentId = null;
+                                            _selectedStudentName = '';
+                                            _searchedStudents.clear();
+                                            _bills.clear();
+                                            _selectedMonths.clear();
+                                          });
+                                        },
+                                      )
+                                    : null,
+                            filled: true,
+                            fillColor: const Color(0xFFF8FAFC),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 14,
-                              vertical: 12,
+                              vertical: 11,
                             ),
                             border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: const BorderSide(
                                 color: Color(0xFFE2E8F0),
@@ -938,7 +784,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: const BorderSide(
-                                color: Color(0xFF059669),
+                                color: Color(0xFFF59E0B),
                                 width: 1.5,
                               ),
                             ),
@@ -957,9 +803,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 3),
+                                  color: Colors.black.withValues(alpha: 0.06),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -976,23 +822,26 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                   dense: true,
                                   leading: const CircleAvatar(
                                     radius: 14,
-                                    backgroundColor: Color(0xFFECFDF5),
+                                    backgroundColor: Color(0xFFFEF3C7),
                                     child: Icon(
                                       Icons.person,
                                       size: 16,
-                                      color: Color(0xFF059669),
+                                      color: Color(0xFFD97706),
                                     ),
                                   ),
                                   title: Text(
                                     st.name,
-                                    style: const TextStyle(
+                                    style: GoogleFonts.plusJakartaSans(
                                       fontSize: 12.5,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                   subtitle: Text(
                                     'NIS: ${st.nis} • ${st.grade}',
-                                    style: const TextStyle(fontSize: 10.5),
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 10.5,
+                                      color: const Color(0xFF64748B),
+                                    ),
                                   ),
                                   onTap: () => _selectStudent(st.id, st.name),
                                 );
@@ -1000,72 +849,198 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                             ),
                           ),
                         ],
-                      ],
-                      const SizedBox(height: 18),
-
-                      // 2. Pemilihan Tahun & Periode Bulan (FIFO 12 Bulan)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Pilih Periode Bulan',
-                            style: AppTypography.itemTitle.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                            ),
-                          ),
+                        if (_selectedStudentId != null &&
+                            _selectedStudentName.isNotEmpty) ...[
+                          const SizedBox(height: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(10),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<int>(
-                                value: _selectedYear,
-                                icon: const Icon(
-                                  Icons.arrow_drop_down,
-                                  size: 18,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF1E293B),
-                                ),
-                                items: _availableYears.map((yr) {
-                                  return DropdownMenuItem<int>(
-                                    value: yr,
-                                    child: Text('Tahun $yr'),
-                                  );
-                                }).toList(),
-                                onChanged: (newYr) {
-                                  if (newYr != null && newYr != _selectedYear) {
-                                    setState(() {
-                                      _selectedYear = newYr;
-                                      _selectedMonths.clear();
-                                    });
-                                    if (_selectedStudentId != null) {
-                                      _loadBillsForStudent(
-                                        _selectedStudentId!,
-                                        year: newYr,
-                                      );
-                                    }
-                                  }
-                                },
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFFBEB),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFFDE68A),
                               ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.check_circle_rounded,
+                                  size: 16,
+                                  color: Color(0xFFD97706),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Santri: $_selectedStudentName',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF92400E),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 16),
+                      ] else ...[
+                        // Wali Santri: Container / Card berisi anak-anaknya
+                        if (dashboardStudents.isNotEmpty) ...[
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.people_alt_rounded,
+                                      size: 16,
+                                      color: Color(0xFFD97706),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Pilih Santri (Anak)',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFF1E293B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: dashboardStudents.map((st) {
+                                    final isSelected =
+                                        _selectedStudentId == st.id;
+                                    return Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                        ),
+                                        child: InkWell(
+                                          onTap: () =>
+                                              _selectStudent(st.id, st.name),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isSelected
+                                                  ? const Color(0xFFFFFBEB)
+                                                  : Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? const Color(0xFFF59E0B)
+                                                    : const Color(0xFFCBD5E1),
+                                                width: isSelected ? 1.6 : 1.0,
+                                              ),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: 14,
+                                                  backgroundColor: isSelected
+                                                      ? const Color(0xFFF59E0B)
+                                                      : const Color(0xFFE2E8F0),
+                                                  child: Icon(
+                                                    Icons.person,
+                                                    size: 16,
+                                                    color: isSelected
+                                                        ? Colors.white
+                                                        : const Color(
+                                                            0xFF64748B),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        st.name,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: GoogleFonts
+                                                            .plusJakartaSans(
+                                                          fontSize: 12,
+                                                          fontWeight: isSelected
+                                                              ? FontWeight.w800
+                                                              : FontWeight
+                                                                  .w600,
+                                                          color: isSelected
+                                                              ? const Color(
+                                                                  0xFFB45309)
+                                                              : const Color(
+                                                                  0xFF1E293B),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        st.grade,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: GoogleFonts
+                                                            .plusJakartaSans(
+                                                          fontSize: 10,
+                                                          color: const Color(
+                                                            0xFF64748B,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                if (isSelected)
+                                                  const Icon(
+                                                    Icons.check_circle_rounded,
+                                                    size: 16,
+                                                    color: Color(0xFFF59E0B),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
 
-                      // Grid 12 Bulan
+                      // 2. Bulan Selector Grid (3 columns x 4 rows)
                       if (_isLoadingBills)
                         const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
+                          padding: EdgeInsets.symmetric(vertical: 28),
                           child: Center(
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFFF59E0B),
+                            ),
                           ),
                         )
                       else
@@ -1075,11 +1050,11 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                           itemCount: 12,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                                childAspectRatio: 1.25,
-                              ),
+                            crossAxisCount: 3,
+                            childAspectRatio: 2.3,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
                           itemBuilder: (context, index) {
                             final monthNum = index + 1;
                             final monthLabel = _monthNamesShort[index];
@@ -1093,80 +1068,70 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                 studentId: _selectedStudentId ?? 0,
                                 periodMonth: monthNum,
                                 periodYear: _selectedYear,
-                                amountBilled: 350000,
+                                amountBilled: 50000,
                                 status: 'UNPAID',
                               ),
                             );
 
                             final isPaid = bill.isPaid;
                             final isPending = bill.isPending;
-                            final isSelected = _selectedMonths.contains(monthNum);
+                            final isSelected =
+                                _selectedMonths.contains(monthNum);
 
                             Color bgColor = Colors.white;
                             Color borderColor = const Color(0xFFE2E8F0);
-                            Color textColor = const Color(0xFF334155);
+                            Color textColor = const Color(0xFF1E293B);
 
                             if (isPaid) {
-                              bgColor = const Color(0xFFF1F5F9);
-                              borderColor = const Color(0xFFE2E8F0);
-                              textColor = const Color(0xFF94A3B8);
+                              bgColor = const Color(0xFFF0FDF4);
+                              borderColor = const Color(0xFFBBF7D0);
+                              textColor = const Color(0xFF15803D);
                             } else if (isPending) {
                               bgColor = const Color(0xFFFEF3C7);
-                              borderColor = const Color(0xFFF59E0B);
+                              borderColor = const Color(0xFFFDE68A);
                               textColor = const Color(0xFFB45309);
                             } else if (isSelected) {
-                              bgColor = const Color(0xFFECFDF5);
-                              borderColor = const Color(0xFF059669);
-                              textColor = const Color(0xFF065F46);
+                              bgColor = const Color(0xFFFFFBEB);
+                              borderColor = const Color(0xFFF59E0B);
+                              textColor = const Color(0xFFB45309);
                             }
 
                             return InkWell(
                               onTap: isPaid || isPending
                                   ? null
                                   : () => _onMonthTapped(monthNum),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(24),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 decoration: BoxDecoration(
                                   color: bgColor,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(24),
                                   border: Border.all(
                                     color: borderColor,
-                                    width: isSelected ? 1.6 : 1.0,
+                                    width: isSelected ? 1.6 : 1.2,
                                   ),
                                 ),
-                                child: Column(
+                                alignment: Alignment.center,
+                                child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    if (isPaid) ...[
+                                      const Icon(
+                                        Icons.check_circle_rounded,
+                                        size: 15,
+                                        color: Color(0xFF15803D),
+                                      ),
+                                      const SizedBox(width: 4),
+                                    ],
                                     Text(
                                       monthLabel,
-                                      style: TextStyle(
-                                        fontSize: 12.5,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
                                         fontWeight: isSelected || isPaid
-                                            ? FontWeight.bold
-                                            : FontWeight.w600,
+                                            ? FontWeight.w800
+                                            : FontWeight.w700,
                                         color: textColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      isPaid
-                                          ? 'LUNAS'
-                                          : isPending
-                                              ? 'MENUNGGU'
-                                              : isSelected
-                                                  ? 'DIPILIH'
-                                                  : 'BELUM',
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.bold,
-                                        color: isPaid
-                                            ? const Color(0xFF10B981)
-                                            : isPending
-                                                ? const Color(0xFFD97706)
-                                                : isSelected
-                                                    ? const Color(0xFF059669)
-                                                    : const Color(0xFFEF4444),
                                       ),
                                     ),
                                   ],
@@ -1175,15 +1140,49 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                             );
                           },
                         ),
+                      const SizedBox(height: 10),
+
+                      // Caption: Pilih satu atau lebih bulan. Bulan dengan centang hijau sudah lunas.
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 1.5),
+                            child: Icon(
+                              Icons.info_rounded,
+                              size: 14,
+                              color: Color(0xFF0284C7),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Pilih satu atau lebih bulan. Bulan dengan centang hijau sudah lunas.',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11.5,
+                                color: const Color(0xFF64748B),
+                                height: 1.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 18),
 
-                      // 3. Ringkasan & Total
+                      // 3. Card Total Tagihan
                       Container(
-                        padding: const EdgeInsets.all(14),
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          color: const Color(0xFFFFFDF5),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFFFEF08A),
+                            width: 1.0,
+                          ),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1191,31 +1190,31 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Total Tagihan Infak',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Color(0xFF64748B),
-                                    fontWeight: FontWeight.w500,
+                                Text(
+                                  'Total Tagihan',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF92400E),
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${_selectedMonths.length} Bulan Terpilih',
-                                  style: const TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1E293B),
+                                  '${_selectedMonths.length} bulan x ${CurrencyFormatter.format(rate)}',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFFB45309),
                                   ),
                                 ),
                               ],
                             ),
                             Text(
                               CurrencyFormatter.format(totalAmount),
-                              style: const TextStyle(
-                                fontSize: 16,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 22,
                                 fontWeight: FontWeight.w900,
-                                color: Color(0xFF059669),
+                                color: const Color(0xFFD97706),
                               ),
                             ),
                           ],
@@ -1223,128 +1222,170 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                       ),
                       const SizedBox(height: 18),
 
-                      // 4. Metode Pembayaran & Rekening
-                      if (!isGuardian) ...[
-                        Row(
-                          children: [
-                            Text(
-                              'Metode Pembayaran',
-                              style: AppTypography.itemTitle.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
+                      // 4. Metode Pembayaran *
+                      Row(
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Metode Pembayaran ',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: '*',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFFEF4444),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => setState(
-                                  () => _selectedPaymentMethod = 'CASH',
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: _selectedPaymentMethod == 'CASH'
-                                        ? const Color(0xFFECFDF5)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: _selectedPaymentMethod == 'CASH'
-                                          ? const Color(0xFF059669)
-                                          : const Color(0xFFE2E8F0),
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'Bayar Kasir (Cash)',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: _selectedPaymentMethod == 'CASH'
-                                          ? const Color(0xFF065F46)
-                                          : const Color(0xFF475569),
-                                    ),
-                                  ),
-                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => setState(
+                                () => _selectedPaymentMethod = 'TRANSFER',
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => setState(
-                                  () => _selectedPaymentMethod = 'TRANSFER',
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: _selectedPaymentMethod == 'TRANSFER'
+                                      ? const Color(0xFFFFFDF5)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
                                     color: _selectedPaymentMethod == 'TRANSFER'
-                                        ? const Color(0xFFECFDF5)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
+                                        ? const Color(0xFFF59E0B)
+                                        : const Color(0xFFE2E8F0),
+                                    width: _selectedPaymentMethod == 'TRANSFER'
+                                        ? 1.5
+                                        : 1.2,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.payments_outlined,
+                                      size: 18,
                                       color:
                                           _selectedPaymentMethod == 'TRANSFER'
-                                              ? const Color(0xFF059669)
-                                              : const Color(0xFFE2E8F0),
+                                              ? const Color(0xFFB45309)
+                                              : const Color(0xFF64748B),
                                     ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'Transfer Bank',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color:
-                                          _selectedPaymentMethod == 'TRANSFER'
-                                              ? const Color(0xFF065F46)
-                                              : const Color(0xFF475569),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Transfer',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: _selectedPaymentMethod ==
+                                                'TRANSFER'
+                                            ? const Color(0xFFB45309)
+                                            : const Color(0xFF64748B),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                      ],
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => setState(
+                                () => _selectedPaymentMethod = 'CASH',
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  color: _selectedPaymentMethod == 'CASH'
+                                      ? const Color(0xFFFFFDF5)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: _selectedPaymentMethod == 'CASH'
+                                        ? const Color(0xFFF59E0B)
+                                        : const Color(0xFFE2E8F0),
+                                    width: _selectedPaymentMethod == 'CASH'
+                                        ? 1.5
+                                        : 1.2,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.local_atm_rounded,
+                                      size: 18,
+                                      color: _selectedPaymentMethod == 'CASH'
+                                          ? const Color(0xFFB45309)
+                                          : const Color(0xFF64748B),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Tunai',
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: _selectedPaymentMethod == 'CASH'
+                                            ? const Color(0xFFB45309)
+                                            : const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
 
-                      // Jika Transfer: Daftar Rekening & Upload Bukti
-                      if (isGuardian || _selectedPaymentMethod == 'TRANSFER') ...[
+                      // Daftar Rekening Transfer & QRIS
+                      if (_selectedPaymentMethod == 'TRANSFER') ...[
+                        const SizedBox(height: 14),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Pilihan Rekening Pembayaran',
-                              style: AppTypography.itemTitle.copyWith(
+                              'Pilihan Rekening Transfer',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 13,
+                                color: const Color(0xFF475569),
                               ),
                             ),
                             InkWell(
                               onTap: _showQrisDialog,
                               child: Row(
-                                children: const [
-                                  Icon(
+                                children: [
+                                  const Icon(
                                     Icons.qr_code_2,
-                                    size: 16,
-                                    color: Color(0xFF059669),
+                                    size: 15,
+                                    color: Color(0xFFF59E0B),
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Bayar QRIS',
-                                    style: TextStyle(
+                                    style: GoogleFonts.plusJakartaSans(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF059669),
+                                      color: const Color(0xFFF59E0B),
                                     ),
                                   ),
                                 ],
@@ -1353,14 +1394,16 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                           ],
                         ),
                         const SizedBox(height: 8),
-
                         ...bankAccounts.map((acc) {
                           return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: const Color(0xFFE2E8F0),
                               ),
@@ -1372,198 +1415,115 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
+                                        horizontal: 6,
+                                        vertical: 2.5,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFFF1F5F9),
+                                        color: const Color(0xFFFEF3C7),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
                                         acc.bankName,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 11,
-                                          color: Color(0xFF1E293B),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 10.5,
+                                          color: const Color(0xFFB45309),
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          acc.accountNumber,
-                                          style: const TextStyle(
-                                            fontFamily: 'monospace',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 12,
-                                            color: Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                        Text(
-                                          'a.n. ${acc.accountHolder}',
-                                          style: const TextStyle(
-                                            fontSize: 10,
-                                            color: Color(0xFF64748B),
-                                          ),
-                                        ),
-                                      ],
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      acc.accountNumber,
+                                      style: const TextStyle(
+                                        fontFamily: 'monospace',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 11.5,
+                                        color: Color(0xFF0F172A),
+                                      ),
                                     ),
                                   ],
                                 ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.copy_rounded,
-                                    size: 16,
-                                    color: Color(0xFF059669),
-                                  ),
-                                  onPressed: () => _copyToClipboard(
+                                InkWell(
+                                  onTap: () => _copyToClipboard(
                                     acc.accountNumber,
                                     acc.bankName,
                                   ),
-                                  tooltip: 'Salin Rekening',
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(
+                                      Icons.copy_rounded,
+                                      size: 15,
+                                      color: Color(0xFFF59E0B),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                           );
                         }),
-                        const SizedBox(height: 12),
-
-                        // Upload Bukti Struk
-                        Row(
-                          children: [
-                            Text(
-                              'Unggah Bukti Pembayaran',
-                              style: AppTypography.itemTitle.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                            if (isGuardian)
-                              const Text(
-                                ' *',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-
-                        InkWell(
-                          onTap: _showImagePickerOptions,
-                          borderRadius: BorderRadius.circular(14),
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: _proofBytes != null
-                                    ? const Color(0xFF059669)
-                                    : const Color(0xFFCBD5E1),
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                            child: _proofBytes == null
-                                ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      Icon(
-                                        Icons.upload_file_rounded,
-                                        color: Color(0xFF059669),
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Pilih foto bukti struk / nota transfer',
-                                        style: TextStyle(
-                                          fontSize: 11.5,
-                                          fontWeight: FontWeight.w600,
-                                          color: Color(0xFF475569),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.memory(
-                                          _proofBytes!,
-                                          width: 44,
-                                          height: 44,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              _proofFilename ?? 'bukti.jpg',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 11.5,
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFF1E293B),
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            const Text(
-                                              'Siap diunggah',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: Color(0xFF059669),
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline_rounded,
-                                          color: Colors.red,
-                                          size: 18,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            _proofBytes = null;
-                                            _proofFilename = null;
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ),
                       ],
+
+                      // 5. Upload Bukti Transfer (Boleh kosong untuk Admin)
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Text(
+                            'Upload Bukti Transfer',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1E293B),
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            isGuardian
+                                ? '(Wajib untuk Wali Santri)'
+                                : '(Boleh kosong untuk Admin)',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+
+                      // Reusable Dashed Upload Box Widget
+                      DashedUploadBox(
+                        imageBytes: _proofBytes,
+                        filename: _proofFilename,
+                        onTap: _showImagePickerOptions,
+                        onRemove: () {
+                          setState(() {
+                            _proofBytes = null;
+                            _proofFilename = null;
+                          });
+                        },
+                      ),
                       const SizedBox(height: 24),
                     ],
                   ),
                 ),
               ),
 
-              // Bottom Button
+              // Bottom Button: Bayar Rp...
               SizedBox(
                 width: double.infinity,
-                height: 48,
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting || _selectedMonths.isEmpty
+                  onPressed: _isSubmitting ||
+                          _selectedStudentId == null ||
+                          _selectedMonths.isEmpty
                       ? null
                       : _handlePayment,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF059669),
-                    disabledBackgroundColor: Colors.grey.shade300,
+                    backgroundColor: const Color(0xFFF5A524),
+                    disabledBackgroundColor:
+                        const Color(0xFFFCD34D).withValues(alpha: 0.6),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     elevation: 0,
                   ),
@@ -1577,12 +1537,10 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                           ),
                         )
                       : Text(
-                          _selectedPaymentMethod == 'CASH' && !isGuardian
-                              ? 'Konfirmasi Pembayaran Kasir'
-                              : 'Kirim Bukti Pembayaran Infak',
-                          style: const TextStyle(
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.bold,
+                          'Bayar ${CurrencyFormatter.format(totalAmount)}',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w800,
                             color: Colors.white,
                           ),
                         ),

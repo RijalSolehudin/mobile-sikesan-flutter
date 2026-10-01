@@ -7,6 +7,7 @@ import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/widgets/dashed_upload_box.dart';
 import '../../../data/models/dashboard_metric_model.dart';
 import '../../../data/models/spp_models.dart';
 import '../../../data/models/top_up_models.dart';
@@ -1248,95 +1249,16 @@ class _TopUpModalState extends State<TopUpModal> {
                         ),
                         const SizedBox(height: 8),
 
-                        GestureDetector(
+                        DashedUploadBox(
+                          imageBytes: _proofBytes,
+                          filename: _proofFilename,
                           onTap: _showImagePickerOptions,
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: _proofBytes != null
-                                    ? const Color(0xFF10B981)
-                                    : const Color(0xFFCBD5E1),
-                              ),
-                            ),
-                            child: _proofBytes != null
-                                ? Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.memory(
-                                          _proofBytes!,
-                                          width: 48,
-                                          height: 48,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'Foto Bukti Terpilih',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 12.5,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              _proofFilename ?? 'Bukti transfer',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 10.5,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.edit,
-                                          size: 18,
-                                          color: AppColors.primary,
-                                        ),
-                                        onPressed: _showImagePickerOptions,
-                                      ),
-                                    ],
-                                  )
-                                : Column(
-                                    children: const [
-                                      Icon(
-                                        Icons.cloud_upload_outlined,
-                                        size: 30,
-                                        color: AppColors.primary,
-                                      ),
-                                      SizedBox(height: 6),
-                                      Text(
-                                        'Unggah Bukti Transfer / Struk',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                          color: Color(0xFF1E293B),
-                                        ),
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        'Format JPG, PNG, atau Screenshot (Maks. 5MB)',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
+                          onRemove: () {
+                            setState(() {
+                              _proofBytes = null;
+                              _proofFilename = null;
+                            });
+                          },
                         ),
                       ] else ...[
                         // Cashier / Treasurer: Toggle Transfer vs Cash
@@ -1446,78 +1368,18 @@ class _TopUpModalState extends State<TopUpModal> {
                         const SizedBox(height: 14),
 
                         // Optional Proof upload for Cashier / Admin
-                        GestureDetector(
+                        DashedUploadBox(
+                          imageBytes: _proofBytes,
+                          filename: _proofFilename,
+                          title: 'Lampirkan Bukti / Struk (Opsional)',
+                          subtitle: 'PNG, JPG (Max 2MB)',
                           onTap: _showImagePickerOptions,
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF8FAFC),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: _proofBytes != null
-                                    ? const Color(0xFF10B981)
-                                    : const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            child: _proofBytes != null
-                                ? Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.memory(
-                                          _proofBytes!,
-                                          width: 40,
-                                          height: 40,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          _proofFilename ?? 'Bukti pembayaran',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.delete_outline,
-                                          size: 18,
-                                          color: Colors.red,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            _proofBytes = null;
-                                            _proofFilename = null;
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      Icon(
-                                        Icons.attach_file_rounded,
-                                        size: 16,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                      SizedBox(width: 6),
-                                      Text(
-                                        'Lampirkan Bukti / Nota (Opsional)',
-                                        style: TextStyle(
-                                          fontSize: 11.5,
-                                          color: AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
+                          onRemove: () {
+                            setState(() {
+                              _proofBytes = null;
+                              _proofFilename = null;
+                            });
+                          },
                         ),
                       ],
                       const SizedBox(height: 20),
