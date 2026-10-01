@@ -7,6 +7,7 @@ import '../../core/theme/app_typography.dart';
 import '../../core/utils/currency_formatter.dart';
 import '../../core/widgets/avatar_icon.dart';
 import '../../core/widgets/shimmer_box.dart';
+import '../../data/models/bill_history_model.dart';
 import '../../data/models/dashboard_metric_model.dart';
 import '../../data/models/menu_item_model.dart';
 import '../../data/models/transaction_item_model.dart';
@@ -26,7 +27,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
+  final ScrollController _scrollController = ScrollController();
   bool _hasFetched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (currentScroll >= maxScroll - 200) {
+      final state = context.read<DashboardBloc>().state;
+      if (state.selectedHistoryTab == 0 &&
+          state.billsHasMore &&
+          !state.isLoadingMoreBills) {
+        context.read<DashboardBloc>().add(
+          const DashboardBillsLoadMoreRequested(),
+        );
+      }
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -41,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -108,6 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppColors.primary,
                 onRefresh: _handleRefresh,
                 child: SingleChildScrollView(
+                  controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
@@ -509,109 +536,265 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 20),
 
-                            // Riwayat Transaksi Header
+                            // Segmented Tab Header: Riwayat Tagihan / Riwayat Transaksi
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    'Riwayat Transaksi',
-                                    style: AppTypography.sectionTitle,
-                                  ),
+                                Row(
+                                  children: [
+                                    _buildTabButton(
+                                      title: 'Riwayat Tagihan',
+                                      isSelected: state.selectedHistoryTab == 0,
+                                      onTap: () {
+                                        context.read<DashboardBloc>().add(
+                                          const DashboardHistoryTabChanged(0),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(width: 8),
+                                    _buildTabButton(
+                                      title: 'Riwayat Transaksi',
+                                      isSelected: state.selectedHistoryTab == 1,
+                                      onTap: () {
+                                        context.read<DashboardBloc>().add(
+                                          const DashboardHistoryTabChanged(1),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    context.go('/mutation');
-                                  },
-                                  child: Text(
-                                    'Lihat Semua >',
-                                    style: AppTypography.itemSubtitle.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600,
+                                if (state.selectedHistoryTab == 1)
+                                  GestureDetector(
+                                    onTap: () {
+                                      context.go('/mutation');
+                                    },
+                                    child: Text(
+                                      'Lihat Semua >',
+                                      style: AppTypography.itemSubtitle.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                             const SizedBox(height: 12),
 
-                            // Transaction List or Empty State
-                            if (isLoading)
-                              Column(
-                                children: List.generate(
-                                  3,
-                                  (i) => const Padding(
-                                    padding: EdgeInsets.only(bottom: 10),
-                                    child: ShimmerBox(
-                                      width: double.infinity,
-                                      height: 64,
-                                      borderRadius: 16,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            else if (displayTransactions.isEmpty)
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 32,
-                                  horizontal: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: const Color(0xFFF1F5F9),
-                                  ),
-                                ),
-                                child: Column(
+                            // Filter status chips (hanya aktif saat tab Riwayat Tagihan)
+                            if (state.selectedHistoryTab == 0) ...[
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                child: Row(
                                   children: [
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFF8FAFC),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.receipt_long_outlined,
-                                        size: 24,
-                                        color: Color(0xFF94A3B8),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      'Belum ada transaksi terbaru',
-                                      style: AppTypography.itemTitle.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 13,
-                                        color: const Color(0xFF475569),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Riwayat transaksi santri akan muncul di sini',
-                                      style:
-                                          AppTypography.itemSubtitle.copyWith(
-                                        fontSize: 11,
-                                        color: const Color(0xFF94A3B8),
-                                      ),
-                                    ),
+                                    _buildFilterChip('Semua', 'all', state.billStatusFilter),
+                                    const SizedBox(width: 6),
+                                    _buildFilterChip('Belum Lunas', 'unpaid', state.billStatusFilter),
+                                    const SizedBox(width: 6),
+                                    _buildFilterChip('Menunggu Verifikasi', 'pending', state.billStatusFilter),
+                                    const SizedBox(width: 6),
+                                    _buildFilterChip('Lunas', 'paid', state.billStatusFilter),
                                   ],
                                 ),
-                              )
-                            else
-                              ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: displayTransactions.length,
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (context, index) {
-                                  final tx = displayTransactions[index];
-                                  return _buildTransactionTile(tx);
-                                },
                               ),
+                              const SizedBox(height: 12),
+                            ],
+
+                            // List Content: Riwayat Tagihan vs Riwayat Transaksi
+                            if (state.selectedHistoryTab == 0) ...[
+                              // TAB 0: RIWAYAT TAGIHAN DENGAN LAZY LOADING
+                              if (isLoading && state.bills.isEmpty)
+                                Column(
+                                  children: List.generate(
+                                    3,
+                                    (i) => const Padding(
+                                      padding: EdgeInsets.only(bottom: 10),
+                                      child: ShimmerBox(
+                                        width: double.infinity,
+                                        height: 64,
+                                        borderRadius: 16,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else if (state.bills.isEmpty)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 32,
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F5F9),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFFF8FAFC),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.receipt_long_outlined,
+                                          size: 24,
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        'Tidak ada tagihan ditemukan',
+                                        style: AppTypography.itemTitle.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                          color: const Color(0xFF475569),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Riwayat tagihan santri akan muncul di sini',
+                                        style: AppTypography.itemSubtitle.copyWith(
+                                          fontSize: 11,
+                                          color: const Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else ...[
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: state.bills.length,
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (context, index) {
+                                    final bill = state.bills[index];
+                                    return _buildBillTile(bill);
+                                  },
+                                ),
+                                // Lazy Loading Indicator
+                                if (state.isLoadingMoreBills) ...[
+                                  const SizedBox(height: 14),
+                                  Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: AppColors.primary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Memuat tagihan lainnya...',
+                                          style: AppTypography.itemSubtitle.copyWith(
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ] else if (!state.billsHasMore && state.bills.isNotEmpty) ...[
+                                  const SizedBox(height: 14),
+                                  Center(
+                                    child: Text(
+                                      '— Semua tagihan telah ditampilkan —',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        color: Colors.grey.shade400,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ] else ...[
+                              // TAB 1: RIWAYAT TRANSAKSI (DOMPET)
+                              if (isLoading && displayTransactions.isEmpty)
+                                Column(
+                                  children: List.generate(
+                                    3,
+                                    (i) => const Padding(
+                                      padding: EdgeInsets.only(bottom: 10),
+                                      child: ShimmerBox(
+                                        width: double.infinity,
+                                        height: 64,
+                                        borderRadius: 16,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else if (displayTransactions.isEmpty)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 32,
+                                    horizontal: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: const Color(0xFFF1F5F9),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 48,
+                                        height: 48,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFFF8FAFC),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.receipt_long_outlined,
+                                          size: 24,
+                                          color: Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        'Belum ada transaksi terbaru',
+                                        style: AppTypography.itemTitle.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                          color: const Color(0xFF475569),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Riwayat transaksi santri akan muncul di sini',
+                                        style: AppTypography.itemSubtitle.copyWith(
+                                          fontSize: 11,
+                                          color: const Color(0xFF94A3B8),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: displayTransactions.length,
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(height: 10),
+                                  itemBuilder: (context, index) {
+                                    final tx = displayTransactions[index];
+                                    return _buildTransactionTile(tx);
+                                  },
+                                ),
+                            ],
                           ],
                         ),
                       ),
@@ -978,6 +1161,245 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBillTile(BillHistoryModel bill) {
+    Color iconBg;
+    Color iconColor;
+    IconData iconData;
+
+    if (bill.billType == 'SPP') {
+      iconBg = const Color(0xFFEFF6FF);
+      iconColor = const Color(0xFF2563EB);
+      iconData = Icons.calendar_month_rounded;
+    } else if (bill.billType == 'INFAQ') {
+      iconBg = const Color(0xFFECFDF5);
+      iconColor = const Color(0xFF059669);
+      iconData = Icons.volunteer_activism_rounded;
+    } else {
+      iconBg = const Color(0xFFF5F3FF);
+      iconColor = const Color(0xFF7C3AED);
+      iconData = Icons.school_rounded;
+    }
+
+    Color badgeBg;
+    Color badgeText;
+    IconData badgeIcon;
+
+    if (bill.isPaid) {
+      badgeBg = const Color(0xFFDCFCE7);
+      badgeText = const Color(0xFF15803D);
+      badgeIcon = Icons.check_circle_rounded;
+    } else if (bill.isPending) {
+      badgeBg = const Color(0xFFFEF3C7);
+      badgeText = const Color(0xFFB45309);
+      badgeIcon = Icons.schedule_rounded;
+    } else {
+      badgeBg = const Color(0xFFFEE2E2);
+      badgeText = const Color(0xFFB91C1C);
+      badgeIcon = Icons.error_outline_rounded;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleBillTap(bill),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderLight),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  iconData,
+                  color: iconColor,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bill.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.itemTitle.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '${bill.studentName} • ${bill.studentClass}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.itemSubtitle.copyWith(
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    CurrencyFormatter.format(bill.amountBilled),
+                    style: AppTypography.itemTitle.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13.5,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2.5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: badgeBg,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(badgeIcon, size: 11, color: badgeText),
+                        const SizedBox(width: 3.5),
+                        Text(
+                          bill.statusLabel,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: badgeText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _handleBillTap(BillHistoryModel bill) {
+    if (bill.isUnpaid) {
+      if (bill.billType == 'SPP') {
+        PaySppModal.show(context);
+      } else if (bill.billType == 'INFAQ') {
+        PayInfaqModal.show(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Silakan hubungi bendahara untuk ${bill.title}.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } else if (bill.isPending) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Pembayaran ${bill.title} sedang diverifikasi oleh admin / bendahara.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Tagihan ${bill.title} untuk ${bill.studentName} sudah Lunas.',
+          ),
+          backgroundColor: AppColors.primaryDark,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Widget _buildTabButton({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
+          ),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            color: isSelected ? Colors.white : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value, String currentValue) {
+    final isSelected = value == currentValue;
+    return GestureDetector(
+      onTap: () {
+        context.read<DashboardBloc>().add(
+          DashboardBillStatusFilterChanged(value),
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : const Color(0xFFCBD5E1),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? Colors.white : const Color(0xFF475569),
+          ),
+        ),
       ),
     );
   }

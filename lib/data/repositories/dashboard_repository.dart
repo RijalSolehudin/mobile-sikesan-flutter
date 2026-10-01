@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/network/api_result.dart';
 import '../../core/network/dio_client.dart';
+import '../models/bill_history_model.dart';
 import '../models/dashboard_metric_model.dart';
 import '../models/menu_item_model.dart';
 import '../models/transaction_item_model.dart';
@@ -84,6 +85,59 @@ class DashboardRepository {
       );
     } catch (e) {
       return ApiFailure('Terjadi kesalahan memuat transaksi: ${e.toString()}');
+    }
+  }
+
+  Future<ApiResult<List<BillHistoryModel>>> getBillHistory({
+    int page = 1,
+    int perPage = 10,
+    String status = 'all',
+    String type = 'all',
+    int? studentId,
+  }) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'per_page': perPage,
+      };
+      if (status != 'all') queryParams['status'] = status;
+      if (type != 'all') queryParams['type'] = type;
+      if (studentId != null) queryParams['student_id'] = studentId;
+
+      final response = await dioClient.dio.get(
+        '/bills/history',
+        queryParameters: queryParams,
+      );
+
+      final dynamic responseData = response.data;
+      List<dynamic> items = [];
+
+      if (responseData is Map<String, dynamic>) {
+        final dataField = responseData['data'];
+        if (dataField is Map<String, dynamic> && dataField['data'] is List) {
+          items = dataField['data'] as List<dynamic>;
+        } else if (dataField is List) {
+          items = dataField;
+        }
+      } else if (responseData is List) {
+        items = responseData;
+      }
+
+      final bills = items
+          .whereType<Map<String, dynamic>>()
+          .map((item) => BillHistoryModel.fromJson(item))
+          .toList();
+
+      return ApiSuccess(bills);
+    } on DioException catch (e) {
+      return ApiFailure(
+        e.response?.data?['message'] ?? 'Gagal memuat riwayat tagihan',
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return ApiFailure(
+        'Terjadi kesalahan memuat riwayat tagihan: ${e.toString()}',
+      );
     }
   }
 

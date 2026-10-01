@@ -37,3 +37,25 @@ class DashboardCarouselChanged extends DashboardEvent {
 class DashboardToggleMenuExpanded extends DashboardEvent {
   const DashboardToggleMenuExpanded();
 }
+
+class DashboardBillsLoadMoreRequested extends DashboardEvent {
+  const DashboardBillsLoadMoreRequested();
+}
+
+class DashboardBillStatusFilterChanged extends DashboardEvent {
+  final String status;
+
+  const DashboardBillStatusFilterChanged(this.status);
+
+  @override
+  List<Object?> get props => [status];
+}
+
+class DashboardHistoryTabChanged extends DashboardEvent {
+  final int tabIndex;
+
+  const DashboardHistoryTabChanged(this.tabIndex);
+
+  @override
+  List<Object?> get props => [tabIndex];
+}
