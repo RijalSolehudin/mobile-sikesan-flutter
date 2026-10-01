@@ -8,6 +8,7 @@ import 'data/local/secure_storage_service.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/dashboard_repository.dart';
 import 'data/repositories/spp_repository.dart';
+import 'data/repositories/infaq_repository.dart';
 import 'data/repositories/wallet_repository.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/dashboard/bloc/dashboard_bloc.dart';
@@ -44,6 +45,7 @@ void main() async {
   final authRepository = AuthRepository(dioClient, secureStorage);
   final dashboardRepository = DashboardRepository(dioClient);
   final sppRepository = SppRepository(dioClient);
+  final infaqRepository = InfaqRepository(dioClient);
   final walletRepository = WalletRepository(dioClient);
 
   authBloc = AuthBloc(authRepository: authRepository)
@@ -57,6 +59,7 @@ void main() async {
       authRepository: authRepository,
       dashboardRepository: dashboardRepository,
       sppRepository: sppRepository,
+      infaqRepository: infaqRepository,
       walletRepository: walletRepository,
       authBloc: authBloc,
       dashboardBloc: dashboardBloc,
@@ -69,6 +72,7 @@ class SikesanMobileApp extends StatelessWidget {
   final AuthRepository authRepository;
   final DashboardRepository dashboardRepository;
   final SppRepository sppRepository;
+  final InfaqRepository infaqRepository;
   final WalletRepository walletRepository;
   final AuthBloc authBloc;
   final DashboardBloc dashboardBloc;
@@ -79,6 +83,7 @@ class SikesanMobileApp extends StatelessWidget {
     required this.authRepository,
     required this.dashboardRepository,
     required this.sppRepository,
+    required this.infaqRepository,
     required this.walletRepository,
     required this.authBloc,
     required this.dashboardBloc,
@@ -94,6 +99,7 @@ class SikesanMobileApp extends StatelessWidget {
           value: dashboardRepository,
         ),
         RepositoryProvider<SppRepository>.value(value: sppRepository),
+        RepositoryProvider<InfaqRepository>.value(value: infaqRepository),
         RepositoryProvider<WalletRepository>.value(value: walletRepository),
       ],
       child: MultiBlocProvider(

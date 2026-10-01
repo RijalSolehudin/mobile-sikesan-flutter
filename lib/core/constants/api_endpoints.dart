@@ -37,5 +37,9 @@ class ApiEndpoints {
   static const String ledgerReports = '/reports/ledger';
   static const String topUps = '/top-ups';
   static const String sppPayments = '/spp/payments';
+  static const String infaqKesantrianPayments = '/infaq-kesantrian/payments';
+  static const String infaqKesantrianSubmit = '/infaq-kesantrian/submit-payment';
+  static String infaqBills(dynamic studentId) => '/students/$studentId/infaq-bills';
+  static String infaqReceipt(dynamic paymentId) => '/infaq-kesantrian/payments/$paymentId/receipt';
   static const String infaqs = '/infaqs';
 }

@@ -13,6 +13,7 @@ import '../../data/models/transaction_item_model.dart';
 import '../auth/bloc/auth_bloc.dart';
 import '../spp/widgets/pay_spp_modal.dart';
 import '../wallet/widgets/top_up_modal.dart';
+import '../infaq/widgets/pay_infaq_modal.dart';
 import 'bloc/dashboard_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -463,6 +464,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     } else if (menu.id == 'top_up' ||
                                         titleLower.contains('top up')) {
                                       TopUpModal.show(context);
+                                    } else if (menu.id == 'infak' ||
+                                        titleLower.contains('infak') ||
+                                        titleLower.contains('infaq')) {
+                                      PayInfaqModal.show(context);
                                     }
                                   },
                                   child: Column(
