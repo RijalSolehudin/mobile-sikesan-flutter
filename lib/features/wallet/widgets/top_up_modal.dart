@@ -79,7 +79,7 @@ class _TopUpModalState extends State<TopUpModal> {
   @override
   void initState() {
     super.initState();
-    _amountController.text = _formatNumber(_selectedAmount);
+    _amountController.text = CurrencyFormatter.formatWithoutSymbol(_selectedAmount);
 
     if (widget.preselectedStudentId != null) {
       _selectedStudentId = widget.preselectedStudentId;
@@ -97,11 +97,6 @@ class _TopUpModalState extends State<TopUpModal> {
     _amountController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  String _formatNumber(num number) {
-    final fmt = NumberFormat('#,###', 'id_ID');
-    return fmt.format(number).replaceAll(',', '.');
   }
 
   void _initDefaultStudent() {
@@ -142,8 +137,7 @@ class _TopUpModalState extends State<TopUpModal> {
   }
 
   void _onAmountChanged(String val) {
-    final cleanDigits = val.replaceAll(RegExp(r'[^0-9]'), '');
-    final numVal = int.tryParse(cleanDigits) ?? 0;
+    final numVal = CurrencyFormatter.parseClean(val);
     setState(() {
       _selectedAmount = numVal;
     });
@@ -152,7 +146,10 @@ class _TopUpModalState extends State<TopUpModal> {
   void _selectPresetAmount(int amount) {
     setState(() {
       _selectedAmount = amount;
-      _amountController.text = _formatNumber(amount);
+      _amountController.text = CurrencyFormatter.formatWithoutSymbol(amount);
+      _amountController.selection = TextSelection.collapsed(
+        offset: _amountController.text.length,
+      );
     });
   }
 
@@ -962,7 +959,7 @@ class _TopUpModalState extends State<TopUpModal> {
                           controller: _amountController,
                           keyboardType: TextInputType.number,
                           inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
+                            CurrencyInputFormatter(),
                           ],
                           style: const TextStyle(
                             fontSize: 22,
