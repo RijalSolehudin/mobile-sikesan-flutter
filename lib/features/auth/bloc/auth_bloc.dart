@@ -1,39 +1,53 @@
+import 'dart:developer' as developer;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../core/network/api_result.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/auth_repository.dart';
-import 'auth_event.dart';
-import 'auth_state.dart';
 
-export 'auth_event.dart';
-export 'auth_state.dart';
+part 'auth_event.dart';
+part 'auth_state.dart';
+part 'auth_bloc.freezed.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepository;
 
   AuthBloc({required AuthRepository authRepository})
     : _authRepository = authRepository,
-      super(AuthState.initial()) {
+      super(const AuthState.initial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthLoginRequested>(_onAuthLoginRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
+
+    _log('AuthBloc initialized');
+  }
+
+  void _log(String message, {Object? error, StackTrace? stackTrace}) {
+    developer.log(
+      message,
+      name: 'AuthBloc',
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   Future<void> _onAuthCheckRequested(
     AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
+    _log('Auth check requested');
     final hasToken = await _authRepository.hasValidToken();
     if (!hasToken) {
-      emit(AuthState.unauthenticated());
+      emit(const AuthState.unauthenticated());
       return;
     }
 
     final user = await _authRepository.getCachedUser();
     if (user != null) {
+      _log('User loaded from cache: ${user.name} (${user.role})');
       emit(AuthState.authenticated(user));
     } else {
-      emit(AuthState.unauthenticated());
+      emit(const AuthState.unauthenticated());
     }
   }
 
@@ -41,7 +55,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthState.loading());
+    _log('Login requested for: ${event.username}');
+    emit(const AuthState.loading());
 
     final result = await _authRepository.login(
       username: event.username,
@@ -49,8 +64,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     if (result is ApiSuccess<UserModel>) {
+      _log('Login success: ${result.data.name}');
       emit(AuthState.authenticated(result.data));
     } else if (result is ApiFailure<UserModel>) {
+      _log('Login failed: ${result.message}');
       emit(AuthState.failure(result.message));
     }
   }
@@ -59,8 +76,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(AuthState.loading());
+    _log('Logout requested');
+    emit(const AuthState.loading());
     await _authRepository.logout();
-    emit(AuthState.unauthenticated());
+    emit(const AuthState.unauthenticated());
   }
 }

@@ -1,35 +1,20 @@
-import 'package:equatable/equatable.dart';
-import '../../../data/models/user_model.dart';
+part of 'auth_bloc.dart';
 
-enum AuthStatus { initial, loading, authenticated, unauthenticated, failure }
+@freezed
+class AuthState with _$AuthState {
+  const AuthState._();
 
-class AuthState extends Equatable {
-  final AuthStatus status;
-  final UserModel? user;
-  final String? errorMessage;
+  const factory AuthState.initial() = AuthInitial;
+  const factory AuthState.loading() = AuthLoading;
+  const factory AuthState.authenticated(UserModel user) = AuthAuthenticated;
+  const factory AuthState.unauthenticated() = AuthUnauthenticated;
+  const factory AuthState.failure(String message) = AuthFailure;
 
-  const AuthState({
-    this.status = AuthStatus.initial,
-    this.user,
-    this.errorMessage,
-  });
+  UserModel? get user => maybeWhen(
+    authenticated: (user) => user,
+    orElse: () => null,
+  );
 
-  factory AuthState.initial() => const AuthState(status: AuthStatus.initial);
-
-  factory AuthState.loading() => const AuthState(status: AuthStatus.loading);
-
-  factory AuthState.authenticated(UserModel user) =>
-      AuthState(status: AuthStatus.authenticated, user: user);
-
-  factory AuthState.unauthenticated() =>
-      const AuthState(status: AuthStatus.unauthenticated);
-
-  factory AuthState.failure(String message) =>
-      AuthState(status: AuthStatus.failure, errorMessage: message);
-
-  bool get isAuthenticated => status == AuthStatus.authenticated;
-  bool get isLoading => status == AuthStatus.loading;
-
-  @override
-  List<Object?> get props => [status, user, errorMessage];
+  bool get isAuthenticated => this is AuthAuthenticated;
+  bool get isLoading => this is AuthLoading;
 }

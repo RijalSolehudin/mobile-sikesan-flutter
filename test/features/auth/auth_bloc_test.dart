@@ -61,8 +61,8 @@ void main() {
       authBloc.close();
     });
 
-    test('Initial state is AuthStatus.initial', () {
-      expect(authBloc.state.status, AuthStatus.initial);
+    test('Initial state is AuthInitial', () {
+      expect(authBloc.state, const AuthState.initial());
     });
 
     test(
@@ -74,7 +74,7 @@ void main() {
 
         await expectLater(
           authBloc.stream,
-          emits(const AuthState(status: AuthStatus.unauthenticated)),
+          emits(const AuthState.unauthenticated()),
         );
       },
     );
@@ -96,7 +96,7 @@ void main() {
 
         await expectLater(
           authBloc.stream,
-          emits(const AuthState(status: AuthStatus.authenticated, user: user)),
+          emits(const AuthState.authenticated(user)),
         );
       },
     );
@@ -120,8 +120,8 @@ void main() {
         await expectLater(
           authBloc.stream,
           emitsInOrder([
-            const AuthState(status: AuthStatus.loading),
-            const AuthState(status: AuthStatus.authenticated, user: user),
+            const AuthState.loading(),
+            const AuthState.authenticated(user),
           ]),
         );
       },
@@ -142,11 +142,8 @@ void main() {
         await expectLater(
           authBloc.stream,
           emitsInOrder([
-            const AuthState(status: AuthStatus.loading),
-            const AuthState(
-              status: AuthStatus.failure,
-              errorMessage: 'Username atau password salah',
-            ),
+            const AuthState.loading(),
+            const AuthState.failure('Username atau password salah'),
           ]),
         );
       },
@@ -158,8 +155,8 @@ void main() {
       await expectLater(
         authBloc.stream,
         emitsInOrder([
-          const AuthState(status: AuthStatus.loading),
-          const AuthState(status: AuthStatus.unauthenticated),
+          const AuthState.loading(),
+          const AuthState.unauthenticated(),
         ]),
       );
     });

@@ -38,7 +38,7 @@ class AppRouter {
         final isLoggingIn = state.matchedLocation == '/login';
 
         // While checking token on initial launch, stay on current location
-        if (authState.status == AuthStatus.initial) {
+        if (authState is AuthInitial) {
           return null;
         }
 

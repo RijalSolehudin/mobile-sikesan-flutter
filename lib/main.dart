@@ -8,8 +8,10 @@ import 'data/local/secure_storage_service.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/dashboard_repository.dart';
 import 'data/repositories/spp_repository.dart';
+import 'data/repositories/wallet_repository.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/dashboard/bloc/dashboard_bloc.dart';
+import 'features/spp/bloc/spp_payment_bloc.dart';
 import 'core/services/session_timeout_listener.dart';
 import 'router/app_router.dart';
 
@@ -42,6 +44,7 @@ void main() async {
   final authRepository = AuthRepository(dioClient, secureStorage);
   final dashboardRepository = DashboardRepository(dioClient);
   final sppRepository = SppRepository(dioClient);
+  final walletRepository = WalletRepository(dioClient);
 
   authBloc = AuthBloc(authRepository: authRepository)
     ..add(const AuthCheckRequested());
@@ -54,6 +57,7 @@ void main() async {
       authRepository: authRepository,
       dashboardRepository: dashboardRepository,
       sppRepository: sppRepository,
+      walletRepository: walletRepository,
       authBloc: authBloc,
       dashboardBloc: dashboardBloc,
       router: router,
@@ -65,6 +69,7 @@ class SikesanMobileApp extends StatelessWidget {
   final AuthRepository authRepository;
   final DashboardRepository dashboardRepository;
   final SppRepository sppRepository;
+  final WalletRepository walletRepository;
   final AuthBloc authBloc;
   final DashboardBloc dashboardBloc;
   final GoRouter router;
@@ -74,6 +79,7 @@ class SikesanMobileApp extends StatelessWidget {
     required this.authRepository,
     required this.dashboardRepository,
     required this.sppRepository,
+    required this.walletRepository,
     required this.authBloc,
     required this.dashboardBloc,
     required this.router,
@@ -88,11 +94,15 @@ class SikesanMobileApp extends StatelessWidget {
           value: dashboardRepository,
         ),
         RepositoryProvider<SppRepository>.value(value: sppRepository),
+        RepositoryProvider<WalletRepository>.value(value: walletRepository),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider<AuthBloc>.value(value: authBloc),
           BlocProvider<DashboardBloc>.value(value: dashboardBloc),
+          BlocProvider<SppPaymentBloc>(
+            create: (context) => SppPaymentBloc(sppRepository: sppRepository),
+          ),
         ],
         child: MaterialApp.router(
           title: 'SIKESAN - Sistem Keuangan Santri',

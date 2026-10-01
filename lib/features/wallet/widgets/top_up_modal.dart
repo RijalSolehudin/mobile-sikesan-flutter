@@ -7,75 +7,85 @@ import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../data/models/dashboard_metric_model.dart';
 import '../../../data/models/spp_models.dart';
-import '../../../data/repositories/spp_repository.dart';
+import '../../../data/models/top_up_models.dart';
+import '../../../data/repositories/wallet_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
-import 'receipt_preview_modal.dart';
-import '../bloc/spp_payment_bloc.dart';
+import 'top_up_receipt_modal.dart';
 
-class PaySppModal extends StatefulWidget {
-  const PaySppModal({super.key});
+class TopUpModal extends StatefulWidget {
+  final int? preselectedStudentId;
+  final String? preselectedStudentName;
 
-  static Future<void> show(BuildContext context) {
+  const TopUpModal({
+    super.key,
+    this.preselectedStudentId,
+    this.preselectedStudentName,
+  });
+
+  static Future<void> show(
+    BuildContext context, {
+    int? preselectedStudentId,
+    String? preselectedStudentName,
+  }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const PaySppModal(),
+      builder: (context) => TopUpModal(
+        preselectedStudentId: preselectedStudentId,
+        preselectedStudentName: preselectedStudentName,
+      ),
     );
   }
 
   @override
-  State<PaySppModal> createState() => _PaySppModalState();
+  State<TopUpModal> createState() => _TopUpModalState();
 }
 
-class _PaySppModalState extends State<PaySppModal>
-    with SingleTickerProviderStateMixin {
+class _TopUpModalState extends State<TopUpModal> {
   final ImagePicker _picker = ImagePicker();
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   int? _selectedStudentId;
   String _selectedStudentName = '';
-  int _selectedYear = DateTime.now().year;
-  final Set<int> _selectedMonths = {};
+  String _selectedStudentNis = '-';
+  String _selectedStudentClass = '-';
+
+  int _selectedAmount = 100000;
   String _selectedPaymentMethod = 'TRANSFER'; // 'TRANSFER' or 'CASH'
 
   Uint8List? _proofBytes;
   String? _proofFilename;
-  bool _isLoadingBills = false;
   bool _isSubmitting = false;
-  List<SppBillModel> _bills = [];
 
-  // For Treasurer Global Student Search
-  final TextEditingController _searchController = TextEditingController();
+  // Search suggestions for staff / cashier / treasurer
   List<StudentLookupModel> _searchedStudents = [];
   bool _isSearchingStudent = false;
 
-  final List<String> _monthNamesShort = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'Mei',
-    'Jun',
-    'Jul',
-    'Agu',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Des',
-  ];
-
-  final List<int> _availableYears = [
-    DateTime.now().year - 1,
-    DateTime.now().year,
-    DateTime.now().year + 1,
+  final List<int> _presetAmounts = [
+    50000,
+    100000,
+    200000,
+    500000,
+    1000000,
   ];
 
   @override
   void initState() {
     super.initState();
+    _amountController.text = _formatNumber(_selectedAmount);
+
+    if (widget.preselectedStudentId != null) {
+      _selectedStudentId = widget.preselectedStudentId;
+      _selectedStudentName = widget.preselectedStudentName ?? 'Santri';
+      _searchController.text = _selectedStudentName;
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initDefaultStudent();
     });
@@ -83,110 +93,65 @@ class _PaySppModalState extends State<PaySppModal>
 
   @override
   void dispose() {
+    _amountController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
+  String _formatNumber(num number) {
+    final fmt = NumberFormat('#,###', 'id_ID');
+    return fmt.format(number).replaceAll(',', '.');
+  }
+
   void _initDefaultStudent() {
+    if (_selectedStudentId != null) return;
+
     final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
 
     if (isGuardian) {
-      final dashboardState = context.read<DashboardBloc>().state;
-      final students = dashboardState.metrics.students;
-      if (students.isNotEmpty) {
-        _selectStudent(students.first.id, students.first.name);
+      final dashboardStudents =
+          context.read<DashboardBloc>().state.metrics.students;
+      if (dashboardStudents.isNotEmpty) {
+        _selectGuardianStudent(dashboardStudents.first);
       }
     }
   }
 
-  void _selectStudent(int id, String name) {
+  void _selectGuardianStudent(StudentSummaryModel student) {
     setState(() {
-      _selectedStudentId = id;
-      _selectedStudentName = name;
-      _selectedMonths.clear();
+      _selectedStudentId = student.id;
+      _selectedStudentName = student.name;
+      _selectedStudentNis = 'NIS-${student.id}';
+      _selectedStudentClass = student.grade;
+      _searchController.text = student.name;
       _searchedStudents.clear();
-      _searchController.text = name;
     });
-    _loadBillsForStudent(id, year: _selectedYear);
   }
 
-  Future<void> _loadBillsForStudent(int studentId, {int? year}) async {
-    setState(() => _isLoadingBills = true);
-    final sppRepo = RepositoryProvider.of<SppRepository>(context);
-    final result = await sppRepo.getStudentBills(
-      studentId,
-      year: year ?? _selectedYear,
-    );
-
-    if (!mounted) return;
-
-    if (result is ApiSuccess<List<SppBillModel>>) {
-      setState(() {
-        _bills = result.data;
-        _isLoadingBills = false;
-      });
-    } else {
-      final msg = result is ApiFailure
-          ? (result as ApiFailure).message
-          : 'Gagal memuat tagihan SPP';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-      );
-      setState(() {
-        _bills = [];
-        _isLoadingBills = false;
-      });
-    }
-  }
-
-  void _onMonthTapped(int monthNumber) {
-    // Kumpulkan seluruh bulan yang belum lunas (UNPAID) untuk tahun yang dipilih
-    final unpaidMonths = <int>[];
-    for (int m = 1; m <= 12; m++) {
-      final bill = _bills.firstWhere(
-        (b) => b.periodYear == _selectedYear && b.periodMonth == m,
-        orElse: () => SppBillModel(
-          id: '',
-          studentId: _selectedStudentId ?? 0,
-          periodMonth: m,
-          periodYear: _selectedYear,
-          amountBilled: 750000,
-          status: 'UNPAID',
-        ),
-      );
-      if (!bill.isPaid) {
-        unpaidMonths.add(m);
-      }
-    }
-
-    if (!unpaidMonths.contains(monthNumber)) {
-      return; // Bulan sudah lunas, tidak dapat dipilih
-    }
-
+  void _selectLookupStudent(StudentLookupModel student) {
     setState(() {
-      final maxSelected = _selectedMonths.isEmpty
-          ? 0
-          : _selectedMonths.reduce((a, b) => a > b ? a : b);
+      _selectedStudentId = student.id;
+      _selectedStudentName = student.name;
+      _selectedStudentNis = student.nis;
+      _selectedStudentClass = student.grade;
+      _searchController.text = student.name;
+      _searchedStudents.clear();
+    });
+  }
 
-      if (_selectedMonths.contains(monthNumber)) {
-        if (monthNumber == maxSelected) {
-          // Klik pada bulan tertinggi yang sedang terpilih -> batalkan bulan ini
-          _selectedMonths.remove(monthNumber);
-        } else {
-          // Klik pada bulan terpilih yang lebih rendah -> pangkas pemilihan di atas bulan ini
-          _selectedMonths.removeWhere((m) => m > monthNumber);
-        }
-      } else {
-        // Klik pada bulan yang belum terpilih:
-        // Terapkan prinsip FIFO: otomatis pilih semua bulan tertua yang belum lunas sampai bulan ini
-        _selectedMonths.clear();
-        for (final m in unpaidMonths) {
-          if (m <= monthNumber) {
-            _selectedMonths.add(m);
-          }
-        }
-      }
+  void _onAmountChanged(String val) {
+    final cleanDigits = val.replaceAll(RegExp(r'[^0-9]'), '');
+    final numVal = int.tryParse(cleanDigits) ?? 0;
+    setState(() {
+      _selectedAmount = numVal;
+    });
+  }
+
+  void _selectPresetAmount(int amount) {
+    setState(() {
+      _selectedAmount = amount;
+      _amountController.text = _formatNumber(amount);
     });
   }
 
@@ -196,8 +161,8 @@ class _PaySppModalState extends State<PaySppModal>
       return;
     }
     setState(() => _isSearchingStudent = true);
-    final sppRepo = RepositoryProvider.of<SppRepository>(context);
-    final result = await sppRepo.getStudents(search: query);
+    final walletRepo = RepositoryProvider.of<WalletRepository>(context);
+    final result = await walletRepo.getStudents(search: query);
 
     if (!mounted) return;
 
@@ -288,7 +253,7 @@ class _PaySppModalState extends State<PaySppModal>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'QRIS Pondok Pesantren',
+                    'QRIS Top Up Santri',
                     style: AppTypography.itemTitle.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -340,7 +305,6 @@ class _PaySppModalState extends State<PaySppModal>
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Visual QR Code Placeholder
                     Container(
                       width: 200,
                       height: 200,
@@ -364,9 +328,9 @@ class _PaySppModalState extends State<PaySppModal>
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: const Icon(
-                              Icons.school_rounded,
+                              Icons.account_balance_wallet_rounded,
                               size: 24,
-                              color: Color(0xFF5B58EB),
+                              color: AppColors.primary,
                             ),
                           ),
                         ],
@@ -390,7 +354,7 @@ class _PaySppModalState extends State<PaySppModal>
               ),
               const SizedBox(height: 16),
               const Text(
-                'Buka aplikasi BCA Mobile, Livin, GoPay, OVO, Dana, atau ShopeePay lalu scan QRIS di atas.',
+                'Buka BCA Mobile, Livin, GoPay, OVO, Dana, atau ShopeePay lalu scan QRIS di atas untuk mengisi saldo santri.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
               ),
@@ -400,7 +364,7 @@ class _PaySppModalState extends State<PaySppModal>
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(ctx).pop(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5B58EB),
+                    backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -433,92 +397,7 @@ class _PaySppModalState extends State<PaySppModal>
     );
   }
 
-  Future<void> _handlePayment() async {
-    if (_selectedStudentId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan pilih santri terlebih dahulu'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    if (_selectedMonths.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan pilih minimal 1 bulan tagihan'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
-    final isGuardian = userRole.toLowerCase().contains('wali');
-
-    if (isGuardian && _proofBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan unggah bukti transfer/pembayaran'),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    // Map selected months to actual bill IDs from database
-    final selectedBills = _bills
-        .where(
-          (b) =>
-              b.periodYear == _selectedYear &&
-              _selectedMonths.contains(b.periodMonth) &&
-              b.id.isNotEmpty,
-        )
-        .toList();
-    final List<String> billIds = selectedBills.map((b) => b.id).toList();
-
-    if (billIds.isEmpty || billIds.length != _selectedMonths.length) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Tagihan SPP untuk sebagian/seluruh periode yang dipilih belum diterbitkan oleh pesantren.',
-          ),
-          backgroundColor: AppColors.error,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isSubmitting = true);
-    final num total = selectedBills.fold<num>(
-      0,
-      (sum, b) => sum + b.amountBilled,
-    );
-
-    final paymentBloc = context.read<SppPaymentBloc>();
-    if (!isGuardian && _selectedPaymentMethod == 'CASH') {
-      paymentBloc.add(
-        SppPaymentEvent.submitCash(
-          studentId: _selectedStudentId!,
-          billIds: billIds,
-          totalAmount: total,
-        ),
-      );
-    } else {
-      paymentBloc.add(
-        SppPaymentEvent.submitTransfer(
-          studentId: _selectedStudentId!,
-          billIds: billIds,
-          totalAmount: total,
-          proofBytes: _proofBytes ?? [],
-          proofFilename: _proofFilename ?? 'proof.jpg',
-        ),
-      );
-    }
-  }
-
-  Future<void> _showSuccessAnimation() async {
+  Future<void> _showSuccessAnimation(bool isApproved) async {
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -563,7 +442,7 @@ class _PaySppModalState extends State<PaySppModal>
               ),
               const SizedBox(height: 16),
               Text(
-                'Pembayaran Berhasil!',
+                isApproved ? 'Top Up Berhasil!' : 'Permintaan Terkirim!',
                 style: AppTypography.itemTitle.copyWith(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -571,7 +450,9 @@ class _PaySppModalState extends State<PaySppModal>
               ),
               const SizedBox(height: 4),
               Text(
-                'Kwitansi pembayaran sedang diproses...',
+                isApproved
+                    ? 'Saldo santri berhasil ditambahkan.'
+                    : 'Menunggu konfirmasi bendahara pesantren.',
                 style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
               ),
             ],
@@ -588,96 +469,128 @@ class _PaySppModalState extends State<PaySppModal>
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final userRole =
-        context.watch<AuthBloc>().state.user?.role ?? 'Wali Santri';
-    final isGuardian = userRole.toLowerCase().contains('wali');
-    final dashboardStudents = context
-        .watch<DashboardBloc>()
-        .state
-        .metrics
-        .students;
-    if (_selectedStudentId == null &&
-        dashboardStudents.isNotEmpty &&
-        isGuardian) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _selectedStudentId == null) {
-          _selectStudent(
-            dashboardStudents.first.id,
-            dashboardStudents.first.name,
-          );
-        }
-      });
+  Future<void> _handleTopUp() async {
+    if (_selectedStudentId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan pilih santri terlebih dahulu'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
     }
 
-    final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 750000;
-    final num totalAmount = _selectedMonths.length * rate;
+    if (_selectedAmount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nominal top up harus lebih dari Rp 0'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final user = context.read<AuthBloc>().state.user;
+    final userRole = user?.role ?? 'Wali Santri';
+    final isGuardian = userRole.toLowerCase().contains('wali');
+
+    if (isGuardian && _proofBytes == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan unggah bukti transfer/pembayaran'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    final walletRepo = RepositoryProvider.of<WalletRepository>(context);
+    final paymentMethod = isGuardian ? 'TRANSFER' : _selectedPaymentMethod;
+
+    final result = await walletRepo.submitTopUpRequest(
+      studentId: _selectedStudentId!,
+      amount: _selectedAmount,
+      paymentMethod: paymentMethod,
+      proofBytes: _proofBytes,
+      proofFilename: _proofFilename ?? 'topup_proof.jpg',
+    );
+
+    if (!mounted) return;
+
+    if (result is ApiSuccess<TopUpRequestModel>) {
+      final topUp = result.data;
+      bool isApproved = topUp.isApproved;
+
+      // Auto approve for cash deposit at counter if Cashier / Treasurer / Admin
+      if (!isGuardian && paymentMethod == 'CASH' && !isApproved) {
+        final approveResult = await walletRepo.approveTopUp(topUp.id);
+        if (approveResult is ApiSuccess) {
+          isApproved = true;
+        }
+      }
+
+      if (!mounted) return;
+
+      final navigator = Navigator.of(context);
+      final parentContext = navigator.context;
+      final guardianName = user?.name ?? 'Wali Santri';
+
+      // Refresh dashboard balances
+      context.read<DashboardBloc>().add(
+            DashboardRefreshRequested(role: userRole),
+          );
+
+      await _showSuccessAnimation(isApproved);
+
+      navigator.pop(); // Close top up modal
+
+      if (!parentContext.mounted) return;
+
+      final now = DateTime.now();
+      final dateStr = DateFormat('yyyy-MM-dd').format(now);
+      final timeStr = DateFormat('HH:mm:ss').format(now);
+      final receiptNumber =
+          'KW-TOPUP-${now.millisecondsSinceEpoch.toString().substring(5)}';
+
+      final receipt = TopUpReceiptModel(
+        receiptNumber: receiptNumber,
+        topUpId: topUp.id,
+        paymentDate: dateStr,
+        paymentTime: timeStr,
+        amount: _selectedAmount,
+        paymentMethod: paymentMethod,
+        status: isApproved ? 'APPROVED' : 'PENDING',
+        studentName: _selectedStudentName,
+        studentNis: _selectedStudentNis,
+        studentClass: _selectedStudentClass,
+        guardianName: guardianName,
+      );
+
+      TopUpReceiptModal.show(parentContext, receipt);
+    } else {
+      setState(() => _isSubmitting = false);
+      final msg = result is ApiFailure
+          ? (result as ApiFailure).message
+          : 'Gagal mengajukan top up saldo';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = context.watch<AuthBloc>().state.user;
+    final userRole = user?.role ?? 'Wali Santri';
+    final isGuardian = userRole.toLowerCase().contains('wali');
+    final dashboardStudents =
+        context.watch<DashboardBloc>().state.metrics.students;
 
     final bankAccounts = BankAccountModel.defaultAccounts();
 
-    return BlocListener<SppPaymentBloc, SppPaymentState>(
-      listener: (context, paymentState) {
-        paymentState.whenOrNull(
-          success: (paymentId, message) async {
-            setState(() => _isSubmitting = false);
-
-            final navigator = Navigator.of(context);
-            final parentContext = navigator.context;
-            final sppRepo = RepositoryProvider.of<SppRepository>(context);
-            final guardianName =
-                context.read<AuthBloc>().state.user?.name ?? 'Wali Santri';
-
-            // Show success animation dialog
-            await _showSuccessAnimation();
-
-            navigator.pop(); // Close pay modal
-
-            // Fetch receipt data and show preview modal using parentContext
-            final receiptResult = await sppRepo.getReceipt(paymentId);
-            if (!parentContext.mounted) return;
-
-            if (receiptResult is ApiSuccess<SppReceiptModel>) {
-              ReceiptPreviewModal.show(parentContext, receiptResult.data);
-            } else {
-              // Fallback receipt preview
-              final fallbackReceipt = SppReceiptModel(
-                receiptNumber:
-                    'KW-SPP-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}',
-                paymentId: paymentId,
-                paymentDate: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                paymentTime: DateFormat('HH:mm:ss').format(DateTime.now()),
-                totalPaidAmount: totalAmount,
-                paymentMethod:
-                    isGuardian ? 'TRANSFER' : _selectedPaymentMethod,
-                status: isGuardian ? 'PENDING' : 'APPROVED',
-                studentName: _selectedStudentName,
-                studentNis: 'NIS-2026',
-                studentClass: 'Kelas Santri',
-                guardianName: guardianName,
-                bills: _selectedMonths
-                    .map(
-                      (m) => SppReceiptBillItem(
-                        month: m,
-                        monthName: _monthNamesShort[m - 1],
-                        year: _selectedYear,
-                        amount: rate,
-                      ),
-                    )
-                    .toList(),
-              );
-              ReceiptPreviewModal.show(parentContext, fallbackReceipt);
-            }
-          },
-          failure: (message) {
-            setState(() => _isSubmitting = false);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: AppColors.error),
-            );
-          },
-        );
-      },
-      child: Center(
+    return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 720,
@@ -696,7 +609,7 @@ class _PaySppModalState extends State<PaySppModal>
           ),
           child: Column(
             children: [
-              // Header (Title, Subtitle, Close Button)
+              // Modal Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -705,7 +618,7 @@ class _PaySppModalState extends State<PaySppModal>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bayar SPP',
+                        'Top Up Saldo Santri',
                         style: AppTypography.headerTitle.copyWith(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
@@ -714,7 +627,7 @@ class _PaySppModalState extends State<PaySppModal>
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Pembayaran SPP bulanan santri',
+                        'Tambah saldo dompet digital santri',
                         style: AppTypography.itemSubtitle.copyWith(
                           fontSize: 12,
                           color: const Color(0xFF64748B),
@@ -727,8 +640,8 @@ class _PaySppModalState extends State<PaySppModal>
                     child: Container(
                       width: 32,
                       height: 32,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF1F5F9),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -742,18 +655,18 @@ class _PaySppModalState extends State<PaySppModal>
               ),
               const SizedBox(height: 16),
 
-              // Scrollable Content
+              // Scrollable Form Body
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 1. Pemilihan Nama Santri
+                      // 1. Pemilihan Santri
                       Row(
                         children: [
                           Text(
-                            'Nama Santri',
+                            'Pilih Santri',
                             style: AppTypography.itemTitle.copyWith(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
@@ -771,7 +684,6 @@ class _PaySppModalState extends State<PaySppModal>
                       const SizedBox(height: 8),
 
                       if (isGuardian) ...[
-                        // Wali Santri: Tags / Chips Santri Asuhan
                         if (dashboardStudents.isEmpty)
                           Container(
                             padding: const EdgeInsets.all(12),
@@ -783,7 +695,7 @@ class _PaySppModalState extends State<PaySppModal>
                               ),
                             ),
                             child: const Text(
-                              'Belum ada santri terhubung dengan akun Anda',
+                              'Belum ada santri asuhan yang terhubung.',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey,
@@ -797,54 +709,49 @@ class _PaySppModalState extends State<PaySppModal>
                             itemCount: dashboardStudents.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: dashboardStudents.length == 1
-                                      ? 1
-                                      : 2,
-                                  crossAxisSpacing: 10,
-                                  mainAxisSpacing: 10,
-                                  mainAxisExtent: 64,
-                                ),
+                              crossAxisCount:
+                                  dashboardStudents.length == 1 ? 1 : 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              mainAxisExtent: 72,
+                            ),
                             itemBuilder: (context, index) {
                               final st = dashboardStudents[index];
                               final isSelected = _selectedStudentId == st.id;
 
                               return InkWell(
-                                onTap: () {
-                                  _selectStudent(st.id, st.name);
-                                },
+                                onTap: () => _selectGuardianStudent(st),
                                 borderRadius: BorderRadius.circular(14),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
+                                    horizontal: 12,
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? const Color(0xFFF5F5FE)
+                                        ? AppColors.primarySurface
                                         : Colors.white,
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
                                       color: isSelected
-                                          ? const Color(0xFF5B58EB)
+                                          ? AppColors.primary
                                           : const Color(0xFFE2E8F0),
                                       width: isSelected ? 1.6 : 1.0,
                                     ),
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: const Color(
-                                                0xFF5B58EB,
-                                              ).withValues(alpha: 0.12),
+                                              color: AppColors.primary
+                                                  .withValues(alpha: 0.12),
                                               blurRadius: 6,
                                               offset: const Offset(0, 2),
                                             ),
                                           ]
                                         : [
                                             BoxShadow(
-                                              color: Colors.black.withValues(
-                                                alpha: 0.02,
-                                              ),
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.02),
                                               blurRadius: 4,
                                               offset: const Offset(0, 1),
                                             ),
@@ -852,17 +759,15 @@ class _PaySppModalState extends State<PaySppModal>
                                   ),
                                   child: Row(
                                     children: [
-                                      // Avatar Icon
                                       Container(
                                         width: 36,
                                         height: 36,
                                         decoration: BoxDecoration(
                                           color: isSelected
-                                              ? const Color(0xFF5B58EB)
+                                              ? AppColors.primary
                                               : const Color(0xFFF1F5F9),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                         ),
                                         child: Icon(
                                           Icons.school_rounded,
@@ -872,8 +777,7 @@ class _PaySppModalState extends State<PaySppModal>
                                               : const Color(0xFF64748B),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
-                                      // Nama & Jenjang
+                                      const SizedBox(width: 10),
                                       Expanded(
                                         child: Column(
                                           mainAxisAlignment:
@@ -897,48 +801,32 @@ class _PaySppModalState extends State<PaySppModal>
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
-                                              st.grade,
+                                              'Saldo: ${CurrencyFormatter.format(st.walletBalance)}',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: isSelected
-                                                    ? FontWeight.w600
-                                                    : FontWeight.w400,
+                                                fontSize: 10.5,
+                                                fontWeight: FontWeight.w600,
                                                 color: isSelected
-                                                    ? const Color(0xFF5B58EB)
+                                                    ? AppColors.primaryDark
                                                     : const Color(0xFF64748B),
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
-                                      // Indikator Pilihan (Ceklis saat terpilih)
                                       if (isSelected)
                                         Container(
                                           width: 18,
                                           height: 18,
                                           decoration: const BoxDecoration(
-                                            color: Color(0xFF5B58EB),
+                                            color: AppColors.primary,
                                             shape: BoxShape.circle,
                                           ),
                                           child: const Icon(
                                             Icons.check,
                                             size: 12,
                                             color: Colors.white,
-                                          ),
-                                        )
-                                      else
-                                        Container(
-                                          width: 18,
-                                          height: 18,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: const Color(0xFFCBD5E1),
-                                              width: 1.2,
-                                            ),
                                           ),
                                         ),
                                     ],
@@ -948,13 +836,13 @@ class _PaySppModalState extends State<PaySppModal>
                             },
                           ),
                       ] else ...[
-                        // Bendahara / Admin: Input Pencarian Santri Global
+                        // Global Student Search (Kasir / Bendahara / Admin)
                         TextField(
                           controller: _searchController,
                           decoration: InputDecoration(
                             hintText: 'Cari nama atau NIS santri...',
                             prefixIcon: const Icon(
-                              Icons.person_outline_rounded,
+                              Icons.search_rounded,
                               color: Color(0xFF94A3B8),
                             ),
                             suffixIcon: _isSearchingStudent
@@ -988,7 +876,7 @@ class _PaySppModalState extends State<PaySppModal>
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(14),
                               borderSide: const BorderSide(
-                                color: Color(0xFF5B58EB),
+                                color: AppColors.primary,
                                 width: 1.5,
                               ),
                             ),
@@ -1032,106 +920,20 @@ class _PaySppModalState extends State<PaySppModal>
                                     '${st.nis} • ${st.grade}',
                                     style: const TextStyle(fontSize: 11),
                                   ),
-                                  onTap: () => _selectStudent(st.id, st.name),
+                                  onTap: () => _selectLookupStudent(st),
                                 );
                               },
                             ),
                           ),
                         ],
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 18),
 
-                      // 2. Tahun Tagihan
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Tahun',
-                                style: AppTypography.itemTitle.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const Text(
-                                ' *',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFFE2E8F0),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.calendar_month_outlined,
-                                  size: 16,
-                                  color: Color(0xFF64748B),
-                                ),
-                                const SizedBox(width: 8),
-                                DropdownButtonHideUnderline(
-                                  child: DropdownButton<int>(
-                                    value: _selectedYear,
-                                    isDense: true,
-                                    icon: const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      size: 18,
-                                    ),
-                                    items: _availableYears.map((y) {
-                                      return DropdownMenuItem(
-                                        value: y,
-                                        child: Text(
-                                          '$y',
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                    onChanged: (newYear) {
-                                      if (newYear != null &&
-                                          newYear != _selectedYear) {
-                                        setState(() {
-                                          _selectedYear = newYear;
-                                          _selectedMonths.clear();
-                                        });
-                                        if (_selectedStudentId != null) {
-                                          _loadBillsForStudent(
-                                            _selectedStudentId!,
-                                            year: newYear,
-                                          );
-                                        }
-                                      }
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // 3. Grid Pilihan 12 Bulan (3 kolom x 4 baris)
+                      // 2. Nominal Top Up
                       Row(
                         children: [
                           Text(
-                            'Pilihan Bulan',
+                            'Nominal Top Up',
                             style: AppTypography.itemTitle.copyWith(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
@@ -1144,229 +946,93 @@ class _PaySppModalState extends State<PaySppModal>
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              'Prinsip FIFO (Berurutan)',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF64748B),
-                              ),
-                            ),
-                          ),
-                          if (_isLoadingBills) ...[
-                            const SizedBox(width: 10),
-                            const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ],
                         ],
-                      ),
-                      const SizedBox(height: 10),
-
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: 12,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              childAspectRatio: 2.6,
-                            ),
-                        itemBuilder: (context, index) {
-                          final monthNumber = index + 1;
-                          final monthName = _monthNamesShort[index];
-
-                          // Check if already paid
-                          final bill = _bills.firstWhere(
-                            (b) =>
-                                b.periodYear == _selectedYear &&
-                                b.periodMonth == monthNumber,
-                            orElse: () => SppBillModel(
-                              id: '',
-                              studentId: _selectedStudentId ?? 0,
-                              periodMonth: monthNumber,
-                              periodYear: _selectedYear,
-                              amountBilled: 750000,
-                              status: 'UNPAID',
-                            ),
-                          );
-
-                          final isPaid = bill.isPaid;
-                          final isSelected = _selectedMonths.contains(
-                            monthNumber,
-                          );
-
-                          if (isPaid) {
-                            // Bulan Lunas: Hijau muda, border hijau, centang hijau, disabled
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFECFDF5),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: const Color(0xFF10B981),
-                                  width: 1.2,
-                                ),
-                              ),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Text(
-                                    monthName,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF047857),
-                                    ),
-                                  ),
-                                  const Positioned(
-                                    right: 8,
-                                    child: Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 16,
-                                      color: Color(0xFF10B981),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
-
-                          // Bulan Belum Lunas: Bisa dipilih dengan prinsip FIFO
-                          return GestureDetector(
-                            onTap: () => _onMonthTapped(monthNumber),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? const Color(0xFF5B58EB)
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? const Color(0xFF5B58EB)
-                                      : const Color(0xFFE2E8F0),
-                                  width: 1.2,
-                                ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(
-                                            0xFF5B58EB,
-                                          ).withValues(alpha: 0.25),
-                                          blurRadius: 6,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                monthName,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.w600,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : const Color(0xFF1E293B),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
                       ),
                       const SizedBox(height: 8),
 
-                      // Keterangan Info Biru
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(
-                            Icons.info_outline_rounded,
-                            size: 14,
-                            color: Color(0xFF3B82F6),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              'Pilih satu atau lebih bulan. Bulan dengan centang hijau sudah lunas.',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.blue.shade700,
-                                height: 1.3,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-
-                      // 4. Card Total Tagihan
+                      // Custom Amount Input
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF0F1FE),
+                          color: const Color(0xFFF8FAFC),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE0E3FD)),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Total Tagihan',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.indigo.shade900,
-                                  ),
+                        child: TextField(
+                          controller: _amountController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: AppColors.primaryDark,
+                          ),
+                          decoration: const InputDecoration(
+                            prefixIcon: Padding(
+                              padding: EdgeInsets.only(left: 16, right: 8),
+                              child: Text(
+                                'Rp',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  _selectedMonths.isEmpty
-                                      ? 'Belum ada bulan dipilih'
-                                      : '${_selectedMonths.length} bulan x ${CurrencyFormatter.format(rate)}',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.indigo.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              CurrencyFormatter.format(totalAmount),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFF5B58EB),
                               ),
                             ),
-                          ],
+                            prefixIconConstraints: BoxConstraints(
+                              minWidth: 0,
+                              minHeight: 0,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            hintText: '0',
+                          ),
+                          onChanged: _onAmountChanged,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 10),
 
-                      // 5. Bagian Metode Pembayaran
+                      // Preset Chips
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _presetAmounts.map((amt) {
+                          final isSelected = _selectedAmount == amt;
+                          return ChoiceChip(
+                            label: Text(
+                              CurrencyFormatter.format(amt),
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w600,
+                                color: isSelected
+                                    ? Colors.white
+                                    : const Color(0xFF334155),
+                              ),
+                            ),
+                            selected: isSelected,
+                            selectedColor: AppColors.primary,
+                            backgroundColor: const Color(0xFFF1F5F9),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            onSelected: (_) => _selectPresetAmount(amt),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 18),
+
+                      // 3. Metode Pembayaran
                       Row(
                         children: [
                           Text(
@@ -1388,19 +1054,18 @@ class _PaySppModalState extends State<PaySppModal>
                       const SizedBox(height: 10),
 
                       if (isGuardian) ...[
-                        // KHUSUS WALI SANTRI:
-                        // A. Grid 3 Card Rekening Bank
+                        // Guardian: Bank Accounts
                         GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: bankAccounts.length,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisSpacing: 8,
-                                crossAxisSpacing: 8,
-                                childAspectRatio: 1.1,
-                              ),
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                            childAspectRatio: 1.1,
+                          ),
                           itemBuilder: (context, index) {
                             final acc = bankAccounts[index];
                             return GestureDetector(
@@ -1418,9 +1083,8 @@ class _PaySppModalState extends State<PaySppModal>
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.02,
-                                      ),
+                                      color: Colors.black
+                                          .withValues(alpha: 0.02),
                                       blurRadius: 4,
                                       offset: const Offset(0, 1),
                                     ),
@@ -1435,9 +1099,8 @@ class _PaySppModalState extends State<PaySppModal>
                                         vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF5B58EB,
-                                        ).withValues(alpha: 0.1),
+                                        color: AppColors.primary
+                                            .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -1445,7 +1108,7 @@ class _PaySppModalState extends State<PaySppModal>
                                         style: const TextStyle(
                                           fontWeight: FontWeight.w900,
                                           fontSize: 11,
-                                          color: Color(0xFF5B58EB),
+                                          color: AppColors.primary,
                                         ),
                                       ),
                                     ),
@@ -1477,14 +1140,14 @@ class _PaySppModalState extends State<PaySppModal>
                                         Icon(
                                           Icons.copy_rounded,
                                           size: 10,
-                                          color: Color(0xFF5B58EB),
+                                          color: AppColors.primary,
                                         ),
                                         SizedBox(width: 2),
                                         Text(
                                           'Salin',
                                           style: TextStyle(
                                             fontSize: 8.5,
-                                            color: Color(0xFF5B58EB),
+                                            color: AppColors.primary,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -1496,28 +1159,9 @@ class _PaySppModalState extends State<PaySppModal>
                             );
                           },
                         ),
-                        const SizedBox(height: 14),
-
-                        // Garis Pemisah (Divider)
-                        Row(
-                          children: const [
-                            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'atau bayar via QRIS',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                            Expanded(child: Divider(color: Color(0xFFE2E8F0))),
-                          ],
-                        ),
                         const SizedBox(height: 12),
 
-                        // B. Card Layout Grid 1 (QRIS)
+                        // QRIS Button
                         GestureDetector(
                           onTap: _showQrisDialog,
                           child: Container(
@@ -1556,7 +1200,7 @@ class _PaySppModalState extends State<PaySppModal>
                                         CrossAxisAlignment.start,
                                     children: const [
                                       Text(
-                                        'QRIS Pesantren SIKESAN',
+                                        'QRIS Pondok Pesantren',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
@@ -1564,7 +1208,7 @@ class _PaySppModalState extends State<PaySppModal>
                                       ),
                                       SizedBox(height: 2),
                                       Text(
-                                        'Klik untuk scan barcode dari BCA, Mandiri, GoPay, Dana, dll.',
+                                        'Klik untuk scan via BCA Mobile, Mandiri, Dana, GoPay, dll.',
                                         style: TextStyle(
                                           fontSize: 10.5,
                                           color: Colors.grey,
@@ -1583,7 +1227,7 @@ class _PaySppModalState extends State<PaySppModal>
                         ),
                         const SizedBox(height: 16),
 
-                        // C. Upload Bukti Pembayaran
+                        // Bukti Pembayaran
                         Row(
                           children: [
                             Text(
@@ -1616,7 +1260,6 @@ class _PaySppModalState extends State<PaySppModal>
                                 color: _proofBytes != null
                                     ? const Color(0xFF10B981)
                                     : const Color(0xFFCBD5E1),
-                                style: BorderStyle.solid,
                               ),
                             ),
                             child: _proofBytes != null
@@ -1638,7 +1281,7 @@ class _PaySppModalState extends State<PaySppModal>
                                               CrossAxisAlignment.start,
                                           children: [
                                             const Text(
-                                              'Bukti Foto Terpilih',
+                                              'Foto Bukti Terpilih',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 12.5,
@@ -1646,8 +1289,7 @@ class _PaySppModalState extends State<PaySppModal>
                                             ),
                                             const SizedBox(height: 2),
                                             Text(
-                                              _proofFilename ??
-                                                  'Bukti transfer',
+                                              _proofFilename ?? 'Bukti transfer',
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
@@ -1662,7 +1304,7 @@ class _PaySppModalState extends State<PaySppModal>
                                         icon: const Icon(
                                           Icons.edit,
                                           size: 18,
-                                          color: Color(0xFF5B58EB),
+                                          color: AppColors.primary,
                                         ),
                                         onPressed: _showImagePickerOptions,
                                       ),
@@ -1673,7 +1315,7 @@ class _PaySppModalState extends State<PaySppModal>
                                       Icon(
                                         Icons.cloud_upload_outlined,
                                         size: 30,
-                                        color: Color(0xFF5B58EB),
+                                        color: AppColors.primary,
                                       ),
                                       SizedBox(height: 6),
                                       Text(
@@ -1697,7 +1339,7 @@ class _PaySppModalState extends State<PaySppModal>
                           ),
                         ),
                       ] else ...[
-                        // Role Bendahara / Staf Kasir: Toggle Tunai & Transfer
+                        // Cashier / Treasurer: Toggle Transfer vs Cash
                         Row(
                           children: [
                             Expanded(
@@ -1711,14 +1353,14 @@ class _PaySppModalState extends State<PaySppModal>
                                   ),
                                   decoration: BoxDecoration(
                                     color: _selectedPaymentMethod == 'TRANSFER'
-                                        ? const Color(0xFFF0F1FE)
+                                        ? AppColors.primarySurface
                                         : Colors.white,
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
                                       color:
                                           _selectedPaymentMethod == 'TRANSFER'
-                                          ? const Color(0xFF5B58EB)
-                                          : const Color(0xFFE2E8F0),
+                                              ? AppColors.primary
+                                              : const Color(0xFFE2E8F0),
                                       width: 1.5,
                                     ),
                                   ),
@@ -1730,8 +1372,8 @@ class _PaySppModalState extends State<PaySppModal>
                                         size: 18,
                                         color:
                                             _selectedPaymentMethod == 'TRANSFER'
-                                            ? const Color(0xFF5B58EB)
-                                            : Colors.grey,
+                                                ? AppColors.primary
+                                                : Colors.grey,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
@@ -1739,10 +1381,9 @@ class _PaySppModalState extends State<PaySppModal>
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color:
-                                              _selectedPaymentMethod ==
+                                          color: _selectedPaymentMethod ==
                                                   'TRANSFER'
-                                              ? const Color(0xFF5B58EB)
+                                              ? AppColors.primary
                                               : Colors.grey.shade700,
                                         ),
                                       ),
@@ -1763,12 +1404,12 @@ class _PaySppModalState extends State<PaySppModal>
                                   ),
                                   decoration: BoxDecoration(
                                     color: _selectedPaymentMethod == 'CASH'
-                                        ? const Color(0xFFF0F1FE)
+                                        ? AppColors.primarySurface
                                         : Colors.white,
                                     borderRadius: BorderRadius.circular(14),
                                     border: Border.all(
                                       color: _selectedPaymentMethod == 'CASH'
-                                          ? const Color(0xFF5B58EB)
+                                          ? AppColors.primary
                                           : const Color(0xFFE2E8F0),
                                       width: 1.5,
                                     ),
@@ -1780,18 +1421,18 @@ class _PaySppModalState extends State<PaySppModal>
                                         Icons.point_of_sale_rounded,
                                         size: 18,
                                         color: _selectedPaymentMethod == 'CASH'
-                                            ? const Color(0xFF5B58EB)
+                                            ? AppColors.primary
                                             : Colors.grey,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Tunai',
+                                        'Tunai (Kasir)',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color:
-                                              _selectedPaymentMethod == 'CASH'
-                                              ? const Color(0xFF5B58EB)
+                                          color: _selectedPaymentMethod ==
+                                                  'CASH'
+                                              ? AppColors.primary
                                               : Colors.grey.shade700,
                                         ),
                                       ),
@@ -1802,6 +1443,82 @@ class _PaySppModalState extends State<PaySppModal>
                             ),
                           ],
                         ),
+                        const SizedBox(height: 14),
+
+                        // Optional Proof upload for Cashier / Admin
+                        GestureDetector(
+                          onTap: _showImagePickerOptions,
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: _proofBytes != null
+                                    ? const Color(0xFF10B981)
+                                    : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: _proofBytes != null
+                                ? Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.memory(
+                                          _proofBytes!,
+                                          width: 40,
+                                          height: 40,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Text(
+                                          _proofFilename ?? 'Bukti pembayaran',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          size: 18,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            _proofBytes = null;
+                                            _proofFilename = null;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(
+                                        Icons.attach_file_rounded,
+                                        size: 16,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        'Lampirkan Bukti / Nota (Opsional)',
+                                        style: TextStyle(
+                                          fontSize: 11.5,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
                       ],
                       const SizedBox(height: 20),
                     ],
@@ -1810,16 +1527,16 @@ class _PaySppModalState extends State<PaySppModal>
               ),
               const SizedBox(height: 12),
 
-              // 6. Tombol Submit Bayar (Rounded Full-Width)
+              // Submit Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting || _selectedMonths.isEmpty
+                  onPressed: _isSubmitting || _selectedAmount <= 0
                       ? null
-                      : _handlePayment,
+                      : _handleTopUp,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF5B58EB),
+                    backgroundColor: AppColors.primary,
                     disabledBackgroundColor: const Color(0xFFCBD5E1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -1836,9 +1553,9 @@ class _PaySppModalState extends State<PaySppModal>
                           ),
                         )
                       : Text(
-                          _selectedMonths.isEmpty
-                              ? 'Pilih Bulan Tagihan'
-                              : 'Bayar ${CurrencyFormatter.format(totalAmount)}',
+                          _selectedAmount <= 0
+                              ? 'Masukkan Nominal'
+                              : 'Top Up ${CurrencyFormatter.format(_selectedAmount)}',
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
@@ -1851,7 +1568,6 @@ class _PaySppModalState extends State<PaySppModal>
           ),
         ),
       ),
-    ),
     );
   }
 }
