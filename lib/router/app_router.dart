@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/login_screen.dart';
+import '../features/auth/role_selection_screen.dart';
+import '../features/splash/splash_screen.dart';
 import '../features/dashboard/home_screen.dart';
 import '../features/mutation/mutation_screen.dart';
 import '../features/information/information_screen.dart';
@@ -31,11 +33,19 @@ class AppRouter {
   static GoRouter createRouter(AuthBloc authBloc) {
     return GoRouter(
       navigatorKey: _rootNavigatorKey,
-      initialLocation: '/home',
+      initialLocation: '/splash',
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (BuildContext context, GoRouterState state) {
         final authState = authBloc.state;
-        final isLoggingIn = state.matchedLocation == '/login';
+        final loc = state.matchedLocation;
+        final isSplash = loc == '/splash';
+        final isRoleSelection = loc == '/role-selection';
+        final isLogin = loc == '/login';
+
+        // While on splash, let SplashScreen perform branding delay and transition
+        if (isSplash) {
+          return null;
+        }
 
         // While checking token on initial launch, stay on current location
         if (authState is AuthInitial) {
@@ -44,13 +54,13 @@ class AppRouter {
 
         final isLoggedIn = authState.isAuthenticated;
 
-        // If not logged in and not on login page, redirect to login
-        if (!isLoggedIn && !isLoggingIn) {
-          return '/login';
+        // If not logged in and not on login or role-selection page, redirect to role-selection
+        if (!isLoggedIn && !isLogin && !isRoleSelection) {
+          return '/role-selection';
         }
 
-        // If logged in and on login page, redirect to home
-        if (isLoggedIn && isLoggingIn) {
+        // If logged in and on login/role-selection/splash, redirect to home
+        if (isLoggedIn && (isLogin || isRoleSelection || isSplash)) {
           return '/home';
         }
 
@@ -58,8 +68,19 @@ class AppRouter {
       },
       routes: [
         GoRoute(
+          path: '/splash',
+          builder: (context, state) => const SplashScreen(),
+        ),
+        GoRoute(
+          path: '/role-selection',
+          builder: (context, state) => const RoleSelectionScreen(),
+        ),
+        GoRoute(
           path: '/login',
-          builder: (context, state) => const LoginScreen(),
+          builder: (context, state) {
+            final initialRole = state.extra as String?;
+            return LoginScreen(initialRole: initialRole);
+          },
         ),
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {

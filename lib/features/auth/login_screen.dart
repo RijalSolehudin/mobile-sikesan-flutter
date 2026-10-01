@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_colors.dart';
 import 'bloc/auth_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String? initialRole;
+
+  const LoginScreen({super.key, this.initialRole});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -16,26 +19,26 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  String _selectedRole = 'Admin';
+  late String _selectedRole;
 
   final Map<String, ({String title, String description, IconData icon})>
   _rolesData = {
     'Admin': (
       title: 'Admin',
       description: 'Akses penuh ke seluruh fitur dan pengaturan sistem.',
-      icon: Icons.admin_panel_settings_rounded,
+      icon: Icons.manage_accounts_rounded,
     ),
     'Bendahara': (
       title: 'Bendahara',
       description:
-          'Pengelolaan keuangan, kasir, verifikasi SPP, dan laporan pembukuan.',
-      icon: Icons.account_balance_rounded,
+          'Pengelolaan keuangan, kasir, verifikasi tagihan, dan laporan pembukuan.',
+      icon: Icons.savings_outlined,
     ),
-    'Wali Santri': (
-      title: 'Wali Santri',
+    'Kesantrian': (
+      title: 'Kesantrian',
       description:
-          'Akses informasi keuangan santri, pembayaran SPP, dan saldo dompet santri.',
-      icon: Icons.family_restroom_rounded,
+          'Pengelolaan kegiatan santri, perizinan, dan kedisiplinan santri.',
+      icon: Icons.school_outlined,
     ),
     'Kasir': (
       title: 'Kasir',
@@ -43,7 +46,28 @@ class _LoginScreenState extends State<LoginScreen> {
           'Layanan kasir langsung untuk pembayaran SPP dan tabungan santri.',
       icon: Icons.point_of_sale_rounded,
     ),
+    'Wali Asrama': (
+      title: 'Wali Asrama',
+      description:
+          'Pembinaan santri asrama, absensi harian, dan monitoring kamar.',
+      icon: Icons.home_outlined,
+    ),
+    'Wali Santri': (
+      title: 'Wali Santri',
+      description:
+          'Akses informasi keuangan santri, pembayaran tagihan, dan saldo dompet.',
+      icon: Icons.person_rounded,
+    ),
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = widget.initialRole ?? 'Admin';
+    if (!_rolesData.containsKey(_selectedRole)) {
+      _selectedRole = 'Admin';
+    }
+  }
 
   @override
   void dispose() {
@@ -114,154 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _showRoleSelectionBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) => Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 540),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 20,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Pilih Role Masuk',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF0F172A),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            size: 20,
-                            color: Color(0xFF64748B),
-                          ),
-                          onPressed: () => Navigator.of(ctx).pop(),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Pilih peran akun yang ingin Anda gunakan untuk masuk',
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
-                        color: const Color(0xFF64748B),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ..._rolesData.entries.map((entry) {
-                      final isSelected = _selectedRole == entry.key;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() => _selectedRole = entry.key);
-                            Navigator.of(ctx).pop();
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFF0FDF4)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isSelected
-                                    ? const Color(0xFF059669)
-                                    : const Color(0xFFE2E8F0),
-                                width: isSelected ? 1.6 : 1.0,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? const Color(0xFF059669)
-                                        : const Color(0xFFF1F5F9),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    entry.value.icon,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : const Color(0xFF64748B),
-                                    size: 22,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        entry.value.title,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 13.5,
-                                          fontWeight: isSelected
-                                              ? FontWeight.w800
-                                              : FontWeight.w600,
-                                          color: isSelected
-                                              ? const Color(0xFF0F172A)
-                                              : const Color(0xFF334155),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        entry.value.description,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 11,
-                                          color: const Color(0xFF64748B),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (isSelected)
-                                  const Icon(
-                                    Icons.check_circle_rounded,
-                                    color: Color(0xFF059669),
-                                    size: 20,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildBrandingCard({required bool isWide}) {
     return Container(
@@ -478,6 +355,45 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Top Row: Back button to role selection
+          Row(
+            children: [
+              InkWell(
+                onTap: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    context.go('/role-selection');
+                  }
+                },
+                borderRadius: BorderRadius.circular(10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 15,
+                        color: Color(0xFF059669),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        'Pilih Role',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF059669),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
           // Title: Masuk sebagai [Role]
           Center(
             child: Text(
@@ -692,7 +608,13 @@ class _LoginScreenState extends State<LoginScreen> {
           // Back to Role Link
           Center(
             child: GestureDetector(
-              onTap: _showRoleSelectionBottomSheet,
+              onTap: () {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                } else {
+                  context.go('/role-selection');
+                }
+              },
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                 child: Text(
