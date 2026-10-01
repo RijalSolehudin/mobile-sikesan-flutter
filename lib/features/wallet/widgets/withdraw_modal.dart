@@ -105,9 +105,6 @@ class _WithdrawModalState extends State<WithdrawModal> {
     } else if (_selectedStudentId != null) {
       // Find initial student balance if preselected
       _fetchStudentDetail(_selectedStudentId!);
-    } else {
-      // For staff (Bendahara / Admin / Kasir): load initial student list
-      _searchGlobalStudents('');
     }
   }
 
@@ -183,17 +180,31 @@ class _WithdrawModalState extends State<WithdrawModal> {
       return;
     }
     _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 250), () {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _searchedStudents = [];
+      });
+      return;
+    }
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
       _searchGlobalStudents(query);
     });
   }
 
   Future<void> _searchGlobalStudents(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      setState(() {
+        _searchedStudents = [];
+        _isSearchingStudent = false;
+      });
+      return;
+    }
     setState(() => _isSearchingStudent = true);
     final walletRepo = RepositoryProvider.of<WalletRepository>(context);
-    final trimmed = query.trim();
     final result = await walletRepo.getStudents(
-      search: trimmed.isNotEmpty ? trimmed : null,
+      search: trimmed,
     );
 
     if (!mounted) return;
@@ -809,11 +820,11 @@ class _WithdrawModalState extends State<WithdrawModal> {
                         onPressed: () {
                           _searchController.clear();
                           setState(() {
+                            _searchedStudents.clear();
                             _selectedStudentId = null;
                             _selectedStudentName = '';
                             _selectedStudentBalance = 0;
                           });
-                          _searchGlobalStudents('');
                         },
                       )
                     : null),
