@@ -49,20 +49,7 @@ class MenuItemModel {
           'Kasir',
         ],
       ),
-      const MenuItemModel(
-        id: 'tarik_saldo',
-        title: 'Tarik Saldo',
-        icon: Icons.arrow_downward_rounded,
-        color: AppColors.expense,
-        bg: AppColors.expenseSurface,
-        allowedRoles: [
-          'Wali Santri',
-          'Super Admin',
-          'Admin',
-          'Bendahara',
-          'Kasir',
-        ],
-      ),
+
       const MenuItemModel(
         id: 'rek_wali_asrama',
         title: 'Rekening Wali Asrama',
@@ -93,7 +80,13 @@ class MenuItemModel {
         icon: Icons.arrow_downward_rounded,
         color: AppColors.expense,
         bg: AppColors.expenseSurface,
-        allowedRoles: ['Kasir', 'Super Admin', 'Admin', 'Bendahara'],
+        allowedRoles: [
+          'Wali Santri',
+          'Kasir',
+          'Super Admin',
+          'Admin',
+          'Bendahara',
+        ],
       ),
       const MenuItemModel(
         id: 'data_santri',

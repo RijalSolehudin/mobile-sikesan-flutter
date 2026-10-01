@@ -465,11 +465,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     } else if (menu.id == 'top_up' ||
                                         titleLower.contains('top up')) {
                                       TopUpModal.show(context);
-                                    } else if (menu.id == 'tarik_saldo' ||
-                                        menu.id == 'uang_keluar' ||
-                                        titleLower.contains('tarik') ||
+                                    } else if (menu.id == 'uang_keluar' ||
                                         titleLower.contains('uang keluar') ||
-                                        titleLower.contains('debit')) {
+                                        titleLower.contains('tarik')) {
                                       WithdrawModal.show(context);
                                     } else if (menu.id == 'infak' ||
                                         titleLower.contains('infak') ||

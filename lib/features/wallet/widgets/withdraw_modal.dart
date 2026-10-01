@@ -105,6 +105,9 @@ class _WithdrawModalState extends State<WithdrawModal> {
     } else if (_selectedStudentId != null) {
       // Find initial student balance if preselected
       _fetchStudentDetail(_selectedStudentId!);
+    } else {
+      // For staff (Bendahara / Admin / Kasir): load initial student list
+      _searchGlobalStudents('');
     }
   }
 
@@ -130,6 +133,10 @@ class _WithdrawModalState extends State<WithdrawModal> {
       _selectedStudentBalance = student.walletBalance;
       _searchController.text = student.name;
       _searchedStudents.clear();
+      if (_amount > _selectedStudentBalance) {
+        _amount = 0;
+        _amountController.clear();
+      }
     });
   }
 
@@ -142,6 +149,10 @@ class _WithdrawModalState extends State<WithdrawModal> {
       _selectedStudentBalance = student.walletBalance;
       _searchController.text = student.name;
       _searchedStudents.clear();
+      if (_amount > _selectedStudentBalance) {
+        _amount = 0;
+        _amountController.clear();
+      }
     });
   }
 
@@ -168,20 +179,22 @@ class _WithdrawModalState extends State<WithdrawModal> {
   }
 
   void _onSearchChanged(String query) {
+    if (_selectedStudentId != null && query.trim() == _selectedStudentName.trim()) {
+      return;
+    }
     _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+    _searchDebounce = Timer(const Duration(milliseconds: 250), () {
       _searchGlobalStudents(query);
     });
   }
 
   Future<void> _searchGlobalStudents(String query) async {
-    if (query.trim().isEmpty) {
-      setState(() => _searchedStudents = []);
-      return;
-    }
     setState(() => _isSearchingStudent = true);
     final walletRepo = RepositoryProvider.of<WalletRepository>(context);
-    final result = await walletRepo.getStudents(search: query);
+    final trimmed = query.trim();
+    final result = await walletRepo.getStudents(
+      search: trimmed.isNotEmpty ? trimmed : null,
+    );
 
     if (!mounted) return;
 
@@ -319,7 +332,7 @@ class _WithdrawModalState extends State<WithdrawModal> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Tarik Saldo Santri',
+                            'Uang Keluar',
                             style: AppTypography.headerTitle.copyWith(
                               fontSize: 18,
                               color: AppColors.textPrimary,
@@ -327,7 +340,7 @@ class _WithdrawModalState extends State<WithdrawModal> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Pencairan uang saku & debit saldo dompet',
+                            'Pencairan uang saku & penarikan saldo santri',
                             style: AppTypography.itemSubtitle.copyWith(
                               fontSize: 11,
                               color: AppColors.textSecondary,
@@ -796,11 +809,11 @@ class _WithdrawModalState extends State<WithdrawModal> {
                         onPressed: () {
                           _searchController.clear();
                           setState(() {
-                            _searchedStudents.clear();
                             _selectedStudentId = null;
                             _selectedStudentName = '';
                             _selectedStudentBalance = 0;
                           });
+                          _searchGlobalStudents('');
                         },
                       )
                     : null),
