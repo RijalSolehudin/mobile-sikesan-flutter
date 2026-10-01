@@ -36,12 +36,14 @@ class StudentLookupModel {
   final String name;
   final String nis;
   final String grade;
+  final num walletBalance;
 
   const StudentLookupModel({
     required this.id,
     required this.name,
     required this.nis,
     required this.grade,
+    this.walletBalance = 0,
   });
 
   factory StudentLookupModel.fromJson(Map<String, dynamic> json) {
@@ -55,11 +57,19 @@ class StudentLookupModel {
       gradeStr = json['grade'].toString();
     }
 
+    num balance = 0;
+    if (json['wallet'] != null && json['wallet'] is Map) {
+      balance = (json['wallet']['balance'] as num?) ?? 0;
+    } else if (json['wallet_balance'] != null) {
+      balance = (json['wallet_balance'] as num?) ?? 0;
+    }
+
     return StudentLookupModel(
       id: (json['id'] as num?)?.toInt() ?? 0,
       name: json['name']?.toString() ?? 'Santri',
       nis: json['nis']?.toString() ?? '-',
       grade: gradeStr,
+      walletBalance: balance,
     );
   }
 

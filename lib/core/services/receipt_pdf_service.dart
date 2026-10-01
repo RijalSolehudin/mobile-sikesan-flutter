@@ -5,6 +5,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../data/models/spp_models.dart';
 import '../../data/models/top_up_models.dart';
+import '../../data/models/withdraw_models.dart';
 
 class ReceiptPdfService {
   static Future<Uint8List> generateReceiptPdf(SppReceiptModel receipt) async {
@@ -735,6 +736,354 @@ class ReceiptPdfService {
     await Printing.sharePdf(
       bytes: pdfBytes,
       filename: 'Kwitansi_TopUp_${receipt.receiptNumber}.pdf',
+    );
+  }
+
+  static Future<Uint8List> generateWithdrawReceiptPdf(WithdrawReceiptModel receipt) async {
+    final pdf = pw.Document();
+    final currencyFormatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          final dateStr = DateFormat('dd MMMM yyyy, HH:mm', 'id_ID').format(receipt.date);
+
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Header Pesantren
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'PONDOK PESANTREN SIKESAN',
+                        style: pw.TextStyle(
+                          fontSize: 18,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColor.fromHex('#DC2626'),
+                        ),
+                      ),
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        'Sistem Keuangan Santri Terintegrasi',
+                        style: const pw.TextStyle(
+                          fontSize: 10,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                      pw.Text(
+                        'Jl. Pesantren Luhur No. 1, Jawa Barat • Telp: (021) 8899-7711',
+                        style: const pw.TextStyle(
+                          fontSize: 8,
+                          color: PdfColors.grey600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColor.fromHex('#FEE2E2'),
+                      borderRadius: const pw.BorderRadius.all(
+                        pw.Radius.circular(6),
+                      ),
+                      border: pw.Border.all(
+                        color: PdfColor.fromHex('#DC2626'),
+                        width: 1,
+                      ),
+                    ),
+                    child: pw.Text(
+                      'BUKTI PENARIKAN SALDO',
+                      style: pw.TextStyle(
+                        fontSize: 11,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColor.fromHex('#DC2626'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 12),
+              pw.Divider(color: PdfColors.grey300),
+              pw.SizedBox(height: 12),
+
+              // Info Transaksi
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'DATA SANTRI',
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        receipt.studentName,
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.Text(
+                        'NIS: ${receipt.studentNis}',
+                        style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                      ),
+                      pw.Text(
+                        'Kelas: ${receipt.studentClass}',
+                        style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                      ),
+                    ],
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.end,
+                    children: [
+                      pw.Text(
+                        'NOMOR PENARIKAN',
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.grey700,
+                        ),
+                      ),
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        receipt.receiptNumber,
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        'Waktu: $dateStr',
+                        style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                      ),
+                      pw.Text(
+                        'Petugas: ${receipt.processedBy}',
+                        style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 20),
+
+              // Tabel Rincian Penarikan
+              pw.Container(
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey300),
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                ),
+                child: pw.Column(
+                  children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: const pw.BoxDecoration(
+                        color: PdfColors.grey100,
+                        borderRadius: pw.BorderRadius.only(
+                          topLeft: pw.Radius.circular(5),
+                          topRight: pw.Radius.circular(5),
+                        ),
+                      ),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'KETERANGAN / KEPERLUAN',
+                            style: pw.TextStyle(
+                              fontSize: 10,
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.grey800,
+                            ),
+                          ),
+                          pw.Text(
+                            'JUMLAH PENARIKAN',
+                            style: pw.TextStyle(
+                              fontSize: 10,
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.grey800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              pw.Text(
+                                receipt.description,
+                                style: pw.TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
+                              ),
+                              pw.SizedBox(height: 3),
+                              pw.Text(
+                                'Metode: Tarik Tunai Kasir / Mandiri',
+                                style: const pw.TextStyle(
+                                  fontSize: 9,
+                                  color: PdfColors.grey600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          pw.Text(
+                            currencyFormatter.format(receipt.amount),
+                            style: pw.TextStyle(
+                              fontSize: 14,
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColor.fromHex('#DC2626'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.Divider(color: PdfColors.grey300, height: 1),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      color: PdfColor.fromHex('#F8FAFC'),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Saldo Awal:',
+                            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                          ),
+                          pw.Text(
+                            currencyFormatter.format(receipt.balanceBefore),
+                            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                          ),
+                        ],
+                      ),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: const pw.BoxDecoration(
+                        color: PdfColors.grey100,
+                        borderRadius: pw.BorderRadius.only(
+                          bottomLeft: pw.Radius.circular(5),
+                          bottomRight: pw.Radius.circular(5),
+                        ),
+                      ),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Sisa Saldo Dompet Santri:',
+                            style: pw.TextStyle(
+                              fontSize: 11,
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColors.grey900,
+                            ),
+                          ),
+                          pw.Text(
+                            currencyFormatter.format(receipt.balanceAfter),
+                            style: pw.TextStyle(
+                              fontSize: 12,
+                              fontWeight: pw.FontWeight.bold,
+                              color: PdfColor.fromHex('#10B981'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 24),
+
+              // Tanda Tangan
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.Text('Penerima / Santri', style: const pw.TextStyle(fontSize: 9)),
+                      pw.SizedBox(height: 48),
+                      pw.Container(width: 130, height: 1, color: PdfColors.grey400),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        receipt.studentName,
+                        style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.Text('Petugas Keuangan', style: const pw.TextStyle(fontSize: 9)),
+                      pw.SizedBox(height: 48),
+                      pw.Container(width: 130, height: 1, color: PdfColors.grey400),
+                      pw.SizedBox(height: 4),
+                      pw.Text(
+                        receipt.processedBy,
+                        style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              pw.Spacer(),
+
+              // Catatan Kaki
+              pw.Container(
+                padding: const pw.EdgeInsets.all(8),
+                decoration: pw.BoxDecoration(
+                  color: PdfColor.fromHex('#F8FAFC'),
+                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                ),
+                child: pw.Text(
+                  'Catatan: Bukti ini merupakan bukti penarikan tunai saldo dompet santri sah yang diterbitkan secara elektronik oleh SIKESAN.',
+                  style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey700),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  static Future<void> printWithdrawReceipt(WithdrawReceiptModel receipt) async {
+    final pdfBytes = await generateWithdrawReceiptPdf(receipt);
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdfBytes,
+      name: 'Kwitansi_Penarikan_${receipt.receiptNumber}',
+    );
+  }
+
+  static Future<void> downloadWithdrawReceipt(WithdrawReceiptModel receipt) async {
+    final pdfBytes = await generateWithdrawReceiptPdf(receipt);
+    await Printing.sharePdf(
+      bytes: pdfBytes,
+      filename: 'Kwitansi_Penarikan_${receipt.receiptNumber}.pdf',
     );
   }
 }

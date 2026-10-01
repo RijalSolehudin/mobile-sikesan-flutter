@@ -34,6 +34,7 @@ class ApiEndpoints {
 
   // Financial Transactions
   static const String walletTransactions = '/transactions/wallet';
+  static const String walletWithdraw = '/wallet/withdraw';
   static const String ledgerReports = '/reports/ledger';
   static const String topUps = '/top-ups';
   static const String sppPayments = '/spp/payments';
