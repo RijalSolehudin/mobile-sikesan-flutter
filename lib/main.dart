@@ -117,22 +117,24 @@ class SikesanMobileApp extends StatelessWidget {
           routerConfig: router,
           scaffoldMessengerKey: rootScaffoldMessengerKey,
           builder: (context, child) {
-            return SessionTimeoutListener(
-              authBloc: authBloc,
-              timeoutDuration: const Duration(minutes: 30),
-              onTimeout: () {
-                rootScaffoldMessengerKey.currentState?.showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Sesi Bendahara berakhir otomatis setelah 30 menit tidak ada aktivitas demi keamanan.',
+            return KeyboardDismissWatcher(
+              child: SessionTimeoutListener(
+                authBloc: authBloc,
+                timeoutDuration: const Duration(minutes: 30),
+                onTimeout: () {
+                  rootScaffoldMessengerKey.currentState?.showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Sesi Bendahara berakhir otomatis setelah 30 menit tidak ada aktivitas demi keamanan.',
+                      ),
+                      backgroundColor: Color(0xFFEF4444),
+                      behavior: SnackBarBehavior.floating,
+                      duration: Duration(seconds: 5),
                     ),
-                    backgroundColor: Color(0xFFEF4444),
-                    behavior: SnackBarBehavior.floating,
-                    duration: Duration(seconds: 5),
-                  ),
-                );
-              },
-              child: child ?? const SizedBox.shrink(),
+                  );
+                },
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
         ),
@@ -140,3 +142,58 @@ class SikesanMobileApp extends StatelessWidget {
     );
   }
 }
+
+class KeyboardDismissWatcher extends StatefulWidget {
+  final Widget child;
+
+  const KeyboardDismissWatcher({super.key, required this.child});
+
+  @override
+  State<KeyboardDismissWatcher> createState() => _KeyboardDismissWatcherState();
+}
+
+class _KeyboardDismissWatcherState extends State<KeyboardDismissWatcher>
+    with WidgetsBindingObserver {
+  double _lastBottomInset = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    super.didChangeMetrics();
+    final view = View.of(context);
+    final currentBottomInset = view.viewInsets.bottom;
+
+    // When keyboard transitions from open to closed (e.g. back button pressed)
+    if (_lastBottomInset > 0 && currentBottomInset == 0) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    _lastBottomInset = currentBottomInset;
+  }
+
+  @override
+  Future<bool> didPopRoute() async {
+    // When back button is tapped, ensure active focus is dropped immediately
+    final currentBottomInset = View.of(context).viewInsets.bottom;
+    if (currentBottomInset > 0 || FocusManager.instance.primaryFocus != null) {
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    return super.didPopRoute();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
