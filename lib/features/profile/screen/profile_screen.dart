@@ -31,10 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            ProfileHeader(
-              userName: userName,
-              userRole: userRole,
-            ),
+            ProfileHeader(userName: userName, userRole: userRole),
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 800),
@@ -54,7 +51,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Halaman Informasi Akun segera hadir.'),
+                              content: Text(
+                                'Halaman Informasi Akun segera hadir.',
+                              ),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -70,7 +69,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Halaman Ubah Password segera hadir.'),
+                              content: Text(
+                                'Halaman Ubah Password segera hadir.',
+                              ),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );

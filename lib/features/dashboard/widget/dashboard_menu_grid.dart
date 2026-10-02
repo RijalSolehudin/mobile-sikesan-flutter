@@ -53,10 +53,7 @@ class DashboardMenuGrid extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Menu Utama',
-              style: AppTypography.sectionTitle,
-            ),
+            Text('Menu Utama', style: AppTypography.sectionTitle),
             if (!isWide && totalMenuCount > 8)
               GestureDetector(
                 onTap: onToggleExpanded,
@@ -107,11 +104,7 @@ class DashboardMenuGrid extends StatelessWidget {
                       color: menu.bg,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      menu.icon,
-                      color: menu.color,
-                      size: 24,
-                    ),
+                    child: Icon(menu.icon, color: menu.color, size: 24),
                   ),
                   const SizedBox(height: 6),
                   Text(

@@ -6,10 +6,7 @@ import '../../../core/theme/app_typography.dart';
 class MutationChartCard extends StatelessWidget {
   final String timeRange;
 
-  const MutationChartCard({
-    super.key,
-    required this.timeRange,
-  });
+  const MutationChartCard({super.key, required this.timeRange});
 
   static FlLine _getLine(double value) {
     return const FlLine(color: AppColors.borderLight, strokeWidth: 1);
@@ -174,12 +171,8 @@ class MutationChartCard extends StatelessWidget {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          AppColors.expense.withValues(
-                            alpha: 0.35,
-                          ),
-                          AppColors.expense.withValues(
-                            alpha: 0.0,
-                          ),
+                          AppColors.expense.withValues(alpha: 0.35),
+                          AppColors.expense.withValues(alpha: 0.0),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,

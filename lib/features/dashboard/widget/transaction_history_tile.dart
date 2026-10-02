@@ -8,10 +8,7 @@ import '../../../data/models/transaction_item_model.dart';
 class TransactionHistoryTile extends StatelessWidget {
   final TransactionItemModel tx;
 
-  const TransactionHistoryTile({
-    super.key,
-    required this.tx,
-  });
+  const TransactionHistoryTile({super.key, required this.tx});
 
   @override
   Widget build(BuildContext context) {

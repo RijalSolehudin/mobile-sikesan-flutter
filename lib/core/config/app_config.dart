@@ -3,9 +3,15 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 enum AppEnvironment { dev, staging, prod }
 
 class AppConfig {
-  static const String _env = String.fromEnvironment('ENV', defaultValue: 'staging');
+  static const String _env = String.fromEnvironment(
+    'ENV',
+    defaultValue: 'staging',
+  );
   static const String _apiBaseUrl = String.fromEnvironment('API_BASE_URL');
-  static const bool enableLogging = bool.fromEnvironment('ENABLE_LOGGING', defaultValue: true);
+  static const bool enableLogging = bool.fromEnvironment(
+    'ENABLE_LOGGING',
+    defaultValue: true,
+  );
 
   static String? customBaseUrl;
 

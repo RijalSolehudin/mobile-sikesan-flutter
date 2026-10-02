@@ -9,6 +9,12 @@ class DioClient {
   final SecureStorageService secureStorage;
   final void Function()? onUnauthorized;
 
+  DioClient.withDio(
+    this.dio, {
+    required this.secureStorage,
+    this.onUnauthorized,
+  });
+
   DioClient({required this.secureStorage, this.onUnauthorized}) {
     dio = Dio(
       BaseOptions(
@@ -41,8 +47,9 @@ class DioClient {
             if (!isAuthEndpoint) {
               final refreshToken = await secureStorage.getRefreshToken();
               if (refreshToken != null && refreshToken.isNotEmpty) {
-                final newAccessToken =
-                    await _performSilentTokenRefresh(refreshToken);
+                final newAccessToken = await _performSilentTokenRefresh(
+                  refreshToken,
+                );
                 if (newAccessToken != null && newAccessToken.isNotEmpty) {
                   final options = error.requestOptions;
                   options.headers['Authorization'] = 'Bearer $newAccessToken';
@@ -200,8 +207,9 @@ class DioClient {
       if (sensitiveKeys.contains(entry.key.toLowerCase())) {
         result[entry.key] = '***REDACTED***';
       } else if (entry.value is Map<String, dynamic>) {
-        result[entry.key] =
-            _maskSensitiveMap(entry.value as Map<String, dynamic>);
+        result[entry.key] = _maskSensitiveMap(
+          entry.value as Map<String, dynamic>,
+        );
       } else {
         result[entry.key] = entry.value;
       }
@@ -226,6 +234,10 @@ class DioClient {
       case DioExceptionType.cancel:
         return 'Permintaan dibatalkan.';
       default:
+        final statusCode = e.response?.statusCode;
+        if (statusCode != null && statusCode >= 500) {
+          return 'Server sedang mengalami kendala teknis (Error $statusCode). Silakan coba beberapa saat lagi.';
+        }
         final dynamic data = e.response?.data;
         if (data is Map && data.containsKey('message')) {
           return data['message'].toString();

@@ -49,7 +49,8 @@ class TopUpRequestModel {
           num.tryParse(json['requested_amount']?.toString() ?? '') ?? 0,
       paymentMethod: json['payment_method']?.toString() ?? 'TRANSFER',
       status: json['status']?.toString() ?? 'PENDING',
-      proofUrl: json['proof_url']?.toString() ?? json['proof_full_url']?.toString(),
+      proofUrl:
+          json['proof_url']?.toString() ?? json['proof_full_url']?.toString(),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,

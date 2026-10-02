@@ -10,10 +10,8 @@ class AuthState with _$AuthState {
   const factory AuthState.unauthenticated() = AuthUnauthenticated;
   const factory AuthState.failure(String message) = AuthFailure;
 
-  UserModel? get user => maybeWhen(
-    authenticated: (user) => user,
-    orElse: () => null,
-  );
+  UserModel? get user =>
+      maybeWhen(authenticated: (user) => user, orElse: () => null);
 
   bool get isAuthenticated => this is AuthAuthenticated;
   bool get isLoading => this is AuthLoading;

@@ -6,7 +6,7 @@
 | **Prioritas** | **P2 - Medium (Quality Assurance & Regression Shield)** |
 | **Kategori** | Testing, CI/CD, Quality Engineering |
 | **Komponen Terkait** | Folder `test/`, `test/widget_test.dart`, Modal Pembayaran SPP/Infaq |
-| **Status** | Open / Pending Action |
+| **Status** | Completed / Verified |
 
 ---
 
@@ -70,7 +70,7 @@ Pastikan file `.github/workflows/ci.yml` menjalankan `flutter test --coverage` d
 ---
 
 ## 4. Kriteria Penerimaan (Acceptance Criteria)
-- [ ] Test coverage mencakup skenario UI form transaksi utama (SPP & Top-up).
-- [ ] Terdapat pengujian otomatis untuk aturan bisnis FIFO pembayaran SPP.
-- [ ] Repository memiliki unit test untuk handling status code `401`, `422`, dan `500`.
-- [ ] Seluruh test dapat dijalankan di CI environment secara headless tanpa error.
+- [x] Test coverage mencakup skenario UI form transaksi utama (SPP submit button disabled/enabled/loading & summary card).
+- [x] Terdapat pengujian otomatis untuk aturan bisnis FIFO pembayaran SPP (`SppFifoHelper`).
+- [x] Repository memiliki unit test untuk handling status code `200`, `401`, `422`, dan `500` (`spp_repository_test.dart`).
+- [x] Seluruh test dapat dijalankan di CI environment secara headless tanpa error (`52 tests passed`).

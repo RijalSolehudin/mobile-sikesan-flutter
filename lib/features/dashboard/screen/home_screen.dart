@@ -267,16 +267,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const SizedBox(height: 2),
                                   Text(
                                     'Sistem Keuangan Santri',
-                                    style: AppTypography.headerSubtitle.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: AppTypography.headerSubtitle
+                                        .copyWith(fontWeight: FontWeight.w600),
                                   ),
                                   Text(
                                     'Pondok Pesantren Pribadi Terintegrasi',
-                                    style: AppTypography.headerSubtitle.copyWith(
-                                      fontSize: 11,
-                                      color: Colors.white.withValues(alpha: 0.8),
-                                    ),
+                                    style: AppTypography.headerSubtitle
+                                        .copyWith(
+                                          fontSize: 11,
+                                          color: Colors.white.withValues(
+                                            alpha: 0.8,
+                                          ),
+                                        ),
                                   ),
                                   const SizedBox(height: 18),
 

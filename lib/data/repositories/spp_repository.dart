@@ -91,9 +91,7 @@ class SppRepository {
           'total_amount': totalAmount.toInt(),
           'payment_method': 'CASH',
         },
-        options: Options(
-          headers: {'Idempotency-Key': key},
-        ),
+        options: Options(headers: {'Idempotency-Key': key}),
       );
 
       final paymentData = response.data['data'];
@@ -139,9 +137,7 @@ class SppRepository {
       final response = await dioClient.dio.post(
         '/spp/submit-payment',
         data: formData,
-        options: Options(
-          headers: {'Idempotency-Key': key},
-        ),
+        options: Options(headers: {'Idempotency-Key': key}),
       );
 
       final paymentData = response.data['data'];

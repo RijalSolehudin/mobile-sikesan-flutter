@@ -167,16 +167,11 @@ class DashboardHistorySection extends StatelessWidget {
           else if (bills.isEmpty)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: 32,
-                horizontal: 16,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFF1F5F9),
-                ),
+                border: Border.all(color: const Color(0xFFF1F5F9)),
               ),
               child: Column(
                 children: [
@@ -242,9 +237,7 @@ class DashboardHistorySection extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Memuat tagihan lainnya...',
-                      style: AppTypography.itemSubtitle.copyWith(
-                        fontSize: 11,
-                      ),
+                      style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
                     ),
                   ],
                 ),
@@ -282,16 +275,11 @@ class DashboardHistorySection extends StatelessWidget {
           else if (transactions.isEmpty)
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: 32,
-                horizontal: 16,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFFF1F5F9),
-                ),
+                border: Border.all(color: const Color(0xFFF1F5F9)),
               ),
               child: Column(
                 children: [

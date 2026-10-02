@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_sikesan_flutter/core/network/api_result.dart';
 import 'package:mobile_sikesan_flutter/core/network/dio_client.dart';
 import 'package:mobile_sikesan_flutter/data/local/secure_storage_service.dart';
+import 'package:mobile_sikesan_flutter/data/models/bill_history_model.dart';
 import 'package:mobile_sikesan_flutter/data/models/dashboard_metric_model.dart';
 import 'package:mobile_sikesan_flutter/data/models/menu_item_model.dart';
 import 'package:mobile_sikesan_flutter/data/models/transaction_item_model.dart';
@@ -48,6 +49,17 @@ class MockDashboardRepository extends DashboardRepository {
             studentName: 'Ahmad',
           ),
         ]);
+  }
+
+  @override
+  Future<ApiResult<List<BillHistoryModel>>> getBillHistory({
+    int page = 1,
+    int perPage = 10,
+    String status = 'all',
+    String type = 'all',
+    int? studentId,
+  }) async {
+    return const ApiSuccess([]);
   }
 
   @override

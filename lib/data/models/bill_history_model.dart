@@ -12,7 +12,8 @@ class BillHistoryModel {
   final String monthName;
   final num amountBilled;
   final String status; // 'UNPAID', 'PENDING', 'PARTIAL', 'PAID'
-  final String statusLabel; // 'Belum Lunas', 'Menunggu Verifikasi', 'Sebagian', 'Lunas'
+  final String
+  statusLabel; // 'Belum Lunas', 'Menunggu Verifikasi', 'Sebagian', 'Lunas'
   final DateTime? dueDate;
   final DateTime? createdAt;
 
@@ -37,7 +38,8 @@ class BillHistoryModel {
 
   bool get isPaid => status.toUpperCase() == 'PAID';
   bool get isPending => status.toUpperCase() == 'PENDING';
-  bool get isUnpaid => status.toUpperCase() == 'UNPAID' || status.toUpperCase() == 'PARTIAL';
+  bool get isUnpaid =>
+      status.toUpperCase() == 'UNPAID' || status.toUpperCase() == 'PARTIAL';
 
   factory BillHistoryModel.fromJson(Map<String, dynamic> json) {
     return BillHistoryModel(

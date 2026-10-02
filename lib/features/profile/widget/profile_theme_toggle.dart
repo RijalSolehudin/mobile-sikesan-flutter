@@ -15,10 +15,7 @@ class ProfileThemeToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
@@ -43,10 +40,7 @@ class ProfileThemeToggle extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Mode Tampilan',
-                  style: AppTypography.itemTitle,
-                ),
+                Text('Mode Tampilan', style: AppTypography.itemTitle),
                 const SizedBox(height: 2),
                 Text(
                   isDarkMode ? 'Mode Gelap' : 'Mode Terang',

@@ -34,7 +34,9 @@ class SppPaymentBloc extends Bloc<SppPaymentEvent, SppPaymentState> {
     SppPaymentSubmitTransfer event,
     Emitter<SppPaymentState> emit,
   ) async {
-    _log('Submitting transfer payment for student ${event.studentId}, total: ${event.totalAmount}');
+    _log(
+      'Submitting transfer payment for student ${event.studentId}, total: ${event.totalAmount}',
+    );
     emit(const SppPaymentState.submitting());
 
     final result = await _sppRepository.submitTransferPayment(
@@ -49,7 +51,12 @@ class SppPaymentBloc extends Bloc<SppPaymentEvent, SppPaymentState> {
 
     if (result is ApiSuccess<String>) {
       _log('Transfer payment submitted successfully: ${result.data}');
-      emit(SppPaymentState.success(paymentId: result.data, message: result.message));
+      emit(
+        SppPaymentState.success(
+          paymentId: result.data,
+          message: result.message,
+        ),
+      );
     } else if (result is ApiFailure<String>) {
       _log('Transfer payment submission failed: ${result.message}');
       emit(SppPaymentState.failure(result.message));
@@ -60,7 +67,9 @@ class SppPaymentBloc extends Bloc<SppPaymentEvent, SppPaymentState> {
     SppPaymentSubmitCash event,
     Emitter<SppPaymentState> emit,
   ) async {
-    _log('Submitting cash payment for student ${event.studentId}, total: ${event.totalAmount}');
+    _log(
+      'Submitting cash payment for student ${event.studentId}, total: ${event.totalAmount}',
+    );
     emit(const SppPaymentState.submitting());
 
     final result = await _sppRepository.payDirect(
@@ -71,17 +80,19 @@ class SppPaymentBloc extends Bloc<SppPaymentEvent, SppPaymentState> {
 
     if (result is ApiSuccess<String>) {
       _log('Cash payment successful: ${result.data}');
-      emit(SppPaymentState.success(paymentId: result.data, message: result.message));
+      emit(
+        SppPaymentState.success(
+          paymentId: result.data,
+          message: result.message,
+        ),
+      );
     } else if (result is ApiFailure<String>) {
       _log('Cash payment failed: ${result.message}');
       emit(SppPaymentState.failure(result.message));
     }
   }
 
-  void _onReset(
-    SppPaymentReset event,
-    Emitter<SppPaymentState> emit,
-  ) {
+  void _onReset(SppPaymentReset event, Emitter<SppPaymentState> emit) {
     _log('Reset payment state');
     emit(const SppPaymentState.initial());
   }

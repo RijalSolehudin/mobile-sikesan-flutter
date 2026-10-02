@@ -17,11 +17,20 @@ void main() {
     test('customBaseUrl override takes precedence when set', () {
       AppConfig.customBaseUrl = 'https://custom.api.sikesan.id/api/v1';
       expect(AppConfig.baseUrl, equals('https://custom.api.sikesan.id/api/v1'));
-      expect(ApiEndpoints.baseUrl, equals('https://custom.api.sikesan.id/api/v1'));
+      expect(
+        ApiEndpoints.baseUrl,
+        equals('https://custom.api.sikesan.id/api/v1'),
+      );
 
       ApiEndpoints.customBaseUrl = 'https://another.api.sikesan.id/api/v1';
-      expect(AppConfig.baseUrl, equals('https://another.api.sikesan.id/api/v1'));
-      expect(ApiEndpoints.baseUrl, equals('https://another.api.sikesan.id/api/v1'));
+      expect(
+        AppConfig.baseUrl,
+        equals('https://another.api.sikesan.id/api/v1'),
+      );
+      expect(
+        ApiEndpoints.baseUrl,
+        equals('https://another.api.sikesan.id/api/v1'),
+      );
     });
 
     test('ApiEndpoints routes are correctly formed without trailing slash', () {

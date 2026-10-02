@@ -34,9 +34,7 @@ class _CsScreenState extends State<CsScreen> {
               setState(() => _selectedFilterIndex = index);
             },
           ),
-          const Expanded(
-            child: CsEmptyState(),
-          ),
+          const Expanded(child: CsEmptyState()),
         ],
       ),
     );

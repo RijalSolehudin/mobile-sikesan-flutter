@@ -47,11 +47,7 @@ class RoleSelectionCard extends StatelessWidget {
                   color: const Color(0xFFE8F7EE),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  icon,
-                  color: const Color(0xFF059669),
-                  size: 20,
-                ),
+                child: Icon(icon, color: const Color(0xFF059669), size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(

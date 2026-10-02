@@ -66,15 +66,13 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _textSlideAnim = Tween<Offset>(
-      begin: const Offset(0, 0.35),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.40, 0.85, curve: Curves.easeOutCubic),
-      ),
-    );
+    _textSlideAnim =
+        Tween<Offset>(begin: const Offset(0, 0.35), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.40, 0.85, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // Subtitle fade
     _subtitleFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -130,10 +128,7 @@ class _SplashScreenState extends State<SplashScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFF2FAF6),
-              Color(0xFFE8F7F0),
-            ],
+            colors: [Color(0xFFF2FAF6), Color(0xFFE8F7F0)],
           ),
         ),
         child: SafeArea(
@@ -149,8 +144,10 @@ class _SplashScreenState extends State<SplashScreen>
                       animation: _animController,
                       builder: (context, child) {
                         return Opacity(
-                          opacity: ((1.0 - _animController.value) * 0.4)
-                              .clamp(0.0, 1.0),
+                          opacity: ((1.0 - _animController.value) * 0.4).clamp(
+                            0.0,
+                            1.0,
+                          ),
                           child: Transform.scale(
                             scale: _glowScaleAnim.value,
                             child: Container(
@@ -158,8 +155,9 @@ class _SplashScreenState extends State<SplashScreen>
                               height: 100,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFF059669)
-                                    .withValues(alpha: 0.25),
+                                color: const Color(
+                                  0xFF059669,
+                                ).withValues(alpha: 0.25),
                               ),
                             ),
                           ),

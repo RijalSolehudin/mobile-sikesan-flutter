@@ -96,10 +96,7 @@ class DashboardRepository {
     int? studentId,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
       if (status != 'all') queryParams['status'] = status;
       if (type != 'all') queryParams['type'] = type;
       if (studentId != null) queryParams['student_id'] = studentId;

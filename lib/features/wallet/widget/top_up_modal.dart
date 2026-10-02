@@ -69,18 +69,14 @@ class _TopUpModalState extends State<TopUpModal> {
   List<StudentLookupModel> _searchedStudents = [];
   bool _isSearchingStudent = false;
 
-  final List<int> _presetAmounts = [
-    50000,
-    100000,
-    200000,
-    500000,
-    1000000,
-  ];
+  final List<int> _presetAmounts = [50000, 100000, 200000, 500000, 1000000];
 
   @override
   void initState() {
     super.initState();
-    _amountController.text = CurrencyFormatter.formatWithoutSymbol(_selectedAmount);
+    _amountController.text = CurrencyFormatter.formatWithoutSymbol(
+      _selectedAmount,
+    );
 
     if (widget.preselectedStudentId != null) {
       _selectedStudentId = widget.preselectedStudentId;
@@ -107,8 +103,11 @@ class _TopUpModalState extends State<TopUpModal> {
     final isGuardian = userRole.toLowerCase().contains('wali');
 
     if (isGuardian) {
-      final dashboardStudents =
-          context.read<DashboardBloc>().state.metrics.students;
+      final dashboardStudents = context
+          .read<DashboardBloc>()
+          .state
+          .metrics
+          .students;
       if (dashboardStudents.isNotEmpty) {
         _selectGuardianStudent(dashboardStudents.first);
       }
@@ -554,8 +553,8 @@ class _TopUpModalState extends State<TopUpModal> {
 
       // Refresh dashboard balances
       context.read<DashboardBloc>().add(
-            DashboardRefreshRequested(role: userRole),
-          );
+        DashboardRefreshRequested(role: userRole),
+      );
 
       await _showSuccessAnimation(isApproved);
 
@@ -600,8 +599,11 @@ class _TopUpModalState extends State<TopUpModal> {
     final user = context.watch<AuthBloc>().state.user;
     final userRole = user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
-    final dashboardStudents =
-        context.watch<DashboardBloc>().state.metrics.students;
+    final dashboardStudents = context
+        .watch<DashboardBloc>()
+        .state
+        .metrics
+        .students;
 
     final bankAccounts = BankAccountModel.defaultAccounts();
 
@@ -724,12 +726,13 @@ class _TopUpModalState extends State<TopUpModal> {
                             itemCount: dashboardStudents.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount:
-                                  dashboardStudents.length == 1 ? 1 : 2,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              mainAxisExtent: 72,
-                            ),
+                                  crossAxisCount: dashboardStudents.length == 1
+                                      ? 1
+                                      : 2,
+                                  crossAxisSpacing: 10,
+                                  mainAxisSpacing: 10,
+                                  mainAxisExtent: 72,
+                                ),
                             itemBuilder: (context, index) {
                               final st = dashboardStudents[index];
                               final isSelected = _selectedStudentId == st.id;
@@ -765,8 +768,9 @@ class _TopUpModalState extends State<TopUpModal> {
                                           ]
                                         : [
                                             BoxShadow(
-                                              color: Colors.black
-                                                  .withValues(alpha: 0.02),
+                                              color: Colors.black.withValues(
+                                                alpha: 0.02,
+                                              ),
                                               blurRadius: 4,
                                               offset: const Offset(0, 1),
                                             ),
@@ -781,8 +785,9 @@ class _TopUpModalState extends State<TopUpModal> {
                                           color: isSelected
                                               ? AppColors.primary
                                               : const Color(0xFFF1F5F9),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         child: Icon(
                                           Icons.school_rounded,
@@ -975,9 +980,7 @@ class _TopUpModalState extends State<TopUpModal> {
                         child: TextField(
                           controller: _amountController,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            CurrencyInputFormatter(),
-                          ],
+                          inputFormatters: [CurrencyInputFormatter()],
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,
@@ -1076,11 +1079,11 @@ class _TopUpModalState extends State<TopUpModal> {
                           itemCount: bankAccounts.length,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                            childAspectRatio: 1.1,
-                          ),
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                                childAspectRatio: 1.1,
+                              ),
                           itemBuilder: (context, index) {
                             final acc = bankAccounts[index];
                             return GestureDetector(
@@ -1098,8 +1101,9 @@ class _TopUpModalState extends State<TopUpModal> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black
-                                          .withValues(alpha: 0.02),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.02,
+                                      ),
                                       blurRadius: 4,
                                       offset: const Offset(0, 1),
                                     ),
@@ -1114,8 +1118,9 @@ class _TopUpModalState extends State<TopUpModal> {
                                         vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary
-                                            .withValues(alpha: 0.1),
+                                        color: AppColors.primary.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
@@ -1295,8 +1300,8 @@ class _TopUpModalState extends State<TopUpModal> {
                                     border: Border.all(
                                       color:
                                           _selectedPaymentMethod == 'TRANSFER'
-                                              ? AppColors.primary
-                                              : const Color(0xFFE2E8F0),
+                                          ? AppColors.primary
+                                          : const Color(0xFFE2E8F0),
                                       width: 1.5,
                                     ),
                                   ),
@@ -1308,8 +1313,8 @@ class _TopUpModalState extends State<TopUpModal> {
                                         size: 18,
                                         color:
                                             _selectedPaymentMethod == 'TRANSFER'
-                                                ? AppColors.primary
-                                                : Colors.grey,
+                                            ? AppColors.primary
+                                            : Colors.grey,
                                       ),
                                       const SizedBox(width: 8),
                                       Text(
@@ -1317,7 +1322,8 @@ class _TopUpModalState extends State<TopUpModal> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color: _selectedPaymentMethod ==
+                                          color:
+                                              _selectedPaymentMethod ==
                                                   'TRANSFER'
                                               ? AppColors.primary
                                               : Colors.grey.shade700,
@@ -1366,8 +1372,8 @@ class _TopUpModalState extends State<TopUpModal> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color: _selectedPaymentMethod ==
-                                                  'CASH'
+                                          color:
+                                              _selectedPaymentMethod == 'CASH'
                                               ? AppColors.primary
                                               : Colors.grey.shade700,
                                         ),

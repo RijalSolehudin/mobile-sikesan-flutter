@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -13,7 +12,9 @@ class ReceiptPdfService {
     return await compute(_buildReceiptPdfDocument, receipt);
   }
 
-  static Future<Uint8List> _buildReceiptPdfDocument(SppReceiptModel receipt) async {
+  static Future<Uint8List> _buildReceiptPdfDocument(
+    SppReceiptModel receipt,
+  ) async {
     final pdf = pw.Document();
     final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID',
@@ -401,7 +402,9 @@ class ReceiptPdfService {
     );
   }
 
-  static Future<Uint8List> generateTopUpReceiptPdf(TopUpReceiptModel receipt) async {
+  static Future<Uint8List> generateTopUpReceiptPdf(
+    TopUpReceiptModel receipt,
+  ) async {
     return await compute(_buildTopUpReceiptPdfDocument, receipt);
   }
 
@@ -750,7 +753,9 @@ class ReceiptPdfService {
     );
   }
 
-  static Future<Uint8List> generateWithdrawReceiptPdf(WithdrawReceiptModel receipt) async {
+  static Future<Uint8List> generateWithdrawReceiptPdf(
+    WithdrawReceiptModel receipt,
+  ) async {
     return await compute(_buildWithdrawReceiptPdfDocument, receipt);
   }
 
@@ -769,7 +774,10 @@ class ReceiptPdfService {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (pw.Context context) {
-          final dateStr = DateFormat('dd MMMM yyyy, HH:mm', 'id_ID').format(receipt.date);
+          final dateStr = DateFormat(
+            'dd MMMM yyyy, HH:mm',
+            'id_ID',
+          ).format(receipt.date);
 
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -862,11 +870,17 @@ class ReceiptPdfService {
                       ),
                       pw.Text(
                         'NIS: ${receipt.studentNis}',
-                        style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                        style: const pw.TextStyle(
+                          fontSize: 10,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                       pw.Text(
                         'Kelas: ${receipt.studentClass}',
-                        style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                        style: const pw.TextStyle(
+                          fontSize: 10,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                     ],
                   ),
@@ -892,11 +906,17 @@ class ReceiptPdfService {
                       pw.SizedBox(height: 4),
                       pw.Text(
                         'Waktu: $dateStr',
-                        style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                        style: const pw.TextStyle(
+                          fontSize: 9,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                       pw.Text(
                         'Petugas: ${receipt.processedBy}',
-                        style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                        style: const pw.TextStyle(
+                          fontSize: 9,
+                          color: PdfColors.grey700,
+                        ),
                       ),
                     ],
                   ),
@@ -908,12 +928,17 @@ class ReceiptPdfService {
               pw.Container(
                 decoration: pw.BoxDecoration(
                   border: pw.Border.all(color: PdfColors.grey300),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(6),
+                  ),
                 ),
                 child: pw.Column(
                   children: [
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: const pw.BoxDecoration(
                         color: PdfColors.grey100,
                         borderRadius: pw.BorderRadius.only(
@@ -944,7 +969,10 @@ class ReceiptPdfService {
                       ),
                     ),
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 14,
+                      ),
                       child: pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
@@ -981,24 +1009,36 @@ class ReceiptPdfService {
                     ),
                     pw.Divider(color: PdfColors.grey300, height: 1),
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       color: PdfColor.fromHex('#F8FAFC'),
                       child: pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(
                             'Saldo Awal:',
-                            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                            style: const pw.TextStyle(
+                              fontSize: 10,
+                              color: PdfColors.grey700,
+                            ),
                           ),
                           pw.Text(
                             currencyFormatter.format(receipt.balanceBefore),
-                            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+                            style: const pw.TextStyle(
+                              fontSize: 10,
+                              color: PdfColors.grey700,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       decoration: const pw.BoxDecoration(
                         color: PdfColors.grey100,
                         borderRadius: pw.BorderRadius.only(
@@ -1040,26 +1080,46 @@ class ReceiptPdfService {
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text('Penerima / Santri', style: const pw.TextStyle(fontSize: 9)),
+                      pw.Text(
+                        'Penerima / Santri',
+                        style: const pw.TextStyle(fontSize: 9),
+                      ),
                       pw.SizedBox(height: 48),
-                      pw.Container(width: 130, height: 1, color: PdfColors.grey400),
+                      pw.Container(
+                        width: 130,
+                        height: 1,
+                        color: PdfColors.grey400,
+                      ),
                       pw.SizedBox(height: 4),
                       pw.Text(
                         receipt.studentName,
-                        style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
-                      pw.Text('Petugas Keuangan', style: const pw.TextStyle(fontSize: 9)),
+                      pw.Text(
+                        'Petugas Keuangan',
+                        style: const pw.TextStyle(fontSize: 9),
+                      ),
                       pw.SizedBox(height: 48),
-                      pw.Container(width: 130, height: 1, color: PdfColors.grey400),
+                      pw.Container(
+                        width: 130,
+                        height: 1,
+                        color: PdfColors.grey400,
+                      ),
                       pw.SizedBox(height: 4),
                       pw.Text(
                         receipt.processedBy,
-                        style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                        style: pw.TextStyle(
+                          fontSize: 9,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -1072,11 +1132,16 @@ class ReceiptPdfService {
                 padding: const pw.EdgeInsets.all(8),
                 decoration: pw.BoxDecoration(
                   color: PdfColor.fromHex('#F8FAFC'),
-                  borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+                  borderRadius: const pw.BorderRadius.all(
+                    pw.Radius.circular(4),
+                  ),
                 ),
                 child: pw.Text(
                   'Catatan: Bukti ini merupakan bukti penarikan tunai saldo dompet santri sah yang diterbitkan secara elektronik oleh SIKESAN.',
-                  style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.grey700),
+                  style: const pw.TextStyle(
+                    fontSize: 8.5,
+                    color: PdfColors.grey700,
+                  ),
                 ),
               ),
             ],
@@ -1096,7 +1161,9 @@ class ReceiptPdfService {
     );
   }
 
-  static Future<void> downloadWithdrawReceipt(WithdrawReceiptModel receipt) async {
+  static Future<void> downloadWithdrawReceipt(
+    WithdrawReceiptModel receipt,
+  ) async {
     final pdfBytes = await generateWithdrawReceiptPdf(receipt);
     await Printing.sharePdf(
       bytes: pdfBytes,

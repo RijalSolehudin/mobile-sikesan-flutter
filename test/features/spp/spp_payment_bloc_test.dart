@@ -9,8 +9,7 @@ class MockSppRepository extends SppRepository {
   ApiResult<String>? transferResult;
   ApiResult<String>? cashResult;
 
-  MockSppRepository()
-    : super(DioClient(secureStorage: SecureStorageService()));
+  MockSppRepository() : super(DioClient(secureStorage: SecureStorageService()));
 
   @override
   Future<ApiResult<String>> submitTransferPayment({
@@ -23,7 +22,8 @@ class MockSppRepository extends SppRepository {
     String? accountHolder,
     String? idempotencyKey,
   }) async {
-    return transferResult ?? const ApiSuccess('PAY-TRF-001', message: 'Berhasil submit transfer');
+    return transferResult ??
+        const ApiSuccess('PAY-TRF-001', message: 'Berhasil submit transfer');
   }
 
   @override
@@ -33,7 +33,8 @@ class MockSppRepository extends SppRepository {
     required num totalAmount,
     String? idempotencyKey,
   }) async {
-    return cashResult ?? const ApiSuccess('PAY-CSH-001', message: 'Berhasil bayar kasir');
+    return cashResult ??
+        const ApiSuccess('PAY-CSH-001', message: 'Berhasil bayar kasir');
   }
 }
 
@@ -56,69 +57,93 @@ void main() {
       expect(paymentBloc.state.isSubmitting, false);
     });
 
-    test('SppPaymentSubmitTransfer emits [submitting, success] on success', () async {
-      mockRepo.transferResult = const ApiSuccess('PAY-TRF-123', message: 'Sukses');
+    test(
+      'SppPaymentSubmitTransfer emits [submitting, success] on success',
+      () async {
+        mockRepo.transferResult = const ApiSuccess(
+          'PAY-TRF-123',
+          message: 'Sukses',
+        );
 
-      paymentBloc.add(
-        const SppPaymentEvent.submitTransfer(
-          studentId: 1,
-          billIds: ['BILL-1', 'BILL-2'],
-          totalAmount: 1500000,
-          proofBytes: [1, 2, 3],
-          proofFilename: 'bukti.jpg',
-        ),
-      );
+        paymentBloc.add(
+          const SppPaymentEvent.submitTransfer(
+            studentId: 1,
+            billIds: ['BILL-1', 'BILL-2'],
+            totalAmount: 1500000,
+            proofBytes: [1, 2, 3],
+            proofFilename: 'bukti.jpg',
+          ),
+        );
 
-      await expectLater(
-        paymentBloc.stream,
-        emitsInOrder([
-          const SppPaymentState.submitting(),
-          const SppPaymentState.success(paymentId: 'PAY-TRF-123', message: 'Sukses'),
-        ]),
-      );
-    });
+        await expectLater(
+          paymentBloc.stream,
+          emitsInOrder([
+            const SppPaymentState.submitting(),
+            const SppPaymentState.success(
+              paymentId: 'PAY-TRF-123',
+              message: 'Sukses',
+            ),
+          ]),
+        );
+      },
+    );
 
-    test('SppPaymentSubmitTransfer emits [submitting, failure] on failure', () async {
-      mockRepo.transferResult = const ApiFailure('Bukti transfer tidak valid', statusCode: 422);
+    test(
+      'SppPaymentSubmitTransfer emits [submitting, failure] on failure',
+      () async {
+        mockRepo.transferResult = const ApiFailure(
+          'Bukti transfer tidak valid',
+          statusCode: 422,
+        );
 
-      paymentBloc.add(
-        const SppPaymentEvent.submitTransfer(
-          studentId: 1,
-          billIds: ['BILL-1'],
-          totalAmount: 750000,
-          proofBytes: [1, 2],
-          proofFilename: 'bukti.jpg',
-        ),
-      );
+        paymentBloc.add(
+          const SppPaymentEvent.submitTransfer(
+            studentId: 1,
+            billIds: ['BILL-1'],
+            totalAmount: 750000,
+            proofBytes: [1, 2],
+            proofFilename: 'bukti.jpg',
+          ),
+        );
 
-      await expectLater(
-        paymentBloc.stream,
-        emitsInOrder([
-          const SppPaymentState.submitting(),
-          const SppPaymentState.failure('Bukti transfer tidak valid'),
-        ]),
-      );
-    });
+        await expectLater(
+          paymentBloc.stream,
+          emitsInOrder([
+            const SppPaymentState.submitting(),
+            const SppPaymentState.failure('Bukti transfer tidak valid'),
+          ]),
+        );
+      },
+    );
 
-    test('SppPaymentSubmitCash emits [submitting, success] on direct cash payment', () async {
-      mockRepo.cashResult = const ApiSuccess('PAY-CASH-789', message: 'Lunas');
+    test(
+      'SppPaymentSubmitCash emits [submitting, success] on direct cash payment',
+      () async {
+        mockRepo.cashResult = const ApiSuccess(
+          'PAY-CASH-789',
+          message: 'Lunas',
+        );
 
-      paymentBloc.add(
-        const SppPaymentEvent.submitCash(
-          studentId: 1,
-          billIds: ['BILL-1'],
-          totalAmount: 750000,
-        ),
-      );
+        paymentBloc.add(
+          const SppPaymentEvent.submitCash(
+            studentId: 1,
+            billIds: ['BILL-1'],
+            totalAmount: 750000,
+          ),
+        );
 
-      await expectLater(
-        paymentBloc.stream,
-        emitsInOrder([
-          const SppPaymentState.submitting(),
-          const SppPaymentState.success(paymentId: 'PAY-CASH-789', message: 'Lunas'),
-        ]),
-      );
-    });
+        await expectLater(
+          paymentBloc.stream,
+          emitsInOrder([
+            const SppPaymentState.submitting(),
+            const SppPaymentState.success(
+              paymentId: 'PAY-CASH-789',
+              message: 'Lunas',
+            ),
+          ]),
+        );
+      },
+    );
 
     test('SppPaymentReset emits initial state', () async {
       paymentBloc.add(const SppPaymentEvent.reset());

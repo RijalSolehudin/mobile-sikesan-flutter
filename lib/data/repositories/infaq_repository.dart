@@ -92,9 +92,7 @@ class InfaqRepository {
           'total_amount': totalAmount.toInt(),
           'payment_method': 'CASH',
         },
-        options: Options(
-          headers: {'Idempotency-Key': key},
-        ),
+        options: Options(headers: {'Idempotency-Key': key}),
       );
 
       final paymentData = response.data['data'];
@@ -140,9 +138,7 @@ class InfaqRepository {
       final response = await dioClient.dio.post(
         '/infaq-kesantrian/submit-payment',
         data: formData,
-        options: Options(
-          headers: {'Idempotency-Key': key},
-        ),
+        options: Options(headers: {'Idempotency-Key': key}),
       );
 
       final paymentData = response.data['data'];

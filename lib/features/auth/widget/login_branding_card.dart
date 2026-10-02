@@ -4,10 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 class LoginBrandingCard extends StatelessWidget {
   final bool isWide;
 
-  const LoginBrandingCard({
-    super.key,
-    required this.isWide,
-  });
+  const LoginBrandingCard({super.key, required this.isWide});
 
   @override
   Widget build(BuildContext context) {

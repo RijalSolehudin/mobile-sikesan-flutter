@@ -8,20 +8,14 @@ import '../../../data/models/transaction_item_model.dart';
 class MutationItemTile extends StatelessWidget {
   final TransactionItemModel tx;
 
-  const MutationItemTile({
-    super.key,
-    required this.tx,
-  });
+  const MutationItemTile({super.key, required this.tx});
 
   @override
   Widget build(BuildContext context) {
     final dateStr = DateFormat('dd MMM, HH:mm').format(tx.date);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
@@ -70,10 +64,7 @@ class MutationItemTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                CurrencyFormatter.formatWithSign(
-                  tx.amount,
-                  tx.isIncome,
-                ),
+                CurrencyFormatter.formatWithSign(tx.amount, tx.isIncome),
                 style: AppTypography.itemTitle.copyWith(
                   fontWeight: FontWeight.w800,
                   fontSize: 13,

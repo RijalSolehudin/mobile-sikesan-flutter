@@ -106,8 +106,9 @@ class StudentWalletSlider extends StatelessWidget {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.primaryLight.withValues(alpha: 0.18),
+                            color: AppColors.primaryLight.withValues(
+                              alpha: 0.18,
+                            ),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(

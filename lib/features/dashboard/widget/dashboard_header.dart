@@ -41,16 +41,11 @@ class DashboardHeader extends StatelessWidget {
         ),
         if (isWide || constraints.maxWidth > 560) ...[
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
               color: const Color(0xFF047857).withValues(alpha: 0.75),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.25),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
             ),
             child: const Text(
               'Semua Kelas',
@@ -63,16 +58,11 @@ class DashboardHeader extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
               color: const Color(0xFF047857).withValues(alpha: 0.75),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.25),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
             ),
             child: const Text(
               'Semua Santri',
@@ -86,10 +76,7 @@ class DashboardHeader extends StatelessWidget {
           const SizedBox(width: 10),
         ] else ...[
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(20),
@@ -113,9 +100,7 @@ class DashboardHeader extends StatelessWidget {
               decoration: BoxDecoration(
                 color: const Color(0xFF047857).withValues(alpha: 0.75),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.25),
-                ),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
               ),
               child: const Icon(
                 Icons.notifications_rounded,
@@ -132,10 +117,7 @@ class DashboardHeader extends StatelessWidget {
                   color: Colors.red,
                   shape: BoxShape.circle,
                 ),
-                constraints: const BoxConstraints(
-                  minWidth: 14,
-                  minHeight: 14,
-                ),
+                constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
                 child: const Text(
                   '1',
                   style: TextStyle(

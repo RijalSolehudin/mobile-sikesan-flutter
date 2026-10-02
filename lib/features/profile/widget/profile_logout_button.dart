@@ -49,10 +49,7 @@ class ProfileLogoutButton extends StatelessWidget {
       onTap: () => _showLogoutDialog(context),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           color: AppColors.expense,
           borderRadius: BorderRadius.circular(16),
@@ -94,9 +91,7 @@ class ProfileLogoutButton extends StatelessWidget {
                   Text(
                     'Keluar dari akun Anda',
                     style: AppTypography.itemSubtitle.copyWith(
-                      color: Colors.white.withValues(
-                        alpha: 0.8,
-                      ),
+                      color: Colors.white.withValues(alpha: 0.8),
                     ),
                   ),
                 ],

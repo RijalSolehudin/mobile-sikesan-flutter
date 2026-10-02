@@ -15,10 +15,7 @@ void main() {
         'student': {
           'name': 'Ahmad Dahlan',
           'nis': 'NIS-1002',
-          'classroom': {
-            'education_level': 'MA',
-            'name': 'Kelas 12 IPA',
-          },
+          'classroom': {'education_level': 'MA', 'name': 'Kelas 12 IPA'},
         },
       };
 

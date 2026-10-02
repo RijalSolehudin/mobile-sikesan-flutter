@@ -30,9 +30,7 @@ class MutationSummaryCards extends StatelessWidget {
               children: [
                 Text(
                   'Total Masuk',
-                  style: AppTypography.itemSubtitle.copyWith(
-                    fontSize: 11,
-                  ),
+                  style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -61,9 +59,7 @@ class MutationSummaryCards extends StatelessWidget {
               children: [
                 Text(
                   'Total Keluar',
-                  style: AppTypography.itemSubtitle.copyWith(
-                    fontSize: 11,
-                  ),
+                  style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
                 ),
                 const SizedBox(height: 4),
                 Text(

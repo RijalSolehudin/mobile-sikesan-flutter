@@ -9,10 +9,7 @@ import '../../infaq/widget/pay_infaq_modal.dart';
 class BillHistoryTile extends StatelessWidget {
   final BillHistoryModel bill;
 
-  const BillHistoryTile({
-    super.key,
-    required this.bill,
-  });
+  const BillHistoryTile({super.key, required this.bill});
 
   void _handleBillTap(BuildContext context) {
     if (bill.isUnpaid) {
@@ -116,11 +113,7 @@ class BillHistoryTile extends StatelessWidget {
                   color: iconBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  iconData,
-                  color: iconColor,
-                  size: 22,
-                ),
+                child: Icon(iconData, color: iconColor, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -141,9 +134,7 @@ class BillHistoryTile extends StatelessWidget {
                       '${bill.studentName} • ${bill.studentClass}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.itemSubtitle.copyWith(
-                        fontSize: 11,
-                      ),
+                      style: AppTypography.itemSubtitle.copyWith(fontSize: 11),
                     ),
                   ],
                 ),

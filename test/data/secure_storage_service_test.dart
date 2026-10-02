@@ -1,6 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile_sikesan_flutter/core/constants/app_constants.dart';
 import 'package:mobile_sikesan_flutter/data/local/secure_storage_service.dart';
 import 'package:mobile_sikesan_flutter/data/models/user_model.dart';
 
@@ -93,6 +92,7 @@ void main() {
       const user = UserModel(
         id: 1,
         name: 'Ahmad Santri',
+        email: 'ahmad@example.com',
         username: 'ahmadsantri',
         role: 'Santri',
       );

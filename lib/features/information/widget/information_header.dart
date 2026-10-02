@@ -5,10 +5,7 @@ import '../../../core/theme/app_typography.dart';
 class InformationHeader extends StatelessWidget {
   final VoidCallback? onAddAnnouncement;
 
-  const InformationHeader({
-    super.key,
-    this.onAddAnnouncement,
-  });
+  const InformationHeader({super.key, this.onAddAnnouncement});
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +13,7 @@ class InformationHeader extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.primary,
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(24),
-        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
       ),
       child: Center(
         child: ConstrainedBox(

@@ -31,7 +31,9 @@ class WithdrawReceiptModel {
 
   factory WithdrawReceiptModel.fromJson(Map<String, dynamic> json) {
     return WithdrawReceiptModel(
-      receiptNumber: json['receipt_number']?.toString() ?? 'WD-${DateTime.now().millisecondsSinceEpoch}',
+      receiptNumber:
+          json['receipt_number']?.toString() ??
+          'WD-${DateTime.now().millisecondsSinceEpoch}',
       transactionId: json['transaction_id']?.toString() ?? '',
       studentId: (json['student_id'] as num?)?.toInt() ?? 0,
       studentName: json['student_name']?.toString() ?? 'Santri',
@@ -44,7 +46,8 @@ class WithdrawReceiptModel {
           ? DateTime.tryParse(json['date'].toString()) ?? DateTime.now()
           : DateTime.now(),
       processedBy: json['processed_by']?.toString() ?? 'Bendahara / Kasir',
-      description: json['description']?.toString() ?? 'Penarikan Tunai Saldo Santri',
+      description:
+          json['description']?.toString() ?? 'Penarikan Tunai Saldo Santri',
       status: json['status']?.toString() ?? 'SUCCESS',
     );
   }

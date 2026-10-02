@@ -29,9 +29,7 @@ class WalletRepository {
           if (description != null && description.isNotEmpty)
             'description': description,
         },
-        options: Options(
-          headers: {'Idempotency-Key': key},
-        ),
+        options: Options(headers: {'Idempotency-Key': key}),
       );
 
       final dynamic dataField = response.data['data'];
@@ -41,7 +39,8 @@ class WalletRepository {
         );
         return ApiSuccess(
           receipt,
-          message: response.data['message']?.toString() ??
+          message:
+              response.data['message']?.toString() ??
               'Penarikan saldo berhasil diproses',
         );
       }
@@ -86,9 +85,7 @@ class WalletRepository {
       final response = await dioClient.dio.post(
         ApiEndpoints.topUps,
         data: formData,
-        options: Options(
-          headers: {'Idempotency-Key': key},
-        ),
+        options: Options(headers: {'Idempotency-Key': key}),
       );
 
       final dynamic dataField = response.data['data'];
@@ -96,7 +93,8 @@ class WalletRepository {
         final topUp = TopUpRequestModel.fromJson(dataField);
         return ApiSuccess(
           topUp,
-          message: response.data['message']?.toString() ??
+          message:
+              response.data['message']?.toString() ??
               'Permintaan top-up berhasil diajukan',
         );
       }
@@ -121,7 +119,8 @@ class WalletRepository {
 
       return ApiSuccess(
         null,
-        message: response.data['message']?.toString() ??
+        message:
+            response.data['message']?.toString() ??
             'Top up saldo berhasil disetujui',
       );
     } on DioException catch (e) {

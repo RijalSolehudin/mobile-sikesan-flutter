@@ -8,10 +8,7 @@ import '../theme/app_colors.dart';
 class AppCrashFallbackScreen extends StatefulWidget {
   final FlutterErrorDetails errorDetails;
 
-  const AppCrashFallbackScreen({
-    super.key,
-    required this.errorDetails,
-  });
+  const AppCrashFallbackScreen({super.key, required this.errorDetails});
 
   @override
   State<AppCrashFallbackScreen> createState() => _AppCrashFallbackScreenState();
@@ -89,10 +86,9 @@ class _AppCrashFallbackScreenState extends State<AppCrashFallbackScreen> {
                           nav.pop();
                         } else {
                           // Jika root atau modal, arahkan ke route awal jika ada router
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/',
-                            (route) => false,
-                          );
+                          Navigator.of(
+                            context,
+                          ).pushNamedAndRemoveUntil('/', (route) => false);
                         }
                       },
                       icon: const Icon(Icons.refresh_rounded, size: 20),

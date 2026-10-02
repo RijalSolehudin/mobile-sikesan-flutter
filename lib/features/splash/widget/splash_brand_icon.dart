@@ -41,11 +41,7 @@ class SplashBrandIcon extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF10B981),
-              Color(0xFF059669),
-              Color(0xFF047857),
-            ],
+            colors: [Color(0xFF10B981), Color(0xFF059669), Color(0xFF047857)],
           ),
         ),
         child: Icon(
@@ -57,17 +53,11 @@ class SplashBrandIcon extends StatelessWidget {
     );
 
     if (scaleAnimation != null) {
-      iconContent = ScaleTransition(
-        scale: scaleAnimation!,
-        child: iconContent,
-      );
+      iconContent = ScaleTransition(scale: scaleAnimation!, child: iconContent);
     }
 
     if (fadeAnimation != null) {
-      iconContent = FadeTransition(
-        opacity: fadeAnimation!,
-        child: iconContent,
-      );
+      iconContent = FadeTransition(opacity: fadeAnimation!, child: iconContent);
     }
 
     return iconContent;

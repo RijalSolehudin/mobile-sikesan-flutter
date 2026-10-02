@@ -21,9 +21,7 @@ class ProfileHeader extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppColors.primary,
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(32),
-        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
       ),
       child: Center(
         child: ConstrainedBox(
