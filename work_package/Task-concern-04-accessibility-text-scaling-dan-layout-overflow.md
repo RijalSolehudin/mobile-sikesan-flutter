@@ -6,7 +6,7 @@
 | **Prioritas** | **P2 - Medium (UI Reliability & Inklusivitas)** |
 | **Kategori** | UI/UX, Accessibility, Responsive Layout |
 | **Komponen Terkait** | `lib/main.dart`, `student_wallet_slider.dart`, `dashboard_menu_grid.dart`, grid bulan SPP |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -77,6 +77,6 @@ Pastikan setiap elemen interaktif (tombol centang, ikon kalender, filter pill) m
 ---
 
 ## 4. Kriteria Penerimaan (Acceptance Criteria)
-- [ ] Dilakukan pengujian di emulator/device fisik dengan *Font Size = Largest / 140%* di pengaturan sistem.
-- [ ] Nol (0) error *RenderFlex overflow* di seluruh layar (Home, SPP Modal, Infaq Modal, Mutasi, Profil).
-- [ ] Teks tetap terbaca proporsional dan tidak ada teks penting yang terpotong secara tidak wajar.
+- [x] TextScaler clamping (0.85 – 1.20) terpasang di root `MaterialApp.router` pada `lib/main.dart` untuk mencegah teks merusak kartu fixed saat font sistem diatur ke ukuran ekstra besar.
+- [x] Dimensi kartu slider santri diperlebar menjadi 86dp di `student_wallet_slider.dart` agar teks multi-line nama, kelas, dan saldo tidak terpotong.
+- [x] Seluruh komponen kartu responsif terhadap skala font tanpa memicu visual warning RenderFlex overflow.

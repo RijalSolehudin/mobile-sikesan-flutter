@@ -136,23 +136,32 @@ class SikesanMobileApp extends StatelessWidget {
           routerConfig: router,
           scaffoldMessengerKey: rootScaffoldMessengerKey,
           builder: (context, child) {
-            return KeyboardDismissWatcher(
-              child: SessionTimeoutListener(
-                authBloc: authBloc,
-                timeoutDuration: const Duration(minutes: 30),
-                onTimeout: () {
-                  rootScaffoldMessengerKey.currentState?.showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Sesi Bendahara berakhir otomatis setelah 30 menit tidak ada aktivitas demi keamanan.',
+            final mediaQuery = MediaQuery.of(context);
+            final clampedTextScaler = mediaQuery.textScaler.clamp(
+              minScaleFactor: 0.85,
+              maxScaleFactor: 1.20,
+            );
+
+            return MediaQuery(
+              data: mediaQuery.copyWith(textScaler: clampedTextScaler),
+              child: KeyboardDismissWatcher(
+                child: SessionTimeoutListener(
+                  authBloc: authBloc,
+                  timeoutDuration: const Duration(minutes: 30),
+                  onTimeout: () {
+                    rootScaffoldMessengerKey.currentState?.showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Sesi Bendahara berakhir otomatis setelah 30 menit tidak ada aktivitas demi keamanan.',
+                        ),
+                        backgroundColor: Color(0xFFEF4444),
+                        behavior: SnackBarBehavior.floating,
+                        duration: Duration(seconds: 5),
                       ),
-                      backgroundColor: Color(0xFFEF4444),
-                      behavior: SnackBarBehavior.floating,
-                      duration: Duration(seconds: 5),
-                    ),
-                  );
-                },
-                child: child ?? const SizedBox.shrink(),
+                    );
+                  },
+                  child: child ?? const SizedBox.shrink(),
+                ),
               ),
             );
           },

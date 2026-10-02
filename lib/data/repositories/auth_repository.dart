@@ -65,6 +65,28 @@ class AuthRepository {
     return await _secureStorage.getUser();
   }
 
+  Future<ApiResult<UserModel>> getProfile() async {
+    try {
+      final response = await _dioClient.dio.get('/auth/me');
+      final dynamic raw = response.data;
+      final dynamic userData =
+          (raw is Map && raw.containsKey('data')) ? raw['data'] : raw;
+      if (userData is Map<String, dynamic>) {
+        final user = UserModel.fromJson(userData);
+        await _secureStorage.saveUser(user);
+        return ApiSuccess(user);
+      }
+      return const ApiFailure('Format data profil tidak valid');
+    } on DioException catch (e) {
+      return ApiFailure(
+        DioClient.formatDioError(e, fallback: 'Gagal menyinkronkan profil'),
+        statusCode: e.response?.statusCode,
+      );
+    } catch (e) {
+      return ApiFailure('Terjadi kesalahan: ${e.toString()}');
+    }
+  }
+
   Future<bool> hasValidToken() async {
     final token = await _secureStorage.getToken();
     return token != null && token.isNotEmpty;

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -9,6 +10,10 @@ import '../../data/models/withdraw_models.dart';
 
 class ReceiptPdfService {
   static Future<Uint8List> generateReceiptPdf(SppReceiptModel receipt) async {
+    return await compute(_buildReceiptPdfDocument, receipt);
+  }
+
+  static Future<Uint8List> _buildReceiptPdfDocument(SppReceiptModel receipt) async {
     final pdf = pw.Document();
     final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID',
@@ -397,6 +402,12 @@ class ReceiptPdfService {
   }
 
   static Future<Uint8List> generateTopUpReceiptPdf(TopUpReceiptModel receipt) async {
+    return await compute(_buildTopUpReceiptPdfDocument, receipt);
+  }
+
+  static Future<Uint8List> _buildTopUpReceiptPdfDocument(
+    TopUpReceiptModel receipt,
+  ) async {
     final pdf = pw.Document();
     final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID',
@@ -740,6 +751,12 @@ class ReceiptPdfService {
   }
 
   static Future<Uint8List> generateWithdrawReceiptPdf(WithdrawReceiptModel receipt) async {
+    return await compute(_buildWithdrawReceiptPdfDocument, receipt);
+  }
+
+  static Future<Uint8List> _buildWithdrawReceiptPdfDocument(
+    WithdrawReceiptModel receipt,
+  ) async {
     final pdf = pw.Document();
     final currencyFormatter = NumberFormat.currency(
       locale: 'id_ID',

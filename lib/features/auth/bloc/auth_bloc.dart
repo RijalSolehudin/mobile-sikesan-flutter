@@ -46,6 +46,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (user != null) {
       _log('User loaded from cache: ${user.name} (${user.role})');
       emit(AuthState.authenticated(user));
+
+      // Background silent verification & RBAC synchronization (TASK-CONC-11)
+      final freshResult = await _authRepository.getProfile();
+      if (freshResult is ApiSuccess<UserModel>) {
+        if (freshResult.data != user) {
+          _log(
+            'User profile synced from server: ${freshResult.data.name} (${freshResult.data.role})',
+          );
+          emit(AuthState.authenticated(freshResult.data));
+        }
+      } else if (freshResult is ApiFailure<UserModel> &&
+          freshResult.statusCode == 401) {
+        _log('Session rejected by server during cold start handshake');
+        await _authRepository.logout();
+        emit(const AuthState.unauthenticated());
+      }
     } else {
       emit(const AuthState.unauthenticated());
     }

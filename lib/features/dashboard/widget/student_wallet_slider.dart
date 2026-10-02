@@ -63,7 +63,7 @@ class StudentWalletSlider extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 76,
+          height: 86,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),

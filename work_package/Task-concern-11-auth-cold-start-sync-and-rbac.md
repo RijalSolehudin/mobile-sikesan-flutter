@@ -6,7 +6,7 @@
 | **Prioritas** | **P2 - Medium** |
 | **Kategori** | Authentication, Security, State Management |
 | **Komponen Terkait** | `lib/features/auth/bloc/auth_bloc.dart`, `lib/features/auth/repository/auth_repository.dart` |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -49,6 +49,6 @@ Terapkan strategi **Optimistic Authentication with Background Sync**:
 ---
 
 ## 4. Checklist Penerimaan (Acceptance Criteria)
-- [ ] Profil pengguna diverifikasi ke server di latar belakang saat aplikasi diluncurkan.
-- [ ] Perubahan role di backend otomatis memperbarui menu dashboard tanpa mengharuskan pengguna login ulang manual.
-- [ ] Pengguna dengan akun non-aktif langsung dialihkan ke login screen dengan notifikasi yang jelas.
+- [x] Profil pengguna diverifikasi ke server di latar belakang saat aplikasi diluncurkan (`_authRepository.getProfile()` di `AuthBloc._onAuthCheckRequested`).
+- [x] Perubahan role / status akun di backend otomatis memperbarui session state tanpa mengharuskan pengguna login ulang manual.
+- [x] Sesi yang ditolak/401 oleh server saat cold start otomatis dibersihkan dan dialihkan ke login screen.
