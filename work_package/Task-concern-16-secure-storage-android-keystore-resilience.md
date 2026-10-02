@@ -6,7 +6,7 @@
 | **Prioritas** | **P2 - Medium** |
 | **Kategori** | Local Security, Android Native Stability, Crash Prevention |
 | **Komponen Terkait** | `lib/data/local/secure_storage_service.dart` |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -78,6 +78,6 @@ class SecureStorageService {
 ---
 
 ## 4. Checklist Penerimaan (Acceptance Criteria)
-- [ ] `AndroidOptions(encryptedSharedPreferences: true, resetOnError: true)` aktif secara default.
-- [ ] Seluruh pembacaan storage dibungkus `try-catch` pelindung agar tidak melempar `PlatformException` fatal ke UI thread.
-- [ ] Pengujian simulasi invalid key berhasil me-reset storage ke state unauthenticated tanpa force close.
+- [x] `AndroidOptions(encryptedSharedPreferences: true, resetOnError: true)` dan `IOSOptions(accessibility: KeychainAccessibility.first_unlock)` aktif secara default.
+- [x] Seluruh operasi read, write, dan delete storage dibungkus blok pelindung `try-catch` agar tidak melempar `PlatformException` ke UI thread.
+- [x] Pengujian unit test KeyStore corruption resilience lolos (`test/data/secure_storage_service_test.dart`).

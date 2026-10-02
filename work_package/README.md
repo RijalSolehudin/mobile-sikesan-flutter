@@ -20,7 +20,7 @@ Seluruh tugas diurutkan berdasarkan tingkat urgensi dan dampak risiko (*Critical
 | **12** | `TASK-CONC-05` | [Task-concern-05-testing-coverage-dan-reliability.md](./Task-concern-05-testing-coverage-dan-reliability.md) | **P2 (Medium)** | QA, Test Automation, & CI | **Quality**: Form checkout belum teruji otomatis. |
 | **13** | `TASK-CONC-10` | [Task-concern-10-pdf-generation-background-isolate.md](./Task-concern-10-pdf-generation-background-isolate.md) | **P2 (Medium)** | Performance & Background Isolate | **UX**: UI freeze/jank saat compile PDF kuitansi. |
 | **14** | `TASK-CONC-11` | [Task-concern-11-auth-cold-start-sync-and-rbac.md](./Task-concern-11-auth-cold-start-sync-and-rbac.md) | **P2 (Medium)** | Security & RBAC Profile Sync | **Integrity**: Role & status akun kadaluwarsa di app. |
-| **15** | `TASK-CONC-16` | [Task-concern-16-secure-storage-android-keystore-resilience.md](./Task-concern-16-secure-storage-android-keystore-resilience.md) | **P2 (Medium)** | Android KeyStore & Crash Resilience | **Stability**: Crash di Samsung/Xiaomi saat KeyStore korup. |
+| **15** | `TASK-CONC-16` | [Task-concern-16-secure-storage-android-keystore-resilience.md](./Task-concern-16-secure-storage-android-keystore-resilience.md) | **P2 (Medium)** | Android KeyStore & Crash Resilience | **Selesai (Completed)**: Enkripsi KeyStore & graceful recovery `resetOnError: true`. |
 | **16** | `TASK-CONC-06` | [Task-concern-06-network-resilience-dan-dependency-injection.md](./Task-concern-06-network-resilience-dan-dependency-injection.md) | **P3 (Moderate)** | Architecture & Offline Experience | **Scalability**: Startup time & sinyal fluktuatif. |
 
 ---
