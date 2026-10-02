@@ -6,9 +6,12 @@ import '../../data/repositories/spp_repository.dart';
 import '../../data/repositories/infaq_repository.dart';
 import '../../data/repositories/wallet_repository.dart';
 
+import '../services/biometric_auth_service.dart';
+
 /// Container Dependency Injection terpusat untuk modularitas dan kesiapan pengujian (TASK-CONC-06)
 class InjectionContainer {
   static late final SecureStorageService secureStorage;
+  static late final BiometricAuthService biometricAuth;
   static late final DioClient dioClient;
   static late final AuthRepository authRepository;
   static late final DashboardRepository dashboardRepository;
@@ -19,6 +22,7 @@ class InjectionContainer {
   /// Menginisialisasi semua dependensi inti aplikasi
   static void init({required void Function() onUnauthorized}) {
     secureStorage = SecureStorageService();
+    biometricAuth = BiometricAuthService();
     dioClient = DioClient(
       secureStorage: secureStorage,
       onUnauthorized: onUnauthorized,

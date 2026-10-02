@@ -47,4 +47,40 @@ class AppTypography {
     fontWeight: FontWeight.w400,
     color: AppColors.textMuted,
   );
+
+  static TextStyle get heading3 => GoogleFonts.plusJakartaSans(
+    fontSize: 20,
+    fontWeight: FontWeight.w700,
+    color: AppColors.textPrimary,
+  );
+
+  static TextStyle get heading4 => GoogleFonts.plusJakartaSans(
+    fontSize: 18,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  static TextStyle get bodySmall => GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textSecondary,
+  );
+
+  static TextStyle get captionMedium => GoogleFonts.plusJakartaSans(
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textSecondary,
+  );
+
+  static TextStyle get captionRegular => GoogleFonts.plusJakartaSans(
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textSecondary,
+  );
+
+  static TextStyle get buttonSmall => GoogleFonts.plusJakartaSans(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    color: AppColors.primary,
+  );
 }

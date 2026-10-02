@@ -15,6 +15,7 @@ import '../../../data/repositories/infaq_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
 import '../../spp/widget/receipt_preview_modal.dart';
+import '../../../core/widgets/transaction_security_sheet.dart';
 
 class PayInfaqModal extends StatefulWidget {
   const PayInfaqModal({super.key});
@@ -437,7 +438,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
     final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
 
-    if (isGuardian && _selectedPaymentMethod == 'TRANSFER' && _proofBytes == null) {
+    if (isGuardian &&
+        _selectedPaymentMethod == 'TRANSFER' &&
+        _proofBytes == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Silakan unggah bukti transfer/pembayaran'),
@@ -469,12 +472,33 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       return;
     }
 
-    setState(() => _isSubmitting = true);
     final num total = selectedBills.fold<num>(
       0,
       (sum, b) => sum + b.amountBilled,
     );
 
+    final isAuthorized = await TransactionSecurityHelper.authorizeTransaction(
+      context: context,
+      actionTitle: 'Bayar Infak Santri',
+      formattedAmount: CurrencyFormatter.formatRupiah(total),
+      subtitle: 'Santri: $_selectedStudentName (${selectedBills.length} Bulan)',
+    );
+
+    if (!isAuthorized) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Otorisasi keamanan transaksi dibatalkan.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    if (!mounted) return;
     final messenger = ScaffoldMessenger.of(context);
     final infaqRepo = RepositoryProvider.of<InfaqRepository>(context);
     final navigator = Navigator.of(context);
@@ -762,24 +786,24 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                     ),
                                   )
                                 : _searchController.text.isNotEmpty
-                                    ? IconButton(
-                                        icon: const Icon(
-                                          Icons.clear,
-                                          size: 16,
-                                          color: Color(0xFF94A3B8),
-                                        ),
-                                        onPressed: () {
-                                          _searchController.clear();
-                                          setState(() {
-                                            _selectedStudentId = null;
-                                            _selectedStudentName = '';
-                                            _searchedStudents.clear();
-                                            _bills.clear();
-                                            _selectedMonths.clear();
-                                          });
-                                        },
-                                      )
-                                    : null,
+                                ? IconButton(
+                                    icon: const Icon(
+                                      Icons.clear,
+                                      size: 16,
+                                      color: Color(0xFF94A3B8),
+                                    ),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      setState(() {
+                                        _selectedStudentId = null;
+                                        _selectedStudentName = '';
+                                        _searchedStudents.clear();
+                                        _bills.clear();
+                                        _selectedMonths.clear();
+                                      });
+                                    },
+                                  )
+                                : null,
                             filled: true,
                             fillColor: const Color(0xFFF8FAFC),
                             contentPadding: const EdgeInsets.symmetric(
@@ -951,8 +975,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                         child: InkWell(
                                           onTap: () =>
                                               _selectStudent(st.id, st.name),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 10,
@@ -984,7 +1009,8 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                                     color: isSelected
                                                         ? Colors.white
                                                         : const Color(
-                                                            0xFF64748B),
+                                                            0xFF64748B,
+                                                          ),
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
@@ -999,32 +1025,37 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                                         maxLines: 1,
                                                         overflow: TextOverflow
                                                             .ellipsis,
-                                                        style: GoogleFonts
-                                                            .plusJakartaSans(
-                                                          fontSize: 12,
-                                                          fontWeight: isSelected
-                                                              ? FontWeight.w800
-                                                              : FontWeight
-                                                                  .w600,
-                                                          color: isSelected
-                                                              ? const Color(
-                                                                  0xFFB45309)
-                                                              : const Color(
-                                                                  0xFF1E293B),
-                                                        ),
+                                                        style:
+                                                            GoogleFonts.plusJakartaSans(
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  isSelected
+                                                                  ? FontWeight
+                                                                        .w800
+                                                                  : FontWeight
+                                                                        .w600,
+                                                              color: isSelected
+                                                                  ? const Color(
+                                                                      0xFFB45309,
+                                                                    )
+                                                                  : const Color(
+                                                                      0xFF1E293B,
+                                                                    ),
+                                                            ),
                                                       ),
                                                       Text(
                                                         st.grade,
                                                         maxLines: 1,
                                                         overflow: TextOverflow
                                                             .ellipsis,
-                                                        style: GoogleFonts
-                                                            .plusJakartaSans(
-                                                          fontSize: 10,
-                                                          color: const Color(
-                                                            0xFF64748B,
-                                                          ),
-                                                        ),
+                                                        style:
+                                                            GoogleFonts.plusJakartaSans(
+                                                              fontSize: 10,
+                                                              color:
+                                                                  const Color(
+                                                                    0xFF64748B,
+                                                                  ),
+                                                            ),
                                                       ),
                                                     ],
                                                   ),
@@ -1067,11 +1098,11 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                           itemCount: 12,
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            childAspectRatio: 2.3,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                          ),
+                                crossAxisCount: 3,
+                                childAspectRatio: 2.3,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
                           itemBuilder: (context, index) {
                             final monthNum = index + 1;
                             final monthLabel = _monthNamesShort[index];
@@ -1092,8 +1123,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
 
                             final isPaid = bill.isPaid;
                             final isPending = bill.isPending;
-                            final isSelected =
-                                _selectedMonths.contains(monthNum);
+                            final isSelected = _selectedMonths.contains(
+                              monthNum,
+                            );
 
                             Color bgColor = Colors.white;
                             Color borderColor = const Color(0xFFE2E8F0);
@@ -1276,8 +1308,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                               ),
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: _selectedPaymentMethod == 'TRANSFER'
                                       ? const Color(0xFFFFFDF5)
@@ -1300,8 +1333,8 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                       size: 18,
                                       color:
                                           _selectedPaymentMethod == 'TRANSFER'
-                                              ? const Color(0xFFB45309)
-                                              : const Color(0xFF64748B),
+                                          ? const Color(0xFFB45309)
+                                          : const Color(0xFF64748B),
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
@@ -1309,8 +1342,8 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                                       style: GoogleFonts.plusJakartaSans(
                                         fontSize: 13.5,
                                         fontWeight: FontWeight.w800,
-                                        color: _selectedPaymentMethod ==
-                                                'TRANSFER'
+                                        color:
+                                            _selectedPaymentMethod == 'TRANSFER'
                                             ? const Color(0xFFB45309)
                                             : const Color(0xFF64748B),
                                       ),
@@ -1328,8 +1361,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                               ),
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
                                 decoration: BoxDecoration(
                                   color: _selectedPaymentMethod == 'CASH'
                                       ? const Color(0xFFFFFDF5)
@@ -1530,15 +1564,17 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isSubmitting ||
+                  onPressed:
+                      _isSubmitting ||
                           _selectedStudentId == null ||
                           _selectedMonths.isEmpty
                       ? null
                       : _handlePayment,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF5A524),
-                    disabledBackgroundColor:
-                        const Color(0xFFFCD34D).withValues(alpha: 0.6),
+                    disabledBackgroundColor: const Color(
+                      0xFFFCD34D,
+                    ).withValues(alpha: 0.6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),

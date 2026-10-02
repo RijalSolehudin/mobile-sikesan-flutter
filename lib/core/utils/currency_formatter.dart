@@ -15,6 +15,8 @@ class CurrencyFormatter {
     return _formatter.format(amount).replaceAll(',', '.');
   }
 
+  static String formatRupiah(num amount) => format(amount);
+
   /// Formats amount with sign: e.g. +Rp 100.000 or -Rp 50.000
   static String formatWithSign(num amount, bool isIncome) {
     final formatted = format(amount.abs());

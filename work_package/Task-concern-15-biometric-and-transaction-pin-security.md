@@ -6,7 +6,7 @@
 | **Prioritas** | **P1 - High** |
 | **Kategori** | Financial Security, Fraud Prevention, Compliance |
 | **Komponen Terkait** | `withdraw_modal.dart`, `pay_spp_modal.dart`, `top_up_modal.dart`, paket `local_auth` |
-| **Status** | Open / Pending Action |
+| **Status** | Completed / Verified |
 
 ---
 
@@ -66,6 +66,6 @@ Sebelum memanggil repository transaksi di modal pembayaran/penarikan, panggil di
 ---
 
 ## 4. Checklist Penerimaan (Acceptance Criteria)
-- [ ] Pengguna diminta memindai sidik jari / Face ID atau memasukkan PIN sebelum saldo dompet/tabungan santri didebit.
-- [ ] Tersedia fallback ke PIN transaksi jika biometrik perangkat tidak aktif/tidak tersedia.
-- [ ] Tidak ada mutasi dana yang dapat diproses tanpa lolos verifikasi lapis kedua.
+- [x] Pengguna diminta memindai sidik jari / Face ID atau memasukkan PIN sebelum saldo dompet/tabungan santri didebit.
+- [x] Tersedia fallback ke PIN transaksi jika biometrik perangkat tidak aktif/tidak tersedia.
+- [x] Tidak ada mutasi dana yang dapat diproses tanpa lolos verifikasi lapis kedua.

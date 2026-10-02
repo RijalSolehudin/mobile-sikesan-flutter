@@ -85,6 +85,25 @@ class SecureStorageService {
     }
   }
 
+  Future<void> saveTransactionPin(String pin) async {
+    try {
+      await _storage.write(key: AppConstants.transactionPinKey, value: pin);
+    } catch (_) {}
+  }
+
+  Future<String?> getTransactionPin() async {
+    try {
+      return await _storage.read(key: AppConstants.transactionPinKey);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> hasTransactionPin() async {
+    final pin = await getTransactionPin();
+    return pin != null && pin.isNotEmpty;
+  }
+
   Future<void> clearAuth() async {
     try {
       await _storage.delete(key: AppConstants.tokenKey);

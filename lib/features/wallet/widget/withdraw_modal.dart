@@ -11,6 +11,7 @@ import '../../../data/models/withdraw_models.dart';
 import '../../../data/repositories/wallet_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
+import '../../../core/widgets/transaction_security_sheet.dart';
 import 'withdraw_receipt_modal.dart';
 
 class WithdrawModal extends StatefulWidget {
@@ -89,8 +90,11 @@ class _WithdrawModalState extends State<WithdrawModal> {
     final isGuardian = userRole.toLowerCase().contains('wali');
 
     if (isGuardian) {
-      final dashboardStudents =
-          context.read<DashboardBloc>().state.metrics.students;
+      final dashboardStudents = context
+          .read<DashboardBloc>()
+          .state
+          .metrics
+          .students;
       if (dashboardStudents.isNotEmpty) {
         if (_selectedStudentId != null) {
           final matched = dashboardStudents.firstWhere(
@@ -110,7 +114,9 @@ class _WithdrawModalState extends State<WithdrawModal> {
 
   Future<void> _fetchStudentDetail(int studentId) async {
     final walletRepo = RepositoryProvider.of<WalletRepository>(context);
-    final result = await walletRepo.getStudents(search: widget.preselectedStudentName);
+    final result = await walletRepo.getStudents(
+      search: widget.preselectedStudentName,
+    );
     if (!mounted) return;
     if (result is ApiSuccess<List<StudentLookupModel>>) {
       final matched = result.data.firstWhere(
@@ -163,7 +169,9 @@ class _WithdrawModalState extends State<WithdrawModal> {
   void _selectQuickAmount(num val) {
     setState(() {
       _amount = val;
-      _amountController.text = CurrencyFormatter.format(val).replaceAll('Rp ', '').trim();
+      _amountController.text = CurrencyFormatter.format(
+        val,
+      ).replaceAll('Rp ', '').trim();
       _amountController.selection = TextSelection.collapsed(
         offset: _amountController.text.length,
       );
@@ -176,7 +184,8 @@ class _WithdrawModalState extends State<WithdrawModal> {
   }
 
   void _onSearchChanged(String query) {
-    if (_selectedStudentId != null && query.trim() == _selectedStudentName.trim()) {
+    if (_selectedStudentId != null &&
+        query.trim() == _selectedStudentName.trim()) {
       return;
     }
     _searchDebounce?.cancel();
@@ -203,9 +212,7 @@ class _WithdrawModalState extends State<WithdrawModal> {
     }
     setState(() => _isSearchingStudent = true);
     final walletRepo = RepositoryProvider.of<WalletRepository>(context);
-    final result = await walletRepo.getStudents(
-      search: trimmed,
-    );
+    final result = await walletRepo.getStudents(search: trimmed);
 
     if (!mounted) return;
 
@@ -238,8 +245,23 @@ class _WithdrawModalState extends State<WithdrawModal> {
       return;
     }
 
+    final isAuthorized = await TransactionSecurityHelper.authorizeTransaction(
+      context: context,
+      actionTitle: 'Tarik Tunai Saldo',
+      formattedAmount: CurrencyFormatter.formatRupiah(_amount),
+      subtitle: 'Santri: $_selectedStudentName',
+    );
+
+    if (!isAuthorized) {
+      if (mounted) {
+        _showError('Otorisasi keamanan transaksi dibatalkan');
+      }
+      return;
+    }
+
     setState(() => _isLoading = true);
 
+    if (!mounted) return;
     final parentContext = context;
     final walletRepo = RepositoryProvider.of<WalletRepository>(context);
     final dashboardBloc = context.read<DashboardBloc>();
@@ -259,9 +281,7 @@ class _WithdrawModalState extends State<WithdrawModal> {
       final receipt = result.data;
 
       // Refresh dashboard metrics
-      dashboardBloc.add(
-        DashboardRefreshRequested(role: userRole),
-      );
+      dashboardBloc.add(DashboardRefreshRequested(role: userRole));
 
       Navigator.of(parentContext).pop();
       WithdrawReceiptModal.show(parentContext, receipt);
@@ -285,9 +305,11 @@ class _WithdrawModalState extends State<WithdrawModal> {
 
   @override
   Widget build(BuildContext context) {
-    final userRole = context.watch<AuthBloc>().state.user?.role ?? 'Wali Santri';
+    final userRole =
+        context.watch<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
-    final isOverBalance = _selectedStudentBalance > 0 && _amount > _selectedStudentBalance;
+    final isOverBalance =
+        _selectedStudentBalance > 0 && _amount > _selectedStudentBalance;
 
     return Center(
       child: ConstrainedBox(
@@ -390,7 +412,10 @@ class _WithdrawModalState extends State<WithdrawModal> {
                 // Balance Info Card
                 if (_selectedStudentId != null) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(16),
@@ -427,7 +452,9 @@ class _WithdrawModalState extends State<WithdrawModal> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  CurrencyFormatter.format(_selectedStudentBalance),
+                                  CurrencyFormatter.format(
+                                    _selectedStudentBalance,
+                                  ),
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
@@ -481,9 +508,7 @@ class _WithdrawModalState extends State<WithdrawModal> {
                 TextField(
                   controller: _amountController,
                   keyboardType: TextInputType.number,
-                  inputFormatters: [
-                    CurrencyInputFormatter(),
-                  ],
+                  inputFormatters: [CurrencyInputFormatter()],
                   onChanged: _onAmountChanged,
                   style: const TextStyle(
                     fontSize: 18,
@@ -568,7 +593,8 @@ class _WithdrawModalState extends State<WithdrawModal> {
                   children: _quickAmounts.map((amt) {
                     final isSelected = _amount == amt;
                     final isDisabled =
-                        _selectedStudentBalance > 0 && amt > _selectedStudentBalance;
+                        _selectedStudentBalance > 0 &&
+                        amt > _selectedStudentBalance;
                     return InkWell(
                       onTap: isDisabled ? null : () => _selectQuickAmount(amt),
                       borderRadius: BorderRadius.circular(10),
@@ -581,28 +607,29 @@ class _WithdrawModalState extends State<WithdrawModal> {
                           color: isSelected
                               ? const Color(0xFFFEE2E2)
                               : (isDisabled
-                                  ? Colors.grey.shade100
-                                  : const Color(0xFFF1F5F9)),
+                                    ? Colors.grey.shade100
+                                    : const Color(0xFFF1F5F9)),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                             color: isSelected
                                 ? const Color(0xFFDC2626)
                                 : (isDisabled
-                                    ? Colors.grey.shade200
-                                    : Colors.transparent),
+                                      ? Colors.grey.shade200
+                                      : Colors.transparent),
                           ),
                         ),
                         child: Text(
                           CurrencyFormatter.format(amt),
                           style: TextStyle(
                             fontSize: 11.5,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w600,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w600,
                             color: isSelected
                                 ? const Color(0xFFDC2626)
                                 : (isDisabled
-                                    ? Colors.grey.shade400
-                                    : AppColors.textPrimary),
+                                      ? Colors.grey.shade400
+                                      : AppColors.textPrimary),
                           ),
                         ),
                       ),
@@ -626,7 +653,8 @@ class _WithdrawModalState extends State<WithdrawModal> {
                   maxLines: 2,
                   style: const TextStyle(fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Contoh: Uang saku mingguan, beli buku di koperasi...',
+                    hintText:
+                        'Contoh: Uang saku mingguan, beli buku di koperasi...',
                     hintStyle: TextStyle(
                       fontSize: 12.5,
                       color: Colors.grey.shade400,
@@ -737,7 +765,10 @@ class _WithdrawModalState extends State<WithdrawModal> {
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
                   width: 170,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFFFEE2E2) : Colors.white,
                     borderRadius: BorderRadius.circular(14),
@@ -758,8 +789,9 @@ class _WithdrawModalState extends State<WithdrawModal> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.w600,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w600,
                           color: isSelected
                               ? const Color(0xFFDC2626)
                               : AppColors.textPrimary,
@@ -815,22 +847,25 @@ class _WithdrawModalState extends State<WithdrawModal> {
                     ),
                   )
                 : (_searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 18),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchedStudents.clear();
-                            _selectedStudentId = null;
-                            _selectedStudentName = '';
-                            _selectedStudentBalance = 0;
-                          });
-                        },
-                      )
-                    : null),
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded, size: 18),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchedStudents.clear();
+                              _selectedStudentId = null;
+                              _selectedStudentName = '';
+                              _selectedStudentBalance = 0;
+                            });
+                          },
+                        )
+                      : null),
             filled: true,
             fillColor: const Color(0xFFF8FAFC),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
@@ -841,7 +876,10 @@ class _WithdrawModalState extends State<WithdrawModal> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
+              borderSide: const BorderSide(
+                color: Color(0xFFDC2626),
+                width: 1.5,
+              ),
             ),
           ),
         ),
@@ -873,7 +911,10 @@ class _WithdrawModalState extends State<WithdrawModal> {
                   dense: true,
                   title: Text(
                     student.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                    ),
                   ),
                   subtitle: Text(
                     'NIS: ${student.nis} • ${student.grade}',
@@ -902,7 +943,9 @@ class _WithdrawModalState extends State<WithdrawModal> {
             decoration: BoxDecoration(
               color: const Color(0xFFFEE2E2).withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFDC2626).withValues(alpha: 0.3)),
+              border: Border.all(
+                color: const Color(0xFFDC2626).withValues(alpha: 0.3),
+              ),
             ),
             child: Row(
               children: [

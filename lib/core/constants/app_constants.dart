@@ -4,4 +4,5 @@ class AppConstants {
   static const String userKey = 'sikesan_user_profile';
   static const String roleKey = 'sikesan_user_role';
   static const String themeKey = 'sikesan_theme_mode';
+  static const String transactionPinKey = 'sikesan_transaction_pin';
 }
