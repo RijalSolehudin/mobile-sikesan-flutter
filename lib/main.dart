@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'core/di/injection_container.dart';
 import 'core/network/dio_client.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/app_crash_fallback_screen.dart';
@@ -50,36 +51,29 @@ void main() async {
     ),
   );
 
-  // Initialize Core Services
-  final secureStorage = SecureStorageService();
-
+  // Initialize Core Services via InjectionContainer (TASK-CONC-06)
   late final AuthBloc authBloc;
-  final dioClient = DioClient(
-    secureStorage: secureStorage,
+  InjectionContainer.init(
     onUnauthorized: () {
       authBloc.add(const AuthLogoutRequested());
     },
   );
 
-  final authRepository = AuthRepository(dioClient, secureStorage);
-  final dashboardRepository = DashboardRepository(dioClient);
-  final sppRepository = SppRepository(dioClient);
-  final infaqRepository = InfaqRepository(dioClient);
-  final walletRepository = WalletRepository(dioClient);
-
-  authBloc = AuthBloc(authRepository: authRepository)
+  authBloc = AuthBloc(authRepository: InjectionContainer.authRepository)
     ..add(const AuthCheckRequested());
-  final dashboardBloc = DashboardBloc(dashboardRepository: dashboardRepository);
+  final dashboardBloc = DashboardBloc(
+    dashboardRepository: InjectionContainer.dashboardRepository,
+  );
 
   final router = AppRouter.createRouter(authBloc);
 
   runApp(
     SikesanMobileApp(
-      authRepository: authRepository,
-      dashboardRepository: dashboardRepository,
-      sppRepository: sppRepository,
-      infaqRepository: infaqRepository,
-      walletRepository: walletRepository,
+      authRepository: InjectionContainer.authRepository,
+      dashboardRepository: InjectionContainer.dashboardRepository,
+      sppRepository: InjectionContainer.sppRepository,
+      infaqRepository: InjectionContainer.infaqRepository,
+      walletRepository: InjectionContainer.walletRepository,
       authBloc: authBloc,
       dashboardBloc: dashboardBloc,
       router: router,

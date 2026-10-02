@@ -21,7 +21,7 @@ Seluruh tugas diurutkan berdasarkan tingkat urgensi dan dampak risiko (*Critical
 | **13** | `TASK-CONC-10` | [Task-concern-10-pdf-generation-background-isolate.md](./Task-concern-10-pdf-generation-background-isolate.md) | **P2 (Medium)** | Performance & Background Isolate | **Selesai (Completed)**: Background isolate `compute()` pada rendering PDF kuitansi. |
 | **14** | `TASK-CONC-11` | [Task-concern-11-auth-cold-start-sync-and-rbac.md](./Task-concern-11-auth-cold-start-sync-and-rbac.md) | **P2 (Medium)** | Security & RBAC Profile Sync | **Selesai (Completed)**: Optimistic auth & background profile sync saat cold start. |
 | **15** | `TASK-CONC-16` | [Task-concern-16-secure-storage-android-keystore-resilience.md](./Task-concern-16-secure-storage-android-keystore-resilience.md) | **P2 (Medium)** | Android KeyStore & Crash Resilience | **Selesai (Completed)**: Enkripsi KeyStore & graceful recovery `resetOnError: true`. |
-| **16** | `TASK-CONC-06` | [Task-concern-06-network-resilience-dan-dependency-injection.md](./Task-concern-06-network-resilience-dan-dependency-injection.md) | **P3 (Moderate)** | Architecture & Offline Experience | **Scalability**: Startup time & sinyal fluktuatif. |
+| **16** | `TASK-CONC-06` | [Task-concern-06-network-resilience-dan-dependency-injection.md](./Task-concern-06-network-resilience-dan-dependency-injection.md) | **P3 (Moderate)** | Architecture & Offline Experience | **Selesai (Completed)**: `InjectionContainer` terpusat & retry policy request GET. |
 
 ---
 

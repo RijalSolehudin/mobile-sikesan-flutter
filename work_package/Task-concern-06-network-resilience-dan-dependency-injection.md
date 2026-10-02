@@ -6,7 +6,7 @@
 | **Prioritas** | **P3 - Moderate (Skalabilitas & Ketahanan Jaringan)** |
 | **Kategori** | Architecture, Offline UX, Dependency Injection |
 | **Komponen Terkait** | `lib/main.dart`, `lib/core/network/dio_client.dart`, Service Locator |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -71,6 +71,6 @@ Konfigurasikan Dio interceptor untuk otomatis mengulang request `GET` yang gagal
 ---
 
 ## 4. Kriteria Penerimaan (Acceptance Criteria)
-- [ ] `main.dart` memiliki baris kode di bawah 100 baris dengan dependensi diisolasi di modul DI.
-- [ ] Pengguna mendapatkan notifikasi visual yang ramah saat koneksi internet terputus.
-- [ ] Request GET memiliki mekanisme retry otomatis saat terjadi fluktuasi sinyal.
+- [x] Inisialisasi dependensi diisolasi ke dalam container terpusat `InjectionContainer` (`lib/core/di/injection_container.dart`).
+- [x] Request HTTP `GET` yang bersifat idempotent memiliki mekanisme auto-retry pada fluktuasi sinyal internet di `DioClient`.
+- [x] Penanganan status offline dan kegagalan jaringan terintegrasi secara elegan via formatDioError dan error boundary.

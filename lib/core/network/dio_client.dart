@@ -61,6 +61,25 @@ class DioClient {
             await secureStorage.clearAuth();
             onUnauthorized?.call();
           }
+
+          // Retry policy untuk idempotent GET requests pada fluktuasi sinyal (TASK-CONC-06)
+          if (error.requestOptions.method.toUpperCase() == 'GET' &&
+              (error.type == DioExceptionType.connectionError ||
+                  error.type == DioExceptionType.receiveTimeout)) {
+            final retries =
+                error.requestOptions.extra['retry_count'] as int? ?? 0;
+            if (retries < 1) {
+              error.requestOptions.extra['retry_count'] = retries + 1;
+              try {
+                await Future.delayed(const Duration(milliseconds: 800));
+                final response = await dio.fetch(error.requestOptions);
+                return handler.resolve(response);
+              } catch (_) {
+                // If retry also fails, proceed to normal error handler
+              }
+            }
+          }
+
           return handler.next(error);
         },
       ),
