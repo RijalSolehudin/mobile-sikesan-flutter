@@ -14,6 +14,7 @@ class DioClient {
       BaseOptions(
         baseUrl: ApiEndpoints.baseUrl,
         connectTimeout: const Duration(seconds: 15),
+        sendTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 15),
         headers: {
           'Accept': 'application/json',
@@ -117,5 +118,30 @@ class DioClient {
       }
     }
     return result;
+  }
+
+  /// Helper untuk memformat pesan kesalahan jaringan Dio secara ramah dan informatif bagi pengguna
+  static String formatDioError(
+    DioException e, {
+    String fallback = 'Terjadi kesalahan jaringan',
+  }) {
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+        return 'Koneksi ke server terputus (waktu habis). Periksa koneksi internet Anda.';
+      case DioExceptionType.sendTimeout:
+        return 'Waktu pengunggahan data habis. Periksa koneksi internet Anda dan coba lagi.';
+      case DioExceptionType.receiveTimeout:
+        return 'Respon server melebihi batas waktu tunggu. Silakan coba beberapa saat lagi.';
+      case DioExceptionType.connectionError:
+        return 'Tidak dapat terhubung ke server. Pastikan perangkat Anda terhubung ke internet.';
+      case DioExceptionType.cancel:
+        return 'Permintaan dibatalkan.';
+      default:
+        final dynamic data = e.response?.data;
+        if (data is Map && data.containsKey('message')) {
+          return data['message'].toString();
+        }
+        return fallback;
+    }
   }
 }

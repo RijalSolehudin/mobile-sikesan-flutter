@@ -6,7 +6,7 @@
 | **Prioritas** | **P1 - High** |
 | **Kategori** | Performance, Network Optimization, Reliability |
 | **Komponen Terkait** | `lib/features/spp/widget/pay_spp_modal.dart`, `lib/features/infaq/widget/pay_infaq_modal.dart`, `lib/features/wallet/widget/top_up_modal.dart` |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -66,6 +66,7 @@ Jika melebihi kuota, beri feedback `SnackBar` edukatif: *"Ukuran gambar bukti tr
 ---
 
 ## 4. Checklist Penerimaan (Acceptance Criteria)
-- [ ] Semua pemanggilan `pickImage` di SPP, Infaq, dan Wallet menyertakan `maxWidth: 1440`, `maxHeight: 1440`, dan `imageQuality: 75`.
-- [ ] Ukuran rata-rata file output bukti bayar terkompresi di bawah 500 KB tanpa kehilangan legibilitas teks nominal/rekening.
-- [ ] Ada pesan error yang jelas jika ukuran file masih melebihi batas yang diizinkan sebelum request HTTP dikirim.
+- [x] Semua pemanggilan `pickImage` di SPP, Infaq, dan Wallet menyertakan `maxWidth: 1440`, `maxHeight: 1440`, dan `imageQuality: 75` melalui `ImageUploadHelper.pickImageWithCompression()`.
+- [x] Helper validasi ukuran file `ImageUploadHelper.validateFileSize()` terpasang untuk mencegah pengiriman file melebihi batas 2MB.
+- [x] SnackBar peringatan edukatif muncul jika pengguna memilih file yang melebihi batas 2MB sebelum proses upload dimulai.
+- [x] Unit test untuk `ImageUploadHelper` terpasang di `test/core/image_upload_helper_test.dart`.

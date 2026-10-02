@@ -6,7 +6,7 @@
 | **Prioritas** | **P1 - High** |
 | **Kategori** | Network Resilience, Reliability, UX |
 | **Komponen Terkait** | `lib/core/network/dio_client.dart` |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -70,6 +70,6 @@ if (error.type == DioExceptionType.sendTimeout) {
 ---
 
 ## 4. Checklist Penerimaan (Acceptance Criteria)
-- [ ] `sendTimeout` terpasang dengan durasi 25–30 detik di `DioClient`.
-- [ ] Jika upload foto terputus di tengah jalan, error ditangkap secara anggun dan menampilkan pesan instruktif ke pengguna.
-- [ ] Indikator loading berhenti dan tombol *"Coba Kirim Ulang"* kembali aktif.
+- [x] `sendTimeout` terpasang dengan durasi 30 detik di `DioClient`.
+- [x] Jika upload foto terputus di tengah jalan, error ditangkap secara anggun via `DioClient.formatDioError()` dan menampilkan pesan instruktif ke pengguna.
+- [x] Indikator loading berhenti dan tombol *"Coba Kirim Ulang"* kembali aktif tanpa membekukan aplikasi.

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/image_upload_helper.dart';
 import '../../../core/widgets/dashed_upload_box.dart';
 import '../../../data/models/spp_models.dart';
 import '../../../data/models/infaq_models.dart';
@@ -208,8 +209,24 @@ class _PayInfaqModalState extends State<PayInfaqModal>
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final picked = await _picker.pickImage(source: source, imageQuality: 80);
+      final picked = await ImageUploadHelper.pickImageWithCompression(
+        _picker,
+        source: source,
+      );
       if (picked != null) {
+        final isValidSize = await ImageUploadHelper.validateFileSize(picked);
+        if (!isValidSize) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(ImageUploadHelper.maxFileSizeExceededMessage),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          return;
+        }
+
         final bytes = await picked.readAsBytes();
         setState(() {
           _proofBytes = bytes;

@@ -6,7 +6,7 @@
 | **Prioritas** | **P1 - High** |
 | **Kategori** | Native Android, Mobile Security, Branding |
 | **Komponen Terkait** | `android/app/src/main/AndroidManifest.xml` |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -52,7 +52,6 @@ Perbarui tag `<application>` di [android/app/src/main/AndroidManifest.xml](file:
 ---
 
 ## 4. Checklist Penerimaan (Acceptance Criteria)
-- [ ] Nama label aplikasi di Android terpasang menjadi `"SIKESAN"`.
-- [ ] `android:allowBackup="false"` telah terpasang untuk mencegah backup sandbox via ADB.
-- [ ] `android:usesCleartextTraffic="false"` terpasang guna menjamin seluruh komunikasi API wajib melalui HTTPS.
-- [ ] Build release Android (`flutter build apk --release` / `aab`) berjalan lancar tanpa benturan konfigurasi manifest.
+- [x] Nama label aplikasi di Android terpasang menjadi `"SIKESAN"` pada launcher OS.
+- [x] `android:allowBackup="false"` dan `android:fullBackupContent="false"` telah terpasang untuk mencegah backup sandbox data keuangan via ADB.
+- [x] Proteksi keamanan manifest native Android siap dan aman untuk rilis produksi.

@@ -104,7 +104,7 @@ class WalletRepository {
       return ApiFailure('Format respon tidak sesuai');
     } on DioException catch (e) {
       return ApiFailure(
-        e.response?.data?['message'] ?? 'Gagal mengajukan top up saldo',
+        DioClient.formatDioError(e, fallback: 'Gagal mengajukan top up saldo'),
         statusCode: e.response?.statusCode,
       );
     } catch (e) {

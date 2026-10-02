@@ -153,7 +153,10 @@ class InfaqRepository {
       );
     } on DioException catch (e) {
       return ApiFailure(
-        e.response?.data?['message'] ?? 'Gagal mengirim pembayaran transfer',
+        DioClient.formatDioError(
+          e,
+          fallback: 'Gagal mengirim pembayaran transfer',
+        ),
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
