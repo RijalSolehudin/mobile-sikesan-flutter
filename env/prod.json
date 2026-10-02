@@ -1,0 +1,5 @@
+{
+  "ENV": "prod",
+  "API_BASE_URL": "https://api.sikesan.ponpes.id/api/v1",
+  "ENABLE_LOGGING": false
+}

@@ -1,25 +1,11 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import '../config/app_config.dart';
 
 class ApiEndpoints {
-  // Staging Cloudflare Named Tunnel endpoint
-  static const String envBaseUrl = String.fromEnvironment('API_BASE_URL');
-  static const String defaultStagingUrl =
-      'https://ears-very-solaris-affecting.trycloudflare.com/api/v1';
+  static String get baseUrl => AppConfig.baseUrl;
 
-  // Custom override if needed
-  static String? customBaseUrl;
-
-  static String get baseUrl {
-    if (customBaseUrl != null && customBaseUrl!.isNotEmpty) {
-      return customBaseUrl!;
-    }
-    if (envBaseUrl.isNotEmpty) {
-      return envBaseUrl;
-    }
-    if (kIsWeb) {
-      return '/api/v1';
-    }
-    return defaultStagingUrl;
+  static String? get customBaseUrl => AppConfig.customBaseUrl;
+  static set customBaseUrl(String? url) {
+    AppConfig.customBaseUrl = url;
   }
 
   // Auth

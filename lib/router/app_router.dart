@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/auth/bloc/auth_bloc.dart';
-import '../features/auth/login_screen.dart';
-import '../features/auth/role_selection_screen.dart';
-import '../features/splash/splash_screen.dart';
-import '../features/dashboard/home_screen.dart';
-import '../features/mutation/mutation_screen.dart';
-import '../features/information/information_screen.dart';
-import '../features/cs_sikesan/cs_screen.dart';
-import '../features/profile/profile_screen.dart';
-import '../features/navigation/main_navigation_shell.dart';
+import '../features/auth/screen/login_screen.dart';
+import '../features/auth/screen/role_selection_screen.dart';
+import '../features/splash/screen/splash_screen.dart';
+import '../features/dashboard/screen/home_screen.dart';
+import '../features/mutation/screen/mutation_screen.dart';
+import '../features/information/screen/information_screen.dart';
+import '../features/cs_sikesan/screen/cs_screen.dart';
+import '../features/profile/screen/profile_screen.dart';
+import '../features/navigation/screen/main_navigation_shell.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
@@ -47,8 +47,9 @@ class AppRouter {
           return null;
         }
 
-        // While checking token on initial launch, stay on current location
+        // Global Splash check: while checking token or during app startup, stay on /splash
         if (authState is AuthInitial) {
+          if (!isSplash) return '/splash';
           return null;
         }
 
@@ -69,7 +70,17 @@ class AppRouter {
       routes: [
         GoRoute(
           path: '/splash',
-          builder: (context, state) => const SplashScreen(),
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const SplashScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 450),
+          ),
         ),
         GoRoute(
           path: '/role-selection',

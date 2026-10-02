@@ -1,9 +1,11 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'core/network/dio_client.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/app_crash_fallback_screen.dart';
 import 'data/local/secure_storage_service.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/dashboard_repository.dart';
@@ -21,6 +23,23 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Tangkap error rendering Flutter UI
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    // Remote observability hook (Crashlytics/Sentry) siap diintegrasikan di sini
+  };
+
+  // Tangkap uncaught async errors di luar widget tree
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Uncaught Asynchronous Error: $error\n$stack');
+    return true;
+  };
+
+  // Tampilkan screen fallback yang ramah pengganti grey screen of death
+  ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+    return AppCrashFallbackScreen(errorDetails: errorDetails);
+  };
 
   // Set System UI Overlay Style for smooth status bar
   SystemChrome.setSystemUIOverlayStyle(

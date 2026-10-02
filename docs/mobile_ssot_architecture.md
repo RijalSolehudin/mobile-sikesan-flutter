@@ -19,13 +19,16 @@ lib/
 │   └── services/               # Remote Api Services (Dio HTTP calls)
 │
 ├── features/                   # Screen UI & Feature Logic (BLoC)
-│   ├── auth/                   # login_screen, bloc (AuthBloc)
-│   ├── dashboard/              # home_screen, widgets, bloc (DashboardBloc)
-│   ├── mutation/               # mutation_screen, widgets, bloc (MutationBloc)
-│   ├── information/            # info_screen, widgets, bloc (InformationBloc)
-│   ├── cs_sikesan/             # cs_screen (placeholder), bloc
-│   ├── profile/                # profile_screen, change_password_screen, bloc
-│   └── navigation/             # main_navigation_shell, custom_curved_bottom_bar
+│   ├── auth/                   # screen/, widget/, bloc/ (AuthBloc)
+│   ├── dashboard/              # screen/, widget/, bloc/ (DashboardBloc)
+│   ├── mutation/               # screen/, widget/
+│   ├── information/            # screen/, widget/
+│   ├── cs_sikesan/             # screen/, widget/
+│   ├── profile/                # screen/, widget/
+│   ├── navigation/             # screen/, widget/
+│   ├── spp/                    # widget/, bloc/ (SppPaymentBloc)
+│   ├── infaq/                  # widget/
+│   └── wallet/                 # widget/
 │
 ├── router/                     # Routing System
 │   ├── app_router.dart         # GoRouter with StatefulShellRoute

@@ -1,0 +1,5 @@
+{
+  "ENV": "staging",
+  "API_BASE_URL": "https://api-staging.sikesan.ponpes.id/api/v1",
+  "ENABLE_LOGGING": true
+}

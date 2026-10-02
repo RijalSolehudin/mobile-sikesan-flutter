@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import '../config/app_config.dart';
 import '../constants/api_endpoints.dart';
 import '../../data/local/secure_storage_service.dart';
 
@@ -38,7 +39,7 @@ class DioClient {
           return handler.next(error);
         },
       ),
-      if (kDebugMode)
+      if (kDebugMode && AppConfig.enableLogging)
         InterceptorsWrapper(
           onRequest: (options, handler) {
             _logSanitizedRequest(options);

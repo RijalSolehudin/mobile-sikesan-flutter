@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>SIKESAN memerlukan izin akses kamera untuk mengambil foto bukti transfer pembayaran SPP, infaq, atau pengisian saldo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SIKESAN memerlukan izin akses galeri foto untuk memilih bukti transfer pembayaran yang tersimpan di perangkat Anda.</string>
 </dict>
 </plist>
