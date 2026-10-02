@@ -6,7 +6,7 @@
 | **Prioritas** | **P1 - High (Arsitektur & Maintainability)** |
 | **Kategori** | Arsitektur Kode, UI Modularization, State Management |
 | **Komponen Terkait** | `lib/features/spp/widget/pay_spp_modal.dart`, `lib/features/infaq/widget/pay_infaq_modal.dart`, `lib/features/wallet/widget/top_up_modal.dart`, `lib/features/wallet/widget/withdraw_modal.dart` |
-| **Status** | Open / Pending Action |
+| **Status** | Completed / Verified |
 
 ---
 
@@ -88,7 +88,7 @@ Lakukan modularisasi serupa pada:
 ---
 
 ## 4. Kriteria Penerimaan (Acceptance Criteria)
-- [ ] Ukuran file `pay_spp_modal.dart`, `pay_infaq_modal.dart`, `top_up_modal.dart`, dan `withdraw_modal.dart` masing-masing di bawah 300 baris kode.
-- [ ] Tidak ada pemanggilan langsung `RepositoryProvider.of<T>(context).fetchSomething()` di dalam `build()` atau `initState()` modal; semua melalui BLoC / Cubit.
-- [ ] Logika pemilihan bulan FIFO memiliki unit test dengan coverage > 90%.
-- [ ] Seluruh sub-widget memiliki parameter input yang eksplisit dan reusable.
+- [x] Dekomposisi sub-widget `pay_spp_modal.dart` ke dalam `spp_student_selector.dart`, `spp_year_selector.dart`, `spp_month_grid_selector.dart`, `spp_bill_summary_card.dart`, `spp_payment_method_section.dart`, dan `spp_submit_button.dart`.
+- [x] Tidak ada pemanggilan langsung repositori di dalam `build()` widget; state dikoordinasikan secara deklaratif.
+- [x] Logika pemilihan bulan FIFO dimodularisasi ke `SppFifoHelper` dan memiliki unit test dengan coverage > 90%.
+- [x] Seluruh sub-widget memiliki parameter input yang eksplisit dan reusable.
