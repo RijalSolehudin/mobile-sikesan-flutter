@@ -24,7 +24,7 @@ class DioClient {
     );
 
     dio.interceptors.addAll([
-      InterceptorsWrapper(
+      QueuedInterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await secureStorage.getToken();
           if (token != null && token.isNotEmpty) {
@@ -34,6 +34,30 @@ class DioClient {
         },
         onError: (DioException error, handler) async {
           if (error.response?.statusCode == 401) {
+            final path = error.requestOptions.path;
+            final isAuthEndpoint =
+                path.contains('/auth/login') || path.contains('/auth/refresh');
+
+            if (!isAuthEndpoint) {
+              final refreshToken = await secureStorage.getRefreshToken();
+              if (refreshToken != null && refreshToken.isNotEmpty) {
+                final newAccessToken =
+                    await _performSilentTokenRefresh(refreshToken);
+                if (newAccessToken != null && newAccessToken.isNotEmpty) {
+                  final options = error.requestOptions;
+                  options.headers['Authorization'] = 'Bearer $newAccessToken';
+                  try {
+                    final response = await dio.fetch(options);
+                    return handler.resolve(response);
+                  } catch (e) {
+                    if (e is DioException) {
+                      return handler.next(e);
+                    }
+                  }
+                }
+              }
+            }
+
             await secureStorage.clearAuth();
             onUnauthorized?.call();
           }
@@ -94,6 +118,45 @@ class DioClient {
     }
   }
 
+  Future<String?> _performSilentTokenRefresh(String refreshToken) async {
+    try {
+      final refreshDio = Dio(
+        BaseOptions(
+          baseUrl: ApiEndpoints.baseUrl,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      final response = await refreshDio.post(
+        '/auth/refresh',
+        data: {'refresh_token': refreshToken},
+      );
+      if (response.statusCode == 200 && response.data is Map) {
+        final dynamic raw = response.data;
+        final dynamic data = raw['data'] ?? raw;
+        final newAccessToken = data['token'] ?? data['access_token'];
+        final newRefreshToken = data['refresh_token'];
+        if (newAccessToken != null) {
+          await secureStorage.saveToken(newAccessToken.toString());
+          if (newRefreshToken != null) {
+            await secureStorage.saveRefreshToken(newRefreshToken.toString());
+          }
+          return newAccessToken.toString();
+        }
+      }
+    } catch (e) {
+      if (kDebugMode && AppConfig.enableLogging) {
+        debugPrint('[SILENT REFRESH] Gagal memperbarui token: $e');
+      }
+      return null;
+    }
+    return null;
+  }
+
   static Map<String, dynamic> _maskSensitiveMap(Map<String, dynamic> map) {
     const sensitiveKeys = {
       'password',
@@ -102,9 +165,16 @@ class DioClient {
       'access_token',
       'refresh_token',
       'secret',
+      'secret_key',
       'pin',
       'old_password',
       'new_password',
+      'cvv',
+      'security_code',
+      'card_number',
+      'no_rekening',
+      'account_number',
+      'nik',
     };
     final result = <String, dynamic>{};
     for (final entry in map.entries) {

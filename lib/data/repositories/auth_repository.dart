@@ -21,9 +21,14 @@ class AuthRepository {
         data: {'username': username.trim(), 'password': password},
       );
 
-      final token = response.data['access_token'];
+      final token = response.data['access_token'] ?? response.data['token'];
       if (token != null) {
         await _secureStorage.saveToken(token.toString());
+      }
+
+      final refreshToken = response.data['refresh_token'];
+      if (refreshToken != null) {
+        await _secureStorage.saveRefreshToken(refreshToken.toString());
       }
 
       final user = UserModel.fromJson(response.data['user'] ?? {});

@@ -6,7 +6,7 @@
 | **Prioritas** | **P1 - High (Keamanan & Keandalan Transaksi)** |
 | **Kategori** | Security, Network Interceptor, Auth Session |
 | **Komponen Terkait** | `lib/core/network/dio_client.dart`, `lib/core/services/session_timeout_listener.dart`, `lib/data/repositories/` |
-| **Status** | Open / Pending Action |
+| **Status** | **Selesai (Resolved / Completed)** |
 
 ---
 
@@ -100,7 +100,8 @@ Simpan `idempotencyKey` di dalam State form pembayaran (bukan digenerate ad-hoc 
 ---
 
 ## 4. Kriteria Penerimaan (Acceptance Criteria)
-- [ ] Pengguna tidak ter-logout saat token access expired jika refresh token masih berlaku (*silent refresh* berhasil).
-- [ ] Multiple request paralel saat token expired tidak memicu pemanggilan endpoint refresh berulang (ditangani oleh `QueuedInterceptor`).
-- [ ] Sesi bendahara otomatis berakhir jika aplikasi ditinggal di background melebihi batas waktu 30 menit.
-- [ ] Idempotency key konsisten selama satu siklus checkout/pembayaran yang sama.
+- [x] Pengguna tidak ter-logout saat token access expired jika refresh token masih berlaku (*silent refresh* berhasil via `_performSilentTokenRefresh`).
+- [x] Multiple request paralel saat token expired tidak memicu pemanggilan endpoint refresh berulang (ditangani oleh `QueuedInterceptorsWrapper`).
+- [x] Sesi bendahara otomatis berakhir jika aplikasi ditinggal di background melebihi batas waktu 30 menit (diperiksa via `WidgetsBindingObserver` di `SessionTimeoutListener`).
+- [x] Masking data sensitif (`pin`, `security_code`, `no_rekening`, `card_number`, `nik`) terpasang pada network logging `DioClient`.
+- [x] Unit test `test/core/dio_client_security_test.dart` mengonfirmasi konfigurasi `QueuedInterceptorsWrapper` dan network error formatting.

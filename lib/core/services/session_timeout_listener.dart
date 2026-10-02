@@ -20,13 +20,16 @@ class SessionTimeoutListener extends StatefulWidget {
   State<SessionTimeoutListener> createState() => _SessionTimeoutListenerState();
 }
 
-class _SessionTimeoutListenerState extends State<SessionTimeoutListener> {
+class _SessionTimeoutListenerState extends State<SessionTimeoutListener>
+    with WidgetsBindingObserver {
   Timer? _timer;
   StreamSubscription<AuthState>? _authSubscription;
+  DateTime? _backgroundTimestamp;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkAndResetTimer(widget.authBloc.state);
     _authSubscription = widget.authBloc.stream.listen((state) {
       _checkAndResetTimer(state);
@@ -35,9 +38,32 @@ class _SessionTimeoutListenerState extends State<SessionTimeoutListener> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     _authSubscription?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_isBendahara(widget.authBloc.state)) return;
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _backgroundTimestamp = DateTime.now();
+      _timer?.cancel();
+    } else if (state == AppLifecycleState.resumed) {
+      if (_backgroundTimestamp != null) {
+        final elapsed = DateTime.now().difference(_backgroundTimestamp!);
+        if (elapsed >= widget.timeoutDuration) {
+          _backgroundTimestamp = null;
+          _handleTimeout();
+          return;
+        }
+      }
+      _backgroundTimestamp = null;
+      _startTimer();
+    }
   }
 
   bool _isBendahara(AuthState state) {
