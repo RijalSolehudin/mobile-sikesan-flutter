@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/modal_scaffold_wrapper.dart';
 
 class MutationPeriodFilter extends StatelessWidget {
   final int? selectedMonth;
@@ -53,14 +54,24 @@ class MutationPeriodFilter extends StatelessWidget {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              ),
+        return ModalScaffoldWrapper(
+          child: StatefulBuilder(
+            builder: (ctx, setModalState) {
+              return Container(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.14),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
               child: SafeArea(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -187,9 +198,10 @@ class MutationPeriodFilter extends StatelessWidget {
               ),
             );
           },
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   @override

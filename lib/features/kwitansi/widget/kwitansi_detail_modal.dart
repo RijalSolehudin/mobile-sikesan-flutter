@@ -9,6 +9,7 @@ import '../../../data/repositories/kwitansi_repository.dart';
 import '../models/kwitansi_model.dart';
 import '../services/kwitansi_invoice_pdf.dart';
 import 'kwitansi_card.dart';
+import '../../../core/widgets/modal_scaffold_wrapper.dart';
 
 class KwitansiDetailModal extends StatefulWidget {
   final KwitansiModel item;
@@ -32,10 +33,12 @@ class KwitansiDetailModal extends StatefulWidget {
       context: context,
       useRootNavigator: true,
       barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (context) => KwitansiDetailModal(
-        item: item,
-        onDeleted: onDeleted,
-        onUpdated: onUpdated,
+      builder: (context) => ModalScaffoldWrapper(
+        child: KwitansiDetailModal(
+          item: item,
+          onDeleted: onDeleted,
+          onUpdated: onUpdated,
+        ),
       ),
     );
   }
@@ -158,8 +161,9 @@ _SIKESAN Digital_''';
       useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (bContext) => StatefulBuilder(
-        builder: (context, setModalState) {
+      builder: (bContext) => ModalScaffoldWrapper(
+        child: StatefulBuilder(
+          builder: (context, setModalState) {
           Future<void> save() async {
             final name = nameCtrl.text.trim();
             if (name.isEmpty) {
@@ -217,10 +221,19 @@ _SIKESAN Digital_''';
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 500),
               child: Container(
-                decoration: const BoxDecoration(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.14),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
+                clipBehavior: Clip.antiAlias,
                 padding: EdgeInsets.fromLTRB(
                   20,
                   16,
@@ -349,7 +362,7 @@ _SIKESAN Digital_''';
           );
         },
       ),
-    );
+    ));
   }
 
   void _handleDelete() {
@@ -359,18 +372,19 @@ _SIKESAN Digital_''';
     showDialog(
       context: context,
       useRootNavigator: true,
-      builder: (dContext) => StatefulBuilder(
-        builder: (dContext, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          title: Text(
-            'Hapus Kwitansi?',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+      builder: (dContext) => ModalScaffoldWrapper(
+        child: StatefulBuilder(
+          builder: (dContext, setDialogState) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
             ),
-          ),
+            title: Text(
+              'Hapus Kwitansi?',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           content: Text(
             'Apakah Anda yakin ingin menghapus kwitansi ${_currentItem.receiptNumber}? Tindakan ini tidak dapat dibatalkan.',
             style: GoogleFonts.plusJakartaSans(
@@ -439,7 +453,7 @@ _SIKESAN Digital_''';
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

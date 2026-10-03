@@ -11,6 +11,7 @@ class DashboardHistorySection extends StatelessWidget {
   final List<TransactionItemModel> transactions;
   final bool isLoading;
   final VoidCallback onViewAllTransactions;
+  final ValueChanged<TransactionItemModel>? onTransactionTap;
 
   // Optional legacy parameters for backwards compatibility
   final bool isGuardian;
@@ -27,6 +28,7 @@ class DashboardHistorySection extends StatelessWidget {
     required this.transactions,
     required this.isLoading,
     required this.onViewAllTransactions,
+    this.onTransactionTap,
     this.isGuardian = false,
     this.selectedTab = 1,
     this.onTabChanged,
@@ -137,7 +139,10 @@ class DashboardHistorySection extends StatelessWidget {
       separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final tx = displayList[index];
-        return TransactionHistoryTile(tx: tx);
+        return TransactionHistoryTile(
+          tx: tx,
+          onTap: onTransactionTap != null ? () => onTransactionTap!(tx) : null,
+        );
       },
     );
   }

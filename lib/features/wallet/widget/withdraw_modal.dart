@@ -13,6 +13,7 @@ import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import 'withdraw_receipt_modal.dart';
+import '../../../core/widgets/modal_scaffold_wrapper.dart';
 
 class WithdrawModal extends StatefulWidget {
   final int? preselectedStudentId;
@@ -35,9 +36,11 @@ class WithdrawModal extends StatefulWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => WithdrawModal(
-        preselectedStudentId: preselectedStudentId,
-        preselectedStudentName: preselectedStudentName,
+      builder: (context) => ModalScaffoldWrapper(
+        child: WithdrawModal(
+          preselectedStudentId: preselectedStudentId,
+          preselectedStudentName: preselectedStudentName,
+        ),
       ),
     );
   }
@@ -299,10 +302,19 @@ class _WithdrawModalState extends State<WithdrawModal> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
         child: Container(
-          decoration: const BoxDecoration(
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.14),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
+          clipBehavior: Clip.antiAlias,
           padding: EdgeInsets.fromLTRB(
             20,
             16,

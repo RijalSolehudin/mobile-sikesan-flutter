@@ -4,6 +4,7 @@ import '../../../core/services/receipt_pdf_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/widgets/modal_scaffold_wrapper.dart';
 import '../../../data/models/withdraw_models.dart';
 
 class WithdrawReceiptModal extends StatelessWidget {
@@ -18,7 +19,9 @@ class WithdrawReceiptModal extends StatelessWidget {
       useSafeArea: true,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => WithdrawReceiptModal(receipt: receipt),
+      builder: (context) => ModalScaffoldWrapper(
+        child: WithdrawReceiptModal(receipt: receipt),
+      ),
     );
   }
 
@@ -33,10 +36,19 @@ class WithdrawReceiptModal extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
         child: Container(
-          decoration: const BoxDecoration(
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.14),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
+          clipBehavior: Clip.antiAlias,
           padding: EdgeInsets.fromLTRB(
             20,
             16,

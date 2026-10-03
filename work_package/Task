@@ -1,5 +1,31 @@
-Behavior navigasi bottombar
-Fallback user jika baru direstart
-Generate NIS
-Icon Sikesan
+[FOR AI: IGNORED THIS]
+ui :
 menu verifikasi transaksi untuk bendahara
+role selection
+tambahkan progres bar di splashscreen
+
+implementasi :
+Generate NIS
+export csv/excel di mutasi
+data card menam
+
+bug:
+Keyboard behavior di halaman login
+card slider tidak bisa dimode web pc
+
+refactor :
+Required upload foto bukti
+
+
+fitur :
+Menu Kasir
+Menu Data santri
+Menu Rekening Wali asrama
+Menu Settings
+Halaman Profile
+Halaman CS sikesan 
+Halaman Pengumuman
+
+
+
+PENDING :

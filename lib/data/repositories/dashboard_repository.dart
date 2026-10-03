@@ -53,11 +53,13 @@ class DashboardRepository {
     int perPage = 10,
     int? month,
     int? year,
+    int? studentId,
   }) async {
     try {
       final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
       if (month != null) queryParams['month'] = month;
       if (year != null) queryParams['year'] = year;
+      if (studentId != null) queryParams['student_id'] = studentId;
 
       final response = await dioClient.dio.get(
         ApiEndpoints.walletTransactions,

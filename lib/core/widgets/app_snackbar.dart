@@ -40,14 +40,14 @@ class AppSnackBar {
 
     final snackBar = SnackBar(
       behavior: SnackBarBehavior.floating,
-      elevation: 3,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      elevation: 6,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       backgroundColor: config.backgroundColor,
       duration: duration ?? _defaultDuration,
       dismissDirection: DismissDirection.horizontal,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: config.borderColor, width: 1),
       ),
       content: Row(

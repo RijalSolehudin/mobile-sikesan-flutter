@@ -15,6 +15,7 @@ import '../../../data/repositories/infaq_repository.dart';
 import '../../../data/repositories/kwitansi_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../models/kwitansi_model.dart';
+import '../../../core/widgets/modal_scaffold_wrapper.dart';
 
 class CreateKwitansiModal extends StatefulWidget {
   final List<String> existingCategories;
@@ -35,9 +36,11 @@ class CreateKwitansiModal extends StatefulWidget {
       context: context,
       useRootNavigator: true,
       barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (context) => CreateKwitansiModal(
-        existingCategories: existingCategories,
-        onCreated: onCreated,
+      builder: (context) => ModalScaffoldWrapper(
+        child: CreateKwitansiModal(
+          existingCategories: existingCategories,
+          onCreated: onCreated,
+        ),
       ),
     );
   }

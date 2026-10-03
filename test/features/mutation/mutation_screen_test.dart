@@ -24,6 +24,7 @@ class MockDashboardRepository extends DashboardRepository {
     int perPage = 15,
     int? month,
     int? year,
+    int? studentId,
   }) async {
     final list = pageData[page] ?? [];
     return ApiSuccess(list);

@@ -15,6 +15,7 @@ import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
 import '../../spp/widget/receipt_preview_modal.dart';
 import '../../../core/widgets/app_snackbar.dart';
+import '../../../core/widgets/modal_scaffold_wrapper.dart';
 
 class PayInfaqModal extends StatefulWidget {
   const PayInfaqModal({super.key});
@@ -26,7 +27,7 @@ class PayInfaqModal extends StatefulWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const PayInfaqModal(),
+      builder: (context) => const ModalScaffoldWrapper(child: PayInfaqModal()),
     );
   }
 
@@ -241,18 +242,22 @@ class _PayInfaqModalState extends State<PayInfaqModal>
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (ctx) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(
-                Icons.photo_camera_rounded,
-                color: Color(0xFFF59E0B),
-              ),
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_camera_rounded,
+                  color: Color(0xFFF59E0B),
+                ),
               title: Text(
                 'Ambil Foto dari Kamera',
                 style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
@@ -278,6 +283,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -527,10 +533,11 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       );
       ReceiptPreviewModal.show(parentContext, fallbackReceipt);
     } else {
+      if (!mounted) return;
       final errorMsg = result is ApiFailure
           ? (result as ApiFailure).message
           : 'Gagal memproses pembayaran';
-      AppSnackBar.showError(null, errorMsg);
+      AppSnackBar.showError(context, errorMsg);
     }
   }
 
@@ -639,13 +646,22 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 720,
-          maxHeight: MediaQuery.of(context).size.height * 0.94,
+          maxHeight: MediaQuery.of(context).size.height * 0.90,
         ),
         child: Container(
-          decoration: const BoxDecoration(
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.14),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
+          clipBehavior: Clip.antiAlias,
           padding: EdgeInsets.fromLTRB(
             20,
             16,

@@ -151,9 +151,9 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         metrics = metricsResult.data;
       }
 
-      List<TransactionItemModel> transactions = [];
+      List<TransactionItemModel> rawTransactions = [];
       if (transactionsResult is ApiSuccess<List<TransactionItemModel>>) {
-        transactions = transactionsResult.data;
+        rawTransactions = transactionsResult.data;
       }
 
       List<BillHistoryModel> bills = [];
@@ -161,11 +161,67 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         bills = billsResult.data;
       }
 
+      // Filter dan integrasi transaksi sesuai relasi santri dan status (menunggu verifikasi & lunas)
+      final isGuardian = role.toLowerCase().contains('wali');
+      final guardianStudentIds = metrics.students.map((s) => s.id).toSet();
+      final guardianStudentNames =
+          metrics.students.map((s) => s.name.toLowerCase().trim()).toSet();
+
+      final List<TransactionItemModel> mergedTransactions = [];
+      final Set<String> seenIds = {};
+
+      // 1. Integrasikan transaksi dari bills yang berstatus PENDING (Menunggu Verifikasi) atau PAID (Lunas)
+      for (final bill in bills) {
+        if (isGuardian && guardianStudentIds.isNotEmpty) {
+          final matchesId =
+              bill.studentId > 0 && guardianStudentIds.contains(bill.studentId);
+          final matchesName = bill.studentName.isNotEmpty &&
+              guardianStudentNames
+                  .contains(bill.studentName.toLowerCase().trim());
+          if (!matchesId && !matchesName) continue;
+        }
+
+        if (bill.isPending || bill.isPaid) {
+          final txFromBill = TransactionItemModel.fromBillModel(bill);
+          if (seenIds.add(txFromBill.id)) {
+            mergedTransactions.add(txFromBill);
+          }
+        }
+      }
+
+      // 2. Tambahkan transaksi dari wallet transactions
+      for (final tx in rawTransactions) {
+        if (isGuardian && guardianStudentIds.isNotEmpty) {
+          final hasStudentId = tx.studentId != null && tx.studentId! > 0;
+          final matchesId =
+              hasStudentId && guardianStudentIds.contains(tx.studentId!);
+          final matchesName = tx.studentName != null &&
+              tx.studentName != 'Santri' &&
+              guardianStudentNames
+                  .contains(tx.studentName!.toLowerCase().trim());
+
+          if ((hasStudentId && !matchesId) ||
+              (tx.studentName != null &&
+                  tx.studentName != 'Santri' &&
+                  !matchesName &&
+                  !matchesId)) {
+            continue;
+          }
+        }
+
+        if (seenIds.add(tx.id)) {
+          mergedTransactions.add(tx);
+        }
+      }
+
+      // 3. Urutkan berdasarkan waktu transaksi terbaru (UTC+7)
+      mergedTransactions.sort((a, b) => b.date.compareTo(a.date));
+
       emit(
         state.copyWith(
           status: DashboardStatus.loaded,
           metrics: metrics,
-          transactions: transactions,
+          transactions: mergedTransactions,
           bills: bills,
           billsPage: 1,
           billsHasMore: bills.length >= 10,

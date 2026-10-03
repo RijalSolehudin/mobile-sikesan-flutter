@@ -135,10 +135,19 @@ class _TransactionPinSheetState extends State<TransactionPinSheet> {
         top: 24,
         bottom: bottomInset > 0 ? bottomInset + 16 : 32,
       ),
-      decoration: const BoxDecoration(
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.14),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

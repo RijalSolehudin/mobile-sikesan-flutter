@@ -17,6 +17,7 @@ import '../../../data/repositories/wallet_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
 import 'top_up_receipt_modal.dart';
+import '../../../core/widgets/modal_scaffold_wrapper.dart';
 
 class TopUpModal extends StatefulWidget {
   final int? preselectedStudentId;
@@ -39,9 +40,11 @@ class TopUpModal extends StatefulWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => TopUpModal(
-        preselectedStudentId: preselectedStudentId,
-        preselectedStudentName: preselectedStudentName,
+      builder: (context) => ModalScaffoldWrapper(
+        child: TopUpModal(
+          preselectedStudentId: preselectedStudentId,
+          preselectedStudentName: preselectedStudentName,
+        ),
       ),
     );
   }
@@ -214,36 +217,41 @@ class _TopUpModalState extends State<TopUpModal> {
     showModalBottomSheet(
       context: context,
       useRootNavigator: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (ctx) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(
-                Icons.photo_camera_rounded,
-                color: AppColors.primary,
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_camera_rounded,
+                  color: AppColors.primary,
+                ),
+                title: const Text('Ambil Foto dari Kamera'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _pickImage(ImageSource.camera);
+                },
               ),
-              title: const Text('Ambil Foto dari Kamera'),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                _pickImage(ImageSource.camera);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.photo_library_rounded,
-                color: AppColors.primary,
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_library_rounded,
+                  color: AppColors.primary,
+                ),
+                title: const Text('Pilih dari Galeri'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  _pickImage(ImageSource.gallery);
+                },
               ),
-              title: const Text('Pilih dari Galeri'),
-              onTap: () {
-                Navigator.of(ctx).pop();
-                _pickImage(ImageSource.gallery);
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -590,13 +598,22 @@ class _TopUpModalState extends State<TopUpModal> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: 720,
-          maxHeight: MediaQuery.of(context).size.height * 0.92,
+          maxHeight: MediaQuery.of(context).size.height * 0.90,
         ),
         child: Container(
-          decoration: const BoxDecoration(
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.14),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
+          clipBehavior: Clip.antiAlias,
           padding: EdgeInsets.fromLTRB(
             20,
             16,
