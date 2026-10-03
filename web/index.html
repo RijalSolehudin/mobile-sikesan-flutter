@@ -165,20 +165,11 @@
       };
 
       window.sikesanPushModal = function() {
-        modalDepth++;
-        try {
-          window.history.pushState({ sikesanModal: modalDepth }, '', window.location.href);
-        } catch (e) {}
+        // Managed natively by Flutter's Navigator stack to prevent GoRouter popstate reload loops
       };
 
       window.sikesanPopModal = function() {
-        if (modalDepth > 0) {
-          modalDepth--;
-          isPoppingFromFlutter = true;
-          try {
-            window.history.back();
-          } catch (e) {}
-        }
+        // Managed natively by Flutter's Navigator stack to prevent GoRouter popstate reload loops
       };
 
       window.sikesanEnableRootGuard = function() {

@@ -54,14 +54,12 @@ class WebHistoryManager {
   }
 
   void onModalPushed() {
-    if (isHandlingBrowserPop) return;
     try {
       _sikesanPushModal();
     } catch (_) {}
   }
 
   void onModalPopped() {
-    if (isHandlingBrowserPop) return;
     try {
       _sikesanPopModal();
     } catch (_) {}

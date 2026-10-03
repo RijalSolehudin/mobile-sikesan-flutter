@@ -19,15 +19,33 @@ import '../widget/kwitansi_card.dart';
 import '../widget/kwitansi_detail_modal.dart';
 import '../widget/create_kwitansi_modal.dart';
 
-class KwitansiScreen extends StatelessWidget {
+class KwitansiScreen extends StatefulWidget {
   const KwitansiScreen({super.key});
 
   @override
+  State<KwitansiScreen> createState() => _KwitansiScreenState();
+}
+
+class _KwitansiScreenState extends State<KwitansiScreen> {
+  late final KwitansiBloc _bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = KwitansiBloc(repository: context.read<KwitansiRepository>())
+      ..add(const KwitansiStarted());
+  }
+
+  @override
+  void dispose() {
+    _bloc.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          KwitansiBloc(repository: context.read<KwitansiRepository>())
-            ..add(const KwitansiStarted()),
+    return BlocProvider.value(
+      value: _bloc,
       child: const _KwitansiScreenBody(),
     );
   }

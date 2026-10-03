@@ -283,4 +283,30 @@ void main() {
       expect(find.byType(KwitansiCard), findsNWidgets(3));
     },
   );
+
+  testWidgets(
+    'Selecting dropdown value in CreateKwitansiModal keeps modal open and stable',
+    (tester) async {
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(CreateKwitansiModal), findsOneWidget);
+
+      // Tap category dropdown
+      final dropdownFinder = find.byType(DropdownButtonFormField<String>).first;
+      await tester.ensureVisible(dropdownFinder);
+      await tester.tap(dropdownFinder);
+      await tester.pumpAndSettle();
+
+      // Select 'Pondok'
+      final pondokItem = find.text('Pondok').last;
+      await tester.tap(pondokItem);
+      await tester.pumpAndSettle();
+
+      // Verify modal is still open and not dismissed
+      expect(find.byType(CreateKwitansiModal), findsOneWidget);
+    },
+  );
 }

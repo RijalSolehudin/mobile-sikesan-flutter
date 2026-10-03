@@ -1,30 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'web_history_manager.dart';
 
-/// NavigatorObserver that tracks popup routes (modals, dialogs, bottom sheets)
-/// and informs the WebHistoryManager to keep browser history synchronized.
-class WebModalHistoryObserver extends NavigatorObserver {
-  @override
-  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didPush(route, previousRoute);
-    if (route is PopupRoute) {
-      WebHistoryManager.instance.onModalPushed();
-    }
-  }
-
-  @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didPop(route, previousRoute);
-    if (route is PopupRoute) {
-      WebHistoryManager.instance.onModalPopped();
-    }
-  }
-
-  @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    super.didRemove(route, previousRoute);
-    if (route is PopupRoute) {
-      WebHistoryManager.instance.onModalPopped();
-    }
-  }
-}
+/// Legacy observer preserved for backwards compatibility.
+///
+/// Modals, dialogs, bottom sheets, and dropdowns are managed natively by
+/// Flutter's [Navigator] stack. Directly invoking browser history.pushState
+/// and history.back on modal/dropdown push/pop conflicts with GoRouter's
+/// RouteInformationProvider, triggering spurious page reloads and re-push cycles.
+class WebModalHistoryObserver extends NavigatorObserver {}
