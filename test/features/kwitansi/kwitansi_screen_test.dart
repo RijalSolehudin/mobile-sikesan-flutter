@@ -1,5 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_sikesan_flutter/core/network/api_result.dart';
+import 'package:mobile_sikesan_flutter/core/network/dio_client.dart';
+import 'package:mobile_sikesan_flutter/data/local/secure_storage_service.dart';
+import 'package:mobile_sikesan_flutter/data/models/user_model.dart';
+import 'package:mobile_sikesan_flutter/data/repositories/auth_repository.dart';
+import 'package:mobile_sikesan_flutter/data/repositories/infaq_repository.dart';
+import 'package:mobile_sikesan_flutter/data/repositories/kwitansi_repository.dart';
+import 'package:mobile_sikesan_flutter/features/auth/bloc/auth_bloc.dart';
 import 'package:mobile_sikesan_flutter/features/kwitansi/screen/kwitansi_screen.dart';
 import 'package:mobile_sikesan_flutter/features/kwitansi/widget/kwitansi_header.dart';
 import 'package:mobile_sikesan_flutter/features/kwitansi/widget/kwitansi_summary_card.dart';
@@ -7,194 +18,269 @@ import 'package:mobile_sikesan_flutter/features/kwitansi/widget/kwitansi_card.da
 import 'package:mobile_sikesan_flutter/features/kwitansi/widget/kwitansi_detail_modal.dart';
 import 'package:mobile_sikesan_flutter/features/kwitansi/widget/create_kwitansi_modal.dart';
 
+const _processor = {
+  'id': 7,
+  'name': 'Risda Nur Fajar Purnama,SE',
+  'phone': '088218712525',
+};
+
+const _loggedInUser = UserModel(
+  id: 7,
+  name: 'Risda Nur Fajar Purnama,SE',
+  username: 'risda',
+  email: 'risda@example.com',
+  role: 'Bendahara',
+  phone: '088218712525',
+);
+
+Map<String, dynamic> _kwitansiJson({
+  required int id,
+  required String number,
+  required String name,
+  required num price,
+  String issuedAt = '2026-09-01T17:36:00',
+  String? whatsapp,
+}) => {
+  'id': id,
+  'receipt_number': number,
+  'issued_at': issuedAt,
+  'recipient_name': name,
+  'category': 'Pondok',
+  'payment_method': 'Transfer',
+  'status': 'active',
+  'whatsapp_number': whatsapp,
+  'signer_role': 'Bendahara Yayasan',
+  'total_amount': price,
+  'items': [
+    {'id': id * 10, 'description': 'SPP Bulan September 2026', 'qty': 1, 'price': price},
+  ],
+  'processed_by': _processor,
+};
+
+/// Backend palsu in-memory yang mengikuti kontrak `/kwitansi`.
+class _FakeKwitansiBackend {
+  final List<Map<String, dynamic>> store = [
+    _kwitansiJson(
+      id: 1,
+      number: 'INV/PONDOK/2026/09/01/017',
+      name: 'M Nazri Fatih altaf',
+      price: 500000,
+    ),
+    _kwitansiJson(
+      id: 2,
+      number: 'INV/PONDOK/2026/09/02/018',
+      name: 'Muhammad Rais Al Fatih',
+      price: 750000,
+      issuedAt: '2026-09-02T17:24:00',
+    ),
+  ];
+  Map<String, dynamic>? lastCreatePayload;
+
+  void handle(RequestOptions options, RequestInterceptorHandler handler) {
+    Response ok(dynamic data, [int code = 200]) =>
+        Response(requestOptions: options, statusCode: code, data: data);
+
+    final path = options.path;
+    final detail = RegExp(r'^/kwitansi/(\d+)$').firstMatch(path);
+
+    if (path == '/students') {
+      return handler.resolve(ok({'data': <dynamic>[]}));
+    }
+    if (path == '/kwitansi/categories') {
+      return handler.resolve(ok({'data': ['Pondok']}));
+    }
+    if (path == '/kwitansi' && options.method == 'GET') {
+      final q = (options.queryParameters['search'] ?? '').toString().toLowerCase();
+      final list = store
+          .where((e) => q.isEmpty || e['recipient_name'].toString().toLowerCase().contains(q))
+          .toList();
+      return handler.resolve(ok({
+        'data': {'data': list, 'current_page': 1, 'last_page': 1, 'total': list.length},
+      }));
+    }
+    if (path == '/kwitansi' && options.method == 'POST') {
+      final body = Map<String, dynamic>.from(options.data as Map);
+      lastCreatePayload = body;
+      final items = (body['items'] as List).cast<Map<String, dynamic>>();
+      final total = items.fold<num>(0, (s, e) => s + (e['qty'] as int) * (e['price'] as num));
+      final created = {
+        ...body,
+        'id': 99,
+        'receipt_number': 'INV/PONDOK/2026/09/03/099',
+        'status': 'active',
+        'total_amount': total,
+        // Backend mengisi penandatangan dari akun yang login
+        'processed_by': _processor,
+      };
+      store.insert(0, created);
+      return handler.resolve(ok({'data': created, 'message': 'Kwitansi dibuat'}, 201));
+    }
+    if (detail != null) {
+      final id = int.parse(detail.group(1)!);
+      final idx = store.indexWhere((e) => e['id'] == id);
+      if (idx == -1) return handler.resolve(ok({'message': 'Not found'}, 404));
+      if (options.method == 'DELETE') {
+        store.removeAt(idx);
+        return handler.resolve(ok({'message': 'Dihapus'}));
+      }
+      return handler.resolve(ok({'data': store[idx]}));
+    }
+    handler.resolve(ok({'message': 'Unhandled $path'}, 404));
+  }
+}
+
+class _FakeAuthRepository extends AuthRepository {
+  _FakeAuthRepository()
+    : super(DioClient(secureStorage: SecureStorageService()), SecureStorageService());
+
+  @override
+  Future<ApiResult<UserModel>> login({
+    required String username,
+    required String password,
+  }) async => const ApiSuccess(_loggedInUser);
+}
+
 void main() {
-  testWidgets(
-    'KwitansiScreen renders header, summary card, and receipt items correctly',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: KwitansiScreen()));
-      await tester.pumpAndSettle();
+  late _FakeKwitansiBackend backend;
+  late Dio dio;
+  late DioClient dioClient;
+  late AuthBloc authBloc;
 
-      // Check Header
-      expect(find.byType(KwitansiHeader), findsOneWidget);
-      expect(find.text('Kwitansi Digital'), findsOneWidget);
-      expect(find.text('Kelola & Buat Kwitansi'), findsOneWidget);
+  setUp(() async {
+    FlutterSecureStorage.setMockInitialValues({});
+    backend = _FakeKwitansiBackend();
+    dio = Dio();
+    dioClient = DioClient.withDio(dio, secureStorage: SecureStorageService());
+    dio.interceptors.add(InterceptorsWrapper(onRequest: backend.handle));
+    authBloc = AuthBloc(authRepository: _FakeAuthRepository())
+      ..add(const AuthLoginRequested(username: 'risda', password: 'x'));
+    await authBloc.stream.firstWhere((s) => s.user != null);
+  });
 
-      // Check Search & Calendar
-      expect(find.text('Cari Nama Penerima'), findsOneWidget);
-      expect(find.byIcon(Icons.calendar_month_outlined), findsOneWidget);
+  tearDown(() => authBloc.close());
 
-      // Check Filter Chips
-      expect(find.text('Semua'), findsOneWidget);
-      expect(find.text('Pondok'), findsWidgets);
-
-      // Check Summary Card
-      expect(find.byType(KwitansiSummaryCard), findsOneWidget);
-      expect(find.text('Total Kwitansi'), findsOneWidget);
-      expect(find.text('5'), findsOneWidget);
-      expect(find.text('Periode & Kategori Terpilih'), findsOneWidget);
-
-      // Check Section Title
-      expect(find.text('Riwayat Kwitansi'), findsOneWidget);
-
-      // Check Receipt Cards
-      expect(find.byType(KwitansiCard), findsNWidgets(5));
-      expect(find.text('M Nazri Fatih altaf'), findsOneWidget);
-      expect(find.text('Muhammad Rais Al Fatih'), findsOneWidget);
-      expect(find.text('INV/PONDOK/2026/09/01/017'), findsOneWidget);
-      expect(find.text('Rp 500.000'), findsOneWidget);
-      expect(find.text('Rp 750.000'), findsOneWidget);
-
-      // Check FAB
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-      expect(find.byIcon(Icons.add), findsOneWidget);
-
-      // Test Search filtering
-      await tester.enterText(find.byType(TextField), 'Nazri');
-      await tester.pumpAndSettle();
-
-      expect(find.byType(KwitansiCard), findsOneWidget);
-      expect(find.text('M Nazri Fatih altaf'), findsOneWidget);
-      expect(find.text('Muhammad Rais Al Fatih'), findsNothing);
-      expect(find.text('1'), findsOneWidget); // summary card updated to 1
-    },
+  Widget buildApp() => MultiRepositoryProvider(
+    providers: [
+      RepositoryProvider(create: (_) => KwitansiRepository(dioClient)),
+      RepositoryProvider(create: (_) => InfaqRepository(dioClient)),
+    ],
+    child: BlocProvider.value(
+      value: authBloc,
+      child: const MaterialApp(home: KwitansiScreen()),
+    ),
   );
 
+  testWidgets('KwitansiScreen loads receipts from backend and searches server-side', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(KwitansiHeader), findsOneWidget);
+    expect(find.text('Semua'), findsOneWidget);
+    expect(find.text('Pondok'), findsWidgets);
+    expect(find.byType(KwitansiSummaryCard), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.byType(KwitansiCard), findsNWidgets(2));
+    expect(find.text('M Nazri Fatih altaf'), findsOneWidget);
+    expect(find.text('INV/PONDOK/2026/09/01/017'), findsOneWidget);
+    expect(find.text('Rp 500.000'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'Nazri');
+    await tester.pump(const Duration(milliseconds: 500)); // debounce
+    await tester.pumpAndSettle();
+
+    expect(find.byType(KwitansiCard), findsOneWidget);
+    expect(find.text('Muhammad Rais Al Fatih'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+  });
+
+  testWidgets('Detail shows signer from processed_by account', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('M Nazri Fatih altaf'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(KwitansiDetailModal), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(KwitansiDetailModal),
+        matching: find.text('01/09/2026 17:36'),
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Lima Ratus Ribu Rupiah'), findsOneWidget);
+    expect(find.text('Risda Nur Fajar Purnama,SE'), findsOneWidget);
+    expect(find.text('Bendahara Yayasan'), findsOneWidget);
+    expect(find.text('Unduh PDF'), findsOneWidget);
+    expect(find.text('Hapus'), findsOneWidget);
+  });
+
+  testWidgets('Delete calls backend and removes the card', (tester) async {
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('M Nazri Fatih altaf'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hapus'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Hapus'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(KwitansiDetailModal), findsNothing);
+    expect(backend.store.any((e) => e['id'] == 1), isFalse);
+    expect(find.text('M Nazri Fatih altaf'), findsNothing);
+    expect(find.byType(KwitansiCard), findsOneWidget);
+  });
+
   testWidgets(
-    'Tapping a KwitansiCard opens KwitansiDetailModal with exact visual layout',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: KwitansiScreen()));
+    'Create posts to backend without signer name; signer comes from logged-in account',
+    (tester) async {
+      await tester.pumpWidget(buildApp());
       await tester.pumpAndSettle();
 
-      // Tap on the first receipt card
-      await tester.tap(find.text('M Nazri Fatih altaf'));
-      await tester.pumpAndSettle();
-
-      // Verify KwitansiDetailModal is open
-      expect(find.byType(KwitansiDetailModal), findsOneWidget);
-
-      // Verify modal header and invoice number
-      expect(
-        find.descendant(
-          of: find.byType(KwitansiDetailModal),
-          matching: find.text('INV/PONDOK/2026/09/01/017'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byType(KwitansiDetailModal),
-          matching: find.text('01/09/2026 17:36'),
-        ),
-        findsOneWidget,
-      );
-
-      // Verify Total Kwitansi card
-      expect(find.text('TOTAL KWITANSI'), findsOneWidget);
-
-      // Verify details
-      expect(find.text('Terima Dari'), findsOneWidget);
-      expect(find.text('Uang Sebesar'), findsOneWidget);
-      expect(find.text('Lima Ratus Ribu Rupiah'), findsOneWidget);
-      expect(find.text('Detail Item'), findsOneWidget);
-      expect(find.text('Metode Pembayaran'), findsOneWidget);
-      expect(find.text('Hormat Kami'), findsOneWidget);
-      expect(find.text('Risda Nur Fajar Purnama'), findsOneWidget);
-      expect(find.text('Bendahara Yayasan'), findsOneWidget);
-
-      // Verify 4 action buttons
-      expect(find.text('Unduh PDF'), findsOneWidget);
-      expect(find.text('Print'), findsOneWidget);
-      expect(find.text('Edit'), findsOneWidget);
-      expect(find.text('Hapus'), findsOneWidget);
-
-      // Close modal
-      await tester.tap(find.byIcon(Icons.close_rounded));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(KwitansiDetailModal), findsNothing);
-    },
-  );
-
-  testWidgets(
-    'Tapping + opens CreateKwitansiModal, submits, and opens KwitansiDetailModal with WhatsApp button',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: KwitansiScreen()));
-      await tester.pumpAndSettle();
-
-      // Tap FAB
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
-
-      // Verify CreateKwitansiModal is open
       expect(find.byType(CreateKwitansiModal), findsOneWidget);
-      expect(find.text('Buat Invoice Digital'), findsOneWidget);
-      expect(
-        find.text('Isi detail invoice / kwitansi digital'),
-        findsOneWidget,
-      );
 
-      // Verify form fields
-      expect(
-        find.text('Ketik nama atau pilih dari database..'),
-        findsOneWidget,
-      );
-      expect(find.text('Simpan Invoice'), findsOneWidget);
-      expect(find.text('Grand Total'), findsOneWidget);
+      // Penandatangan read-only dari akun yang login
+      expect(find.text('Risda Nur Fajar Purnama,SE'), findsOneWidget);
+      expect(find.text('Nama penandatangan'), findsNothing);
 
-      // Fill in Nama Tujuan
       await tester.enterText(
-        find.widgetWithText(
-          TextFormField,
-          'Ketik nama atau pilih dari database..',
-        ),
+        find.widgetWithText(TextFormField, 'Ketik nama atau pilih dari database..'),
         'das',
       );
-      await tester.pumpAndSettle();
-
-      // Fill in No WhatsApp
       await tester.enterText(
         find.widgetWithText(TextFormField, '08xxxxxxxxxx'),
         '081234567890',
       );
-      await tester.pumpAndSettle();
-
-      // Fill in Email
-      await tester.enterText(
-        find.widgetWithText(TextFormField, 'email@contoh.com'),
-        'das@gmail.com',
-      );
-      await tester.pumpAndSettle();
-
-      // Fill item price
       await tester.enterText(find.widgetWithText(TextFormField, '0'), '1');
-      await tester.pumpAndSettle();
-
-      // Fill item description
       await tester.enterText(
         find.widgetWithText(TextFormField, 'Deskripsi Item'),
         'das',
       );
       await tester.pumpAndSettle();
 
-      // Scroll down to submit button and tap
       await tester.ensureVisible(find.text('Simpan Invoice'));
       await tester.tap(find.text('Simpan Invoice'));
       await tester.pumpAndSettle();
 
-      // Verify KwitansiDetailModal is opened immediately after submit (Screenshot 3)
+      final payload = backend.lastCreatePayload!;
+      expect(payload['recipient_name'], 'das');
+      expect(payload['whatsapp_number'], '081234567890');
+      expect(payload.containsKey('signer_name'), isFalse);
+      expect(payload.containsKey('contact'), isFalse);
+      expect((payload['items'] as List).single['price'], 1);
+
       expect(find.byType(KwitansiDetailModal), findsOneWidget);
-      expect(find.text('TOTAL KWITANSI'), findsOneWidget);
-      expect(find.text('Rp 1'), findsWidgets);
       expect(find.text('Satu Rupiah'), findsOneWidget);
       expect(find.text('WhatsApp'), findsOneWidget);
-      expect(find.text('Unduh PDF'), findsOneWidget);
-      expect(find.text('Print'), findsOneWidget);
 
-      // Close KwitansiDetailModal
       await tester.tap(find.byIcon(Icons.close_rounded));
       await tester.pumpAndSettle();
-
-      expect(find.byType(KwitansiDetailModal), findsNothing);
+      expect(find.byType(KwitansiCard), findsNWidgets(3));
     },
   );
 }

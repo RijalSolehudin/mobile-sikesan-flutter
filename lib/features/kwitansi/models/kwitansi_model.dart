@@ -1,11 +1,22 @@
+import 'package:intl/intl.dart';
+
 import '../../../core/utils/currency_formatter.dart';
 
+num _toNum(dynamic value) => num.tryParse(value?.toString() ?? '') ?? 0;
+
+String? _toNullableString(dynamic value) {
+  final str = value?.toString().trim();
+  return (str == null || str.isEmpty) ? null : str;
+}
+
 class KwitansiItemDetail {
+  final String? id;
   final String description;
   final int qty;
   final num price;
 
   const KwitansiItemDetail({
+    this.id,
     required this.description,
     this.qty = 1,
     required this.price,
@@ -14,69 +25,173 @@ class KwitansiItemDetail {
   num get total => qty * price;
 
   String get formattedTotal => CurrencyFormatter.format(total);
+
+  factory KwitansiItemDetail.fromJson(Map<String, dynamic> json) {
+    return KwitansiItemDetail(
+      id: json['id']?.toString(),
+      description: json['description']?.toString() ?? 'Item Pembayaran',
+      qty: int.tryParse(json['qty']?.toString() ?? '') ?? 1,
+      price: _toNum(json['price']),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'description': description,
+    'qty': qty,
+    'price': price,
+  };
+}
+
+/// Akun (staf) yang memproses / menerbitkan kwitansi.
+/// Namanya dipakai sebagai penandatangan & nomornya sebagai "Kontak Kami".
+class KwitansiProcessor {
+  final int? id;
+  final String name;
+  final String? phone;
+
+  const KwitansiProcessor({this.id, required this.name, this.phone});
+
+  factory KwitansiProcessor.fromJson(Map<String, dynamic> json) {
+    return KwitansiProcessor(
+      id: int.tryParse(json['id']?.toString() ?? ''),
+      name: json['name']?.toString() ?? json['username']?.toString() ?? '-',
+      phone: _toNullableString(json['phone']),
+    );
+  }
 }
 
 class KwitansiModel {
+  static const String defaultSignerRole = 'Bendahara Yayasan';
+
   final String id;
   final String receiptNumber;
   final String recipientName;
+  final int? studentId;
   final String category;
-  final String itemCountDescription;
   final num amount;
-  final String dateTime;
+  final DateTime? issuedAt;
   final String paymentMethod;
   final String status;
   final String? note;
-  final String? studentNis;
-  final String? studentClass;
-  final String? itemDetailTitle;
-  final String signerName;
   final String signerRole;
+  final KwitansiProcessor? processedBy;
   final String? whatsappNumber;
   final String? email;
   final String? address;
-  final String? contact;
-  final String? attachmentPath;
+  final String? attachmentUrl;
   final List<KwitansiItemDetail> items;
 
   const KwitansiModel({
     required this.id,
     required this.receiptNumber,
     required this.recipientName,
+    this.studentId,
     required this.category,
-    required this.itemCountDescription,
     required this.amount,
-    required this.dateTime,
+    this.issuedAt,
     required this.paymentMethod,
     required this.status,
     this.note,
-    this.studentNis,
-    this.studentClass,
-    this.itemDetailTitle,
-    this.signerName = 'Risda Nur Fajar Purnama',
-    this.signerRole = 'Bendahara Yayasan',
+    this.signerRole = defaultSignerRole,
+    this.processedBy,
     this.whatsappNumber,
     this.email,
     this.address,
-    this.contact,
-    this.attachmentPath,
+    this.attachmentUrl,
     this.items = const [],
   });
 
+  // ---------------------------------------------------------------------------
+  // Derived / display getters
+  // ---------------------------------------------------------------------------
+
+  /// Nama penandatangan = nama akun yang memproses kwitansi.
+  String get signerName => processedBy?.name ?? '-';
+
+  /// Nomor kontak = nomor telepon akun yang memproses kwitansi.
+  String? get contact => processedBy?.phone;
+
   String get formattedAmount => CurrencyFormatter.format(amount);
+
+  /// Format tampilan `dd/MM/yyyy HH:mm` (dipakai kartu, detail & invoice).
+  String get dateTime =>
+      issuedAt == null ? '-' : DateFormat('dd/MM/yyyy HH:mm').format(issuedAt!);
+
+  String get itemCountDescription =>
+      '${items.isEmpty ? 1 : items.length} Item Pembayaran';
 
   String get displayItemDetail {
     if (items.isNotEmpty) {
       final first = items.first;
-      return '${first.description} (${first.qty}x)';
+      final more = items.length > 1 ? ' +${items.length - 1} item' : '';
+      return '${first.description} (${first.qty}x)$more';
     }
-    return itemDetailTitle ??
-        (note != null && note!.isNotEmpty
-            ? note!
-            : '$itemCountDescription ($category)');
+    return note != null && note!.isNotEmpty ? note! : category;
   }
 
   String get spelledAmount => numberToWords(amount);
+
+  // ---------------------------------------------------------------------------
+  // JSON mapping
+  // ---------------------------------------------------------------------------
+
+  static String _mapStatus(String? raw) {
+    switch ((raw ?? '').toLowerCase()) {
+      case 'active':
+      case 'aktif':
+      case '':
+        return 'Aktif';
+      case 'void':
+      case 'cancelled':
+      case 'canceled':
+        return 'Dibatalkan';
+      default:
+        return raw!;
+    }
+  }
+
+  factory KwitansiModel.fromJson(Map<String, dynamic> json) {
+    final rawItems = json['items'];
+    final items = rawItems is List
+        ? rawItems
+              .whereType<Map<String, dynamic>>()
+              .map(KwitansiItemDetail.fromJson)
+              .toList()
+        : <KwitansiItemDetail>[];
+
+    final itemsTotal = items.fold<num>(0, (sum, e) => sum + e.total);
+    final total = json['total_amount'] ?? json['amount'];
+
+    final processed = json['processed_by'] ?? json['processor'];
+
+    return KwitansiModel(
+      id: json['id']?.toString() ?? '',
+      receiptNumber: json['receipt_number']?.toString() ?? '-',
+      recipientName: json['recipient_name']?.toString() ?? '-',
+      studentId: int.tryParse(json['student_id']?.toString() ?? ''),
+      category: json['category']?.toString() ?? 'Pondok',
+      amount: total != null ? _toNum(total) : itemsTotal,
+      issuedAt: DateTime.tryParse(
+        (json['issued_at'] ?? json['created_at'])?.toString() ?? '',
+      )?.toLocal(),
+      paymentMethod: json['payment_method']?.toString() ?? 'Transfer',
+      status: _mapStatus(json['status']?.toString()),
+      note: _toNullableString(json['note']),
+      signerRole: _toNullableString(json['signer_role']) ?? defaultSignerRole,
+      processedBy: processed is Map<String, dynamic>
+          ? KwitansiProcessor.fromJson(processed)
+          : null,
+      whatsappNumber: _toNullableString(json['whatsapp_number']),
+      email: _toNullableString(json['email']),
+      address: _toNullableString(json['address']),
+      attachmentUrl: _toNullableString(json['attachment_url']),
+      items: items,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
 
   static String numberToWords(num number) {
     final satuan = [
@@ -124,130 +239,103 @@ class KwitansiModel {
     final result = convert(n).replaceAll(RegExp(r'\s+'), ' ').trim();
     return '$result Rupiah';
   }
+}
 
-  KwitansiModel copyWith({
-    String? id,
-    String? receiptNumber,
+/// Payload untuk membuat / memperbarui kwitansi.
+///
+/// Sengaja TIDAK memuat nama penandatangan maupun kontak: backend mengisinya
+/// dari akun yang sedang login (`processed_by`).
+class KwitansiRequest {
+  final DateTime issuedAt;
+  final String recipientName;
+  final int? studentId;
+  final String? whatsappNumber;
+  final String? email;
+  final String? address;
+  final String category;
+  final String paymentMethod;
+  final List<KwitansiItemDetail> items;
+  final String signerRole;
+  final String? note;
+
+  const KwitansiRequest({
+    required this.issuedAt,
+    required this.recipientName,
+    this.studentId,
+    this.whatsappNumber,
+    this.email,
+    this.address,
+    required this.category,
+    required this.paymentMethod,
+    required this.items,
+    required this.signerRole,
+    this.note,
+  });
+
+  factory KwitansiRequest.fromModel(KwitansiModel m) => KwitansiRequest(
+    issuedAt: m.issuedAt ?? DateTime.now(),
+    recipientName: m.recipientName,
+    studentId: m.studentId,
+    whatsappNumber: m.whatsappNumber,
+    email: m.email,
+    address: m.address,
+    category: m.category,
+    paymentMethod: m.paymentMethod,
+    items: m.items,
+    signerRole: m.signerRole,
+    note: m.note,
+  );
+
+  KwitansiRequest copyWith({
     String? recipientName,
-    String? category,
-    String? itemCountDescription,
-    num? amount,
-    String? dateTime,
     String? paymentMethod,
-    String? status,
-    String? note,
-    String? studentNis,
-    String? studentClass,
-    String? itemDetailTitle,
-    String? signerName,
-    String? signerRole,
-    String? whatsappNumber,
-    String? email,
-    String? address,
-    String? contact,
-    String? attachmentPath,
     List<KwitansiItemDetail>? items,
-  }) {
-    return KwitansiModel(
-      id: id ?? this.id,
-      receiptNumber: receiptNumber ?? this.receiptNumber,
-      recipientName: recipientName ?? this.recipientName,
-      category: category ?? this.category,
-      itemCountDescription: itemCountDescription ?? this.itemCountDescription,
-      amount: amount ?? this.amount,
-      dateTime: dateTime ?? this.dateTime,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
-      status: status ?? this.status,
-      note: note ?? this.note,
-      studentNis: studentNis ?? this.studentNis,
-      studentClass: studentClass ?? this.studentClass,
-      itemDetailTitle: itemDetailTitle ?? this.itemDetailTitle,
-      signerName: signerName ?? this.signerName,
-      signerRole: signerRole ?? this.signerRole,
-      whatsappNumber: whatsappNumber ?? this.whatsappNumber,
-      email: email ?? this.email,
-      address: address ?? this.address,
-      contact: contact ?? this.contact,
-      attachmentPath: attachmentPath ?? this.attachmentPath,
-      items: items ?? this.items,
-    );
-  }
+  }) => KwitansiRequest(
+    issuedAt: issuedAt,
+    recipientName: recipientName ?? this.recipientName,
+    studentId: studentId,
+    whatsappNumber: whatsappNumber,
+    email: email,
+    address: address,
+    category: category,
+    paymentMethod: paymentMethod ?? this.paymentMethod,
+    items: items ?? this.items,
+    signerRole: signerRole,
+    note: note,
+  );
 
-  static List<KwitansiModel> get initialData => [
-    const KwitansiModel(
-      id: '1',
-      receiptNumber: 'INV/PONDOK/2026/09/01/017',
-      recipientName: 'M Nazri Fatih altaf',
-      category: 'Pondok',
-      itemCountDescription: '1 Item Pembayaran',
-      amount: 500000,
-      dateTime: '01/09/2026 17:36',
-      paymentMethod: 'Transfer',
-      status: 'Aktif',
-      studentNis: '202609001',
-      studentClass: 'Kelas 7A',
-      itemDetailTitle: 'SPP Bulan Agustus 2026 (1x)',
-      note: 'Pembayaran Iuran Bulanan Pondok',
-    ),
-    const KwitansiModel(
-      id: '2',
-      receiptNumber: 'INV/PONDOK/2026/09/02/018',
-      recipientName: 'Muhammad Rais Al Fatih',
-      category: 'Pondok',
-      itemCountDescription: '1 Item Pembayaran',
-      amount: 750000,
-      dateTime: '02/09/2026 17:24',
-      paymentMethod: 'Transfer',
-      status: 'Aktif',
-      studentNis: '202609002',
-      studentClass: 'Kelas 8B',
-      itemDetailTitle: 'Uang Kegiatan & Fasilitas Santri',
-      note: 'Pembayaran Kegiatan Santri',
-    ),
-    const KwitansiModel(
-      id: '3',
-      receiptNumber: 'INV/PONDOK/2026/09/02/015',
-      recipientName: 'Ahmad Zaky Mubarak',
-      category: 'Pondok',
-      itemCountDescription: '1 Item Pembayaran',
-      amount: 350000,
-      dateTime: '02/09/2026 17:17',
-      paymentMethod: 'Tunai',
-      status: 'Aktif',
-      studentNis: '202609003',
-      studentClass: 'Kelas 7B',
-      itemDetailTitle: 'Seragam & Kitab Pesantren',
-      note: 'Pembayaran Seragam & Kitab',
-    ),
-    const KwitansiModel(
-      id: '4',
-      receiptNumber: 'INV/PONDOK/2026/08/28/012',
-      recipientName: 'Fathir Rahman Hakim',
-      category: 'Pondok',
-      itemCountDescription: '2 Item Pembayaran',
-      amount: 1200000,
-      dateTime: '28/08/2026 10:15',
-      paymentMethod: 'Transfer',
-      status: 'Aktif',
-      studentNis: '202608012',
-      studentClass: 'Kelas 9A',
-      itemDetailTitle: 'SPP & Ekstrakurikuler (2x)',
-      note: 'Pembayaran SPP & Ekstrakurikuler',
-    ),
-    const KwitansiModel(
-      id: '5',
-      receiptNumber: 'INV/PONDOK/2026/08/25/009',
-      recipientName: 'Alifia Nurul Izzah',
-      category: 'Pondok',
-      itemCountDescription: '1 Item Pembayaran',
-      amount: 450000,
-      dateTime: '25/08/2026 14:02',
-      paymentMethod: 'Transfer',
-      status: 'Aktif',
-      studentNis: '202608009',
-      studentClass: 'Kelas 7C',
-      itemDetailTitle: 'Iuran Sarana & Uang Saku',
-      note: 'Pembayaran Uang Saku & Fasilitas',
-    ),
-  ];
+  Map<String, dynamic> toJson() {
+    String? clean(String? v) =>
+        (v == null || v.trim().isEmpty) ? null : v.trim();
+    return {
+      'issued_at': DateFormat('yyyy-MM-dd HH:mm:ss').format(issuedAt),
+      'recipient_name': recipientName.trim(),
+      'student_id': studentId,
+      'whatsapp_number': clean(whatsappNumber),
+      'email': clean(email),
+      'address': clean(address),
+      'category': category.trim(),
+      'payment_method': paymentMethod,
+      'signer_role': signerRole.trim(),
+      'note': clean(note),
+      'items': items.map((e) => e.toJson()).toList(),
+    }..removeWhere((_, v) => v == null);
+  }
+}
+
+/// Hasil list kwitansi (dengan metadata paginasi Laravel).
+class KwitansiPage {
+  final List<KwitansiModel> items;
+  final int currentPage;
+  final int lastPage;
+  final int total;
+
+  const KwitansiPage({
+    required this.items,
+    this.currentPage = 1,
+    this.lastPage = 1,
+    this.total = 0,
+  });
+
+  bool get hasMore => currentPage < lastPage;
 }

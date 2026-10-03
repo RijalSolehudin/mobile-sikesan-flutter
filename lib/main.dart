@@ -12,6 +12,7 @@ import 'data/repositories/spp_repository.dart';
 import 'data/repositories/infaq_repository.dart';
 import 'data/repositories/wallet_repository.dart';
 import 'data/repositories/announcement_repository.dart';
+import 'data/repositories/kwitansi_repository.dart';
 import 'core/navigation/navigation_keys.dart';
 import 'core/widgets/app_snackbar.dart';
 import 'features/auth/bloc/auth_bloc.dart';
@@ -73,6 +74,7 @@ void main() async {
       infaqRepository: InjectionContainer.infaqRepository,
       walletRepository: InjectionContainer.walletRepository,
       announcementRepository: InjectionContainer.announcementRepository,
+      kwitansiRepository: InjectionContainer.kwitansiRepository,
       authBloc: authBloc,
       dashboardBloc: dashboardBloc,
       router: router,
@@ -87,6 +89,7 @@ class SikesanMobileApp extends StatelessWidget {
   final InfaqRepository infaqRepository;
   final WalletRepository walletRepository;
   final AnnouncementRepository announcementRepository;
+  final KwitansiRepository? kwitansiRepository;
   final AuthBloc authBloc;
   final DashboardBloc dashboardBloc;
   final GoRouter router;
@@ -99,6 +102,7 @@ class SikesanMobileApp extends StatelessWidget {
     required this.infaqRepository,
     required this.walletRepository,
     required this.announcementRepository,
+    this.kwitansiRepository,
     required this.authBloc,
     required this.dashboardBloc,
     required this.router,
@@ -118,6 +122,10 @@ class SikesanMobileApp extends StatelessWidget {
         RepositoryProvider<AnnouncementRepository>.value(
           value: announcementRepository,
         ),
+        if (kwitansiRepository != null)
+          RepositoryProvider<KwitansiRepository>.value(
+            value: kwitansiRepository!,
+          ),
       ],
       child: MultiBlocProvider(
         providers: [

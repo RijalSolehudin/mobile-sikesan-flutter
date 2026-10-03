@@ -32,4 +32,9 @@ class ApiEndpoints {
   static String infaqReceipt(dynamic paymentId) =>
       '/infaq-kesantrian/payments/$paymentId/receipt';
   static const String infaqs = '/infaqs';
+
+  // Kwitansi Digital (Super Admin, Admin, Bendahara)
+  static const String kwitansi = '/kwitansi';
+  static const String kwitansiCategories = '/kwitansi/categories';
+  static String kwitansiDetail(dynamic id) => '/kwitansi/$id';
 }

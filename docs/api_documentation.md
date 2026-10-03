@@ -405,9 +405,153 @@ Menggabungkan riwayat dari berbagai jenis tabel transaksi secara kronologis.
 }
 ```
 
+## 7. Kwitansi Digital (Receipt & Invoice)
+
+Fitur ini hanya dapat diakses oleh role: `Super Admin`, `Admin`, dan `Bendahara`.
+
+### `GET /api/v1/kwitansi`
+Mengambil daftar kwitansi dengan paginasi dan filter pencarian.
+- **Query Parameters**:
+  - `search` (opsional): Pencarian nama penerima atau nomor kwitansi.
+  - `category` (opsional): Filter kategori (contoh: `Pondok`).
+  - `date` (opsional): Filter tanggal terbit (`YYYY-MM-DD`).
+  - `page` (opsional, default: 1): Nomor halaman.
+  - `per_page` (opsional, default: 20): Jumlah item per halaman.
+
+**Response (200 OK):**
+```json
+{
+  "message": "Kwitansi retrieved successfully",
+  "data": {
+    "current_page": 1,
+    "last_page": 1,
+    "total": 1,
+    "data": [
+      {
+        "id": 1,
+        "receipt_number": "INV/PONDOK/2026/09/01/017",
+        "issued_at": "2026-09-01 17:36:00",
+        "recipient_name": "M Nazri Fatih altaf",
+        "student_id": 10,
+        "category": "Pondok",
+        "payment_method": "Transfer",
+        "status": "active",
+        "total_amount": 500000,
+        "whatsapp_number": "081234567890",
+        "email": "wali@example.com",
+        "address": "Jl. Pesantren No. 10",
+        "signer_role": "Bendahara Yayasan",
+        "note": "Pembayaran SPP September 2026",
+        "items": [
+          {
+            "id": 1,
+            "description": "SPP Bulan September 2026",
+            "qty": 1,
+            "price": 500000
+          }
+        ],
+        "processed_by": {
+          "id": 7,
+          "name": "Risda Nur Fajar Purnama,SE",
+          "phone": "088218712525"
+        }
+      }
+    ]
+  }
+}
+```
+
+### `GET /api/v1/kwitansi/categories`
+Mengambil daftar kategori kwitansi yang tersedia.
+**Response (200 OK):**
+```json
+{
+  "message": "Categories retrieved successfully",
+  "data": ["Pondok", "Pembangunan", "Seragam", "Kegiatan"]
+}
+```
+
+### `GET /api/v1/kwitansi/{id}`
+Mengambil detail satu kwitansi beserta rincian item dan akun pemroses.
+**Response (200 OK):**
+```json
+{
+  "message": "Kwitansi detail retrieved successfully",
+  "data": {
+    "id": 1,
+    "receipt_number": "INV/PONDOK/2026/09/01/017",
+    "issued_at": "2026-09-01 17:36:00",
+    "recipient_name": "M Nazri Fatih altaf",
+    "student_id": 10,
+    "category": "Pondok",
+    "payment_method": "Transfer",
+    "status": "active",
+    "total_amount": 500000,
+    "whatsapp_number": "081234567890",
+    "email": "wali@example.com",
+    "address": "Jl. Pesantren No. 10",
+    "signer_role": "Bendahara Yayasan",
+    "note": "Pembayaran SPP September 2026",
+    "items": [
+      {
+        "id": 1,
+        "description": "SPP Bulan September 2026",
+        "qty": 1,
+        "price": 500000
+      }
+    ],
+    "processed_by": {
+      "id": 7,
+      "name": "Risda Nur Fajar Purnama,SE",
+      "phone": "088218712525"
+    }
+  }
+}
+```
+
+### `POST /api/v1/kwitansi`
+Membuat kwitansi baru. Backend secara otomatis menetapkan `processed_by` dari user login yang mengirim request (`auth()->user()`).
+- **Headers**:
+  - `Idempotency-Key` (opsional UUIDv4)
+- **Body (JSON atau Multipart jika ada lampiran file `attachment`)**:
+```json
+{
+  "issued_at": "2026-09-01 17:36:00",
+  "recipient_name": "M Nazri Fatih altaf",
+  "student_id": 10,
+  "category": "Pondok",
+  "payment_method": "Transfer",
+  "signer_role": "Bendahara Yayasan",
+  "whatsapp_number": "081234567890",
+  "email": "wali@example.com",
+  "address": "Jl. Pesantren No. 10",
+  "note": "Catatan tambahan",
+  "items": [
+    {
+      "description": "SPP Bulan September 2026",
+      "qty": 1,
+      "price": 500000
+    }
+  ]
+}
+```
+
+### `PUT /api/v1/kwitansi/{id}`
+Memperbarui metadata kwitansi (nama penerima, metode bayar, rincian item).
+**Response (200 OK):** Detail kwitansi yang telah diperbarui.
+
+### `DELETE /api/v1/kwitansi/{id}`
+Menghapus kwitansi.
+**Response (200 OK):**
+```json
+{
+  "message": "Kwitansi berhasil dihapus"
+}
+```
+
 ---
 
-## 7. Standar Respon Error (Error Handling)
+## 8. Standar Respon Error (Error Handling)
 
 Untuk membangun mekanisme *Error Handling* global (misal: menggunakan Axios Interceptors) dan form validasi, berikut adalah struktur standar respon error dari Laravel SIKESAN:
 

@@ -110,13 +110,7 @@ class MenuItemModel {
         icon: Icons.receipt_long_rounded,
         color: Color(0xFF059669),
         bg: Color(0xFFD1FAE5),
-        allowedRoles: [
-          'Wali Santri',
-          'Kasir',
-          'Super Admin',
-          'Admin',
-          'Bendahara',
-        ],
+        allowedRoles: ['Super Admin', 'Admin', 'Bendahara'],
       ),
       const MenuItemModel(
         id: 'bayar_spp',

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:printing/printing.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/network/api_result.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/app_snackbar.dart';
+import '../../../data/repositories/kwitansi_repository.dart';
 import '../models/kwitansi_model.dart';
+import '../services/kwitansi_invoice_pdf.dart';
 import 'kwitansi_card.dart';
 
 class KwitansiDetailModal extends StatefulWidget {
@@ -35,11 +36,7 @@ class KwitansiDetailModal extends StatefulWidget {
           : '$currentLoc/detail';
       return context.push(
         targetPath,
-        extra: {
-          'item': item,
-          'onDeleted': onDeleted,
-          'onUpdated': onUpdated,
-        },
+        extra: {'item': item, 'onDeleted': onDeleted, 'onUpdated': onUpdated},
       );
     } catch (_) {
       return showDialog(
@@ -65,146 +62,28 @@ class _KwitansiDetailModalState extends State<KwitansiDetailModal> {
   void initState() {
     super.initState();
     _currentItem = widget.item;
+    // Ambil versi terbaru dari server (mis. data penandatangan terkini).
+    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshDetail());
   }
 
   Future<void> _handlePrint(BuildContext context) async {
-    final pdf = pw.Document();
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.roll80,
-        build: (pw.Context ctx) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.center,
-            children: [
-              pw.Text(
-                'SIKESAN',
-                style: pw.TextStyle(
-                  fontSize: 16,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              pw.Text(
-                'Kwitansi Digital Terintegrasi',
-                style: const pw.TextStyle(fontSize: 10),
-              ),
-              pw.SizedBox(height: 8),
-              pw.Divider(thickness: 0.5),
-              pw.SizedBox(height: 6),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'No. Kwitansi:',
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
-                  pw.Text(
-                    _currentItem.receiptNumber,
-                    style: pw.TextStyle(
-                      fontSize: 9,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Waktu:', style: const pw.TextStyle(fontSize: 9)),
-                  pw.Text(
-                    _currentItem.dateTime,
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
-                ],
-              ),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Terima Dari:',
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
-                  pw.Text(
-                    _currentItem.recipientName,
-                    style: pw.TextStyle(
-                      fontSize: 9,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Terbilang:', style: const pw.TextStyle(fontSize: 8)),
-                  pw.Text(
-                    _currentItem.spelledAmount,
-                    style: const pw.TextStyle(fontSize: 8),
-                  ),
-                ],
-              ),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Metode:', style: const pw.TextStyle(fontSize: 9)),
-                  pw.Text(
-                    _currentItem.paymentMethod,
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 8),
-              pw.Divider(thickness: 0.5),
-              pw.SizedBox(height: 6),
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'Total Kwitansi:',
-                    style: pw.TextStyle(
-                      fontSize: 10,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Text(
-                    _currentItem.formattedAmount,
-                    style: pw.TextStyle(
-                      fontSize: 12,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-              pw.SizedBox(height: 12),
-              pw.Text(
-                'Terima kasih atas pembayaran Anda',
-                style: pw.TextStyle(
-                  fontSize: 8,
-                  fontStyle: pw.FontStyle.italic,
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
     try {
-      await Printing.layoutPdf(
-        onLayout: (PdfPageFormat format) async => pdf.save(),
-        name: 'kwitansi_${_currentItem.receiptNumber.replaceAll('/', '_')}',
-      );
+      await KwitansiInvoicePdf.printInvoice(_currentItem);
     } catch (_) {
       if (context.mounted) {
-        AppSnackBar.showError(context, 'Gagal mencetak kwitansi');
+        AppSnackBar.showError(context, 'Gagal mencetak invoice');
       }
     }
   }
 
-  void _handleDownload() {
-    AppSnackBar.showSuccess(
-      context,
-      'Kwitansi ${_currentItem.receiptNumber} berhasil diunduh ke PDF',
-    );
+  Future<void> _handleDownload() async {
+    try {
+      await KwitansiInvoicePdf.shareInvoice(_currentItem);
+    } catch (_) {
+      if (mounted) {
+        AppSnackBar.showError(context, 'Gagal mengunduh invoice PDF');
+      }
+    }
   }
 
   Future<void> _handleWhatsApp() async {
@@ -255,15 +134,35 @@ _SIKESAN Digital_''';
     }
   }
 
+  Future<void> _refreshDetail() async {
+    if (_currentItem.id.isEmpty) return;
+    final result = await context.read<KwitansiRepository>().getDetail(
+      _currentItem.id,
+    );
+    if (!mounted) return;
+    if (result is ApiSuccess<KwitansiModel>) {
+      setState(() => _currentItem = result.data);
+    }
+  }
+
   void _handleEdit() {
+    final repository = context.read<KwitansiRepository>();
+    final isSingleItem = _currentItem.items.length <= 1;
+    final firstItem = _currentItem.items.isNotEmpty
+        ? _currentItem.items.first
+        : null;
+
     final nameCtrl = TextEditingController(text: _currentItem.recipientName);
     final amountCtrl = TextEditingController(
-      text: CurrencyFormatter.formatWithoutSymbol(_currentItem.amount),
+      text: CurrencyFormatter.formatWithoutSymbol(
+        firstItem?.price ?? _currentItem.amount,
+      ),
     );
     final detailCtrl = TextEditingController(
-      text: _currentItem.displayItemDetail,
+      text: firstItem?.description ?? _currentItem.displayItemDetail,
     );
     String selectedMethod = _currentItem.paymentMethod;
+    bool isSaving = false;
 
     showModalBottomSheet(
       context: context,
@@ -272,6 +171,59 @@ _SIKESAN Digital_''';
       backgroundColor: Colors.transparent,
       builder: (bContext) => StatefulBuilder(
         builder: (context, setModalState) {
+          Future<void> save() async {
+            final name = nameCtrl.text.trim();
+            if (name.isEmpty) {
+              AppSnackBar.showError(context, 'Nama penerima wajib diisi');
+              return;
+            }
+
+            var items = _currentItem.items;
+            if (isSingleItem) {
+              final newPrice = CurrencyFormatter.parseClean(amountCtrl.text);
+              if (newPrice <= 0) {
+                AppSnackBar.showError(context, 'Nominal harus lebih dari 0');
+                return;
+              }
+              items = [
+                KwitansiItemDetail(
+                  id: firstItem?.id,
+                  description: detailCtrl.text.trim().isEmpty
+                      ? 'Item Pembayaran'
+                      : detailCtrl.text.trim(),
+                  qty: firstItem?.qty ?? 1,
+                  price: newPrice,
+                ),
+              ];
+            }
+
+            final request = KwitansiRequest.fromModel(_currentItem).copyWith(
+              recipientName: name,
+              paymentMethod: selectedMethod,
+              items: items,
+            );
+
+            setModalState(() => isSaving = true);
+            final result = await repository.update(_currentItem.id, request);
+            if (!bContext.mounted) return;
+            setModalState(() => isSaving = false);
+
+            switch (result) {
+              case ApiSuccess(data: final updated):
+                if (mounted) setState(() => _currentItem = updated);
+                widget.onUpdated?.call(updated);
+                Navigator.of(bContext).pop();
+                if (mounted) {
+                  AppSnackBar.showSuccess(
+                    this.context,
+                    'Kwitansi berhasil diperbarui',
+                  );
+                }
+              case ApiFailure(message: final message):
+                AppSnackBar.showError(context, message);
+            }
+          }
+
           return Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 500),
@@ -319,26 +271,38 @@ _SIKESAN Digital_''';
                       ),
                     ),
                     const SizedBox(height: 10),
-                    TextField(
-                      controller: amountCtrl,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [CurrencyInputFormatter()],
-                      decoration: const InputDecoration(
-                        labelText: 'Nominal (Rp)',
-                        isDense: true,
-                        border: OutlineInputBorder(),
+                    if (isSingleItem) ...[
+                      TextField(
+                        controller: amountCtrl,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [CurrencyInputFormatter()],
+                        decoration: const InputDecoration(
+                          labelText: 'Nominal (Rp)',
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: detailCtrl,
-                      decoration: const InputDecoration(
-                        labelText: 'Detail Item',
-                        isDense: true,
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: detailCtrl,
+                        decoration: const InputDecoration(
+                          labelText: 'Detail Item',
+                          isDense: true,
+                          border: OutlineInputBorder(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
+                      const SizedBox(height: 10),
+                    ] else ...[
+                      Text(
+                        'Kwitansi ini berisi ${_currentItem.items.length} item. '
+                        'Nominal & detail item tidak dapat diubah dari sini.',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
                     DropdownButtonFormField<String>(
                       initialValue: selectedMethod,
                       decoration: const InputDecoration(
@@ -346,17 +310,13 @@ _SIKESAN Digital_''';
                         isDense: true,
                         border: OutlineInputBorder(),
                       ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'Transfer',
-                          child: Text('Transfer'),
-                        ),
-                        DropdownMenuItem(value: 'Tunai', child: Text('Tunai')),
-                        DropdownMenuItem(
-                          value: 'Saldo Santri',
-                          child: Text('Saldo Santri'),
-                        ),
-                      ],
+                      items:
+                          {'Transfer', 'Tunai', 'Saldo Santri', selectedMethod}
+                              .map(
+                                (m) =>
+                                    DropdownMenuItem(value: m, child: Text(m)),
+                              )
+                              .toList(),
                       onChanged: (val) {
                         if (val != null) {
                           setModalState(() => selectedMethod = val);
@@ -374,35 +334,23 @@ _SIKESAN Digital_''';
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        onPressed: () {
-                          final newAmount = CurrencyFormatter.parseClean(
-                            amountCtrl.text,
-                          );
-                          final updated = _currentItem.copyWith(
-                            recipientName: nameCtrl.text.trim(),
-                            amount: newAmount > 0
-                                ? newAmount
-                                : _currentItem.amount,
-                            itemDetailTitle: detailCtrl.text.trim(),
-                            paymentMethod: selectedMethod,
-                          );
-                          setState(() {
-                            _currentItem = updated;
-                          });
-                          widget.onUpdated?.call(updated);
-                          Navigator.of(bContext).pop();
-                          AppSnackBar.showSuccess(
-                            context,
-                            'Kwitansi berhasil diperbarui',
-                          );
-                        },
-                        child: Text(
-                          'Simpan Perubahan',
-                          style: GoogleFonts.plusJakartaSans(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                        onPressed: isSaving ? null : save,
+                        child: isSaving
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.4,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                'Simpan Perubahan',
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                       ),
                     ),
                   ],
@@ -416,58 +364,91 @@ _SIKESAN Digital_''';
   }
 
   void _handleDelete() {
+    final repository = context.read<KwitansiRepository>();
+    bool isDeleting = false;
+
     showDialog(
       context: context,
-      builder: (dContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Text(
-          'Hapus Kwitansi?',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+      builder: (dContext) => StatefulBuilder(
+        builder: (dContext, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
           ),
-        ),
-        content: Text(
-          'Apakah Anda yakin ingin menghapus kwitansi ${_currentItem.receiptNumber}? Tindakan ini tidak dapat dibatalkan.',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
-            color: const Color(0xFF64748B),
+          title: Text(
+            'Hapus Kwitansi?',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dContext).pop(),
-            child: Text(
-              'Batal',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF64748B),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus kwitansi ${_currentItem.receiptNumber}? Tindakan ini tidak dapat dibatalkan.',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              color: const Color(0xFF64748B),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: isDeleting ? null : () => Navigator.of(dContext).pop(),
+              child: Text(
+                'Batal',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF64748B),
+                ),
               ),
             ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF4444),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
+              onPressed: isDeleting
+                  ? null
+                  : () async {
+                      setDialogState(() => isDeleting = true);
+                      final result = await repository.delete(_currentItem.id);
+                      if (!dContext.mounted) return;
+
+                      switch (result) {
+                        case ApiSuccess():
+                          final receiptNumber = _currentItem.receiptNumber;
+                          Navigator.of(dContext).pop(); // pop confirm dialog
+                          if (mounted) {
+                            Navigator.of(context).pop(); // pop detail modal
+                            AppSnackBar.showSuccess(
+                              context,
+                              'Kwitansi $receiptNumber telah dihapus',
+                            );
+                          }
+                          widget.onDeleted?.call();
+                        case ApiFailure(message: final message):
+                          setDialogState(() => isDeleting = false);
+                          AppSnackBar.showError(dContext, message);
+                      }
+                    },
+              child: isDeleting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      'Hapus',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
             ),
-            onPressed: () {
-              Navigator.of(dContext).pop(); // pop confirm dialog
-              Navigator.of(context).pop(); // pop detail modal
-              widget.onDeleted?.call();
-              AppSnackBar.showSuccess(
-                context,
-                'Kwitansi ${_currentItem.receiptNumber} telah dihapus',
-              );
-            },
-            child: Text(
-              'Hapus',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -233,6 +233,9 @@ class DashboardRepository {
     }
   }
 
+  /// Menu yang aksesnya wajib dibatasi sesuai `allowedRoles` lokal.
+  static const Set<String> _strictRoleMenuIds = {'kwitansi'};
+
   Future<List<MenuItemModel>> getMenuItemsForRole(String role) async {
     try {
       // Check if remote menu config endpoint exists with role query
@@ -259,7 +262,12 @@ class DashboardRepository {
             if (item is Map<String, dynamic>) {
               final id = item['id']?.toString() ?? '';
               final isEnabled = item['is_enabled'] ?? true;
-              if (defaultMap.containsKey(id) && isEnabled) {
+              // Menu dengan RBAC ketat tetap wajib lolos filter role lokal,
+              // meskipun diaktifkan oleh konfigurasi remote.
+              final passesStrictRole =
+                  !_strictRoleMenuIds.contains(id) ||
+                  (defaultMap[id]?.isVisibleForRole(role) ?? false);
+              if (defaultMap.containsKey(id) && isEnabled && passesStrictRole) {
                 // Dynamically enabled by administrator for this role
                 result.add(defaultMap[id]!);
               }

@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
+import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/image_upload_helper.dart';
+import '../../../core/widgets/app_snackbar.dart';
+import '../../../data/models/spp_models.dart';
+import '../../../data/models/user_model.dart';
+import '../../../data/repositories/infaq_repository.dart';
+import '../../../data/repositories/kwitansi_repository.dart';
+import '../../auth/bloc/auth_bloc.dart';
 import '../models/kwitansi_model.dart';
 
 class CreateKwitansiModal extends StatefulWidget {
@@ -29,10 +39,7 @@ class CreateKwitansiModal extends StatefulWidget {
           : '$currentLoc/create';
       return context.push(
         targetPath,
-        extra: {
-          'categories': existingCategories,
-          'onCreated': onCreated,
-        },
+        extra: {'categories': existingCategories, 'onCreated': onCreated},
       );
     } catch (_) {
       return showDialog(
@@ -88,27 +95,21 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
   final List<_CreateKwitansiItemInput> _items = [];
 
   final TextEditingController _signerRoleController = TextEditingController(
-    text: 'Bendahara',
+    text: KwitansiModel.defaultSignerRole,
   );
-  final TextEditingController _signerNameController = TextEditingController(
-    text: 'Risda Nur Fajar Purnama',
-  );
-  final TextEditingController _contactController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
   XFile? _attachedFile;
   final ImagePicker _picker = ImagePicker();
 
-  final List<String> _santriDatabase = [
-    'M Rayyan Zaidane Alhaq',
-    'M Nazri Fatih altaf',
-    'Muhammad Rais Al Fatih',
-    'Ahmad Zaky Mubarak',
-    'Fathir Rahman Hakim',
-    'Alifia Nurul Izzah',
-    'Erlangga Putra Haryandi',
-    'Yansen Panca Mahardika',
-  ];
+  /// Data santri dari backend untuk autocomplete "Nama Tujuan".
+  List<StudentLookupModel> _students = [];
+  int? _selectedStudentId;
+
+  bool _isSubmitting = false;
+
+  /// Dipertahankan antar-percobaan agar retry tidak membuat kwitansi ganda.
+  final String _idempotencyKey = const Uuid().v4();
 
   @override
   void initState() {
@@ -126,6 +127,16 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
 
     // Initialize with 1 default item
     _items.add(_CreateKwitansiItemInput());
+
+    _loadStudents();
+  }
+
+  Future<void> _loadStudents() async {
+    final result = await context.read<InfaqRepository>().getStudents();
+    if (!mounted) return;
+    if (result is ApiSuccess<List<StudentLookupModel>>) {
+      setState(() => _students = result.data);
+    }
   }
 
   @override
@@ -136,8 +147,6 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
     _addressController.dispose();
     _newCategoryController.dispose();
     _signerRoleController.dispose();
-    _signerNameController.dispose();
-    _contactController.dispose();
     _noteController.dispose();
     for (var item in _items) {
       item.dispose();
@@ -175,10 +184,21 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
 
   Future<void> _pickAttachment() async {
     try {
-      final file = await _picker.pickImage(source: ImageSource.gallery);
-      if (file != null) {
-        setState(() => _attachedFile = file);
+      final file = await ImageUploadHelper.pickImageWithCompression(
+        _picker,
+        source: ImageSource.gallery,
+      );
+      if (file == null) return;
+      if (!await ImageUploadHelper.validateFileSize(file)) {
+        if (mounted) {
+          AppSnackBar.showError(
+            context,
+            'Ukuran lampiran terlalu besar (maksimal 2MB).',
+          );
+        }
+        return;
       }
+      if (mounted) setState(() => _attachedFile = file);
     } catch (_) {}
   }
 
@@ -197,17 +217,13 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
     }
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
 
     final recipient = _recipientController.text.trim();
     if (recipient.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nama Tujuan wajib diisi'),
-          backgroundColor: AppColors.expense,
-        ),
-      );
+      AppSnackBar.showError(context, 'Nama Tujuan wajib diisi');
       return;
     }
 
@@ -216,32 +232,17 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
     if (_isCreatingNewCategory) {
       final typedCat = _newCategoryController.text.trim();
       if (typedCat.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nama kategori baru wajib diisi'),
-            backgroundColor: AppColors.expense,
-          ),
-        );
+        AppSnackBar.showError(context, 'Nama kategori baru wajib diisi');
         return;
       }
       categoryToUse = typedCat;
       newCategorySaved = typedCat;
     }
 
-    final totalAmount = _grandTotal;
-    if (totalAmount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Total kwitansi harus lebih dari 0'),
-          backgroundColor: AppColors.expense,
-        ),
-      );
+    if (_grandTotal <= 0) {
+      AppSnackBar.showError(context, 'Total kwitansi harus lebih dari 0');
       return;
     }
-
-    final dateStr = DateFormat('dd/MM/yyyy HH:mm').format(_selectedDate);
-    final invoiceRandom =
-        'INV/${categoryToUse.toUpperCase()}/${DateFormat('yyyy/MM/dd').format(_selectedDate)}/${(DateTime.now().millisecondsSinceEpoch % 900 + 100).toString().padLeft(3, '0')}';
 
     final parsedItems = _items.map((it) {
       final desc = it.descriptionController.text.trim().isEmpty
@@ -249,38 +250,54 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
           : it.descriptionController.text.trim();
       return KwitansiItemDetail(
         description: desc,
-        qty: it.qty,
+        qty: it.qty < 1 ? 1 : it.qty,
         price: it.price,
       );
     }).toList();
 
-    final newKwitansi = KwitansiModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      receiptNumber: invoiceRandom,
-      recipientName: recipient,
-      category: categoryToUse,
-      itemCountDescription: '${parsedItems.length} Item Pembayaran',
-      amount: totalAmount,
-      dateTime: dateStr,
-      paymentMethod: _selectedPaymentMethod,
-      status: 'Aktif',
-      note: _noteController.text.trim(),
-      signerRole: _signerRoleController.text.trim().isEmpty
-          ? 'Bendahara Yayasan'
-          : _signerRoleController.text.trim(),
-      signerName: _signerNameController.text.trim().isEmpty
-          ? 'Risda Nur Fajar Purnama'
-          : _signerNameController.text.trim(),
-      whatsappNumber: _whatsappController.text.trim(),
-      email: _emailController.text.trim(),
-      address: _addressController.text.trim(),
-      contact: _contactController.text.trim(),
-      attachmentPath: _attachedFile?.path,
-      items: parsedItems,
+    // Pakai jam saat ini pada tanggal yang dipilih.
+    final now = DateTime.now();
+    final issuedAt = DateTime(
+      _selectedDate.year,
+      _selectedDate.month,
+      _selectedDate.day,
+      now.hour,
+      now.minute,
+      now.second,
     );
 
-    Navigator.of(context).pop();
-    widget.onCreated(newKwitansi, newCategorySaved);
+    final request = KwitansiRequest(
+      issuedAt: issuedAt,
+      recipientName: recipient,
+      studentId: _selectedStudentId,
+      whatsappNumber: _whatsappController.text,
+      email: _emailController.text,
+      address: _addressController.text,
+      category: categoryToUse,
+      paymentMethod: _selectedPaymentMethod,
+      items: parsedItems,
+      signerRole: _signerRoleController.text.trim().isEmpty
+          ? KwitansiModel.defaultSignerRole
+          : _signerRoleController.text.trim(),
+      note: _noteController.text,
+    );
+
+    setState(() => _isSubmitting = true);
+    final result = await context.read<KwitansiRepository>().create(
+      request,
+      attachment: _attachedFile,
+      idempotencyKey: _idempotencyKey,
+    );
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    switch (result) {
+      case ApiSuccess(data: final created):
+        Navigator.of(context).pop();
+        widget.onCreated(created, newCategorySaved);
+      case ApiFailure(message: final message):
+        AppSnackBar.showError(context, message);
+    }
   }
 
   @override
@@ -418,20 +435,28 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
 
                             // Nama Tujuan *
                             _buildLabel('Nama Tujuan', isRequired: true),
-                            Autocomplete<String>(
+                            Autocomplete<StudentLookupModel>(
+                              displayStringForOption: (s) => s.name,
                               optionsBuilder: (textEditingValue) {
-                                if (textEditingValue.text.isEmpty) {
-                                  return _santriDatabase;
-                                }
-                                return _santriDatabase.where(
-                                  (santri) => santri.toLowerCase().contains(
-                                    textEditingValue.text.toLowerCase(),
-                                  ),
-                                );
+                                final q = textEditingValue.text
+                                    .toLowerCase()
+                                    .trim();
+                                if (q.isEmpty) return _students.take(20);
+                                return _students
+                                    .where(
+                                      (s) =>
+                                          s.name.toLowerCase().contains(q) ||
+                                          s.nis.toLowerCase().contains(q),
+                                    )
+                                    .take(20);
                               },
-                              onSelected: (val) {
-                                _recipientController.text = val;
+                              onSelected: (student) {
+                                _recipientController.text = student.name;
+                                _selectedStudentId = student.id;
                               },
+                              optionsViewBuilder:
+                                  (context, onSelected, options) =>
+                                      _buildStudentOptions(onSelected, options),
                               fieldViewBuilder:
                                   (
                                     context,
@@ -439,18 +464,14 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
                                     focusNode,
                                     onFieldSubmitted,
                                   ) {
-                                    _recipientController.addListener(() {
-                                      if (controller.text !=
-                                          _recipientController.text) {
-                                        controller.text =
-                                            _recipientController.text;
-                                      }
-                                    });
                                     return TextFormField(
                                       controller: controller,
                                       focusNode: focusNode,
-                                      onChanged: (val) =>
-                                          _recipientController.text = val,
+                                      onChanged: (val) {
+                                        _recipientController.text = val;
+                                        // Nama diketik manual → bukan santri terdaftar
+                                        _selectedStudentId = null;
+                                      },
                                       validator: (v) =>
                                           (v == null || v.trim().isEmpty)
                                           ? 'Nama tujuan wajib diisi'
@@ -861,56 +882,19 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
                             ),
                             const SizedBox(height: 14),
 
-                            // Jabatan & Nama Lengkap
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _buildLabel('Jabatan', isRequired: true),
-                                      TextFormField(
-                                        controller: _signerRoleController,
-                                        decoration: _inputDecoration(
-                                          hint: 'Contoh: Bendahara',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _buildLabel(
-                                        'Nama Lengkap',
-                                        isRequired: true,
-                                      ),
-                                      TextFormField(
-                                        controller: _signerNameController,
-                                        decoration: _inputDecoration(
-                                          hint: 'Nama penandatangan',
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                            // Jabatan Penandatangan
+                            _buildLabel('Jabatan', isRequired: true),
+                            TextFormField(
+                              controller: _signerRoleController,
+                              decoration: _inputDecoration(
+                                hint: 'Contoh: Bendahara Yayasan',
+                              ),
                             ),
                             const SizedBox(height: 14),
 
-                            // Kontak (Opsional)
-                            _buildLabel('Kontak (Opsional)'),
-                            TextFormField(
-                              controller: _contactController,
-                              decoration: _inputDecoration(
-                                hint:
-                                    'Nomor kontak yang ditampilkan di invoice',
-                              ),
-                            ),
+                            // Penandatangan = akun yang memproses (read-only)
+                            _buildLabel('Penandatangan & Kontak'),
+                            _buildProcessorCard(),
                             const SizedBox(height: 14),
 
                             // Catatan (Maks. 100 karakter)
@@ -1011,27 +995,129 @@ class _CreateKwitansiModalState extends State<CreateKwitansiModal> {
                     width: double.infinity,
                     height: 46,
                     child: ElevatedButton(
-                      onPressed: _handleSubmit,
+                      onPressed: _isSubmitting ? null : _handleSubmit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF16A34A),
+                        disabledBackgroundColor: const Color(
+                          0xFF16A34A,
+                        ).withValues(alpha: 0.6),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
-                        'Simpan Invoice',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.4,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(
+                              'Simpan Invoice',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                     ),
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProcessorCard() {
+    final user = context.select<AuthBloc, UserModel?>((b) => b.state.user);
+    final name = user?.name ?? '-';
+    final phone = user?.phone?.trim();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.primarySurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.verified_user_outlined,
+            size: 20,
+            color: AppColors.primary,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  phone == null || phone.isEmpty
+                      ? 'Diambil otomatis dari akun yang memproses kwitansi'
+                      : 'Kontak: $phone • otomatis dari akun Anda',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 10.5,
+                    color: const Color(0xFF64748B),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudentOptions(
+    AutocompleteOnSelected<StudentLookupModel> onSelected,
+    Iterable<StudentLookupModel> options,
+  ) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(10),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 240, maxWidth: 400),
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              final s = options.elementAt(index);
+              return ListTile(
+                dense: true,
+                title: Text(
+                  s.name,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                subtitle: Text(
+                  '${s.nis} • ${s.grade}',
+                  style: GoogleFonts.plusJakartaSans(fontSize: 10.5),
+                ),
+                onTap: () => onSelected(s),
+              );
+            },
           ),
         ),
       ),

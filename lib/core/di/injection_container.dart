@@ -6,6 +6,7 @@ import '../../data/repositories/spp_repository.dart';
 import '../../data/repositories/infaq_repository.dart';
 import '../../data/repositories/wallet_repository.dart';
 import '../../data/repositories/announcement_repository.dart';
+import '../../data/repositories/kwitansi_repository.dart';
 
 import '../services/biometric_auth_service.dart';
 
@@ -20,6 +21,7 @@ class InjectionContainer {
   static late final InfaqRepository infaqRepository;
   static late final WalletRepository walletRepository;
   static late final AnnouncementRepository announcementRepository;
+  static late final KwitansiRepository kwitansiRepository;
 
   /// Menginisialisasi semua dependensi inti aplikasi
   static void init({required void Function() onUnauthorized}) {
@@ -35,5 +37,6 @@ class InjectionContainer {
     infaqRepository = InfaqRepository(dioClient);
     walletRepository = WalletRepository(dioClient);
     announcementRepository = AnnouncementRepository(dioClient);
+    kwitansiRepository = KwitansiRepository(dioClient);
   }
 }
