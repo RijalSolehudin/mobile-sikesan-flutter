@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/announcement_model.dart';
 
 class AnnouncementDetailScreen extends StatelessWidget {
@@ -37,10 +37,7 @@ class AnnouncementDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat(
-      'EEEE, dd MMMM yyyy • HH:mm',
-      'id_ID',
-    ).format(announcement.publishedAt);
+    final dateStr = DateFormatter.formatWithDay(announcement.publishedAt);
 
     return Scaffold(
       backgroundColor: AppColors.background,

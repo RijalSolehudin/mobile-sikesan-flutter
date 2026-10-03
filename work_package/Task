@@ -29,3 +29,7 @@ Halaman Pengumuman
 
 
 PENDING :
+
+
+
+flutter build web --release --base-href "/m/" --dart-define-from-file=env/staging.json

@@ -73,6 +73,16 @@ class DateFormatter {
     return '$day $month, $hour:$minute';
   }
 
+  static const List<String> _dayNamesIndo = [
+    'Senin',
+    'Selasa',
+    'Rabu',
+    'Kamis',
+    'Jumat',
+    'Sabtu',
+    'Minggu',
+  ];
+
   /// Format lengkap dengan penanda WIB: '03 Oktober 2026, 17:00 WIB'
   static String formatFull(DateTime date) {
     final dt = toUtc7(date);
@@ -82,6 +92,18 @@ class DateFormatter {
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
     return '$day $month $year, $hour:$minute WIB';
+  }
+
+  /// Format lengkap dengan hari: 'Sabtu, 03 Oktober 2026 • 17:00 WIB'
+  static String formatWithDay(DateTime date) {
+    final dt = toUtc7(date);
+    final dayName = _dayNamesIndo[dt.weekday - 1];
+    final day = dt.day.toString().padLeft(2, '0');
+    final month = _monthNamesIndo[dt.month - 1];
+    final year = dt.year;
+    final hour = dt.hour.toString().padLeft(2, '0');
+    final minute = dt.minute.toString().padLeft(2, '0');
+    return '$dayName, $day $month $year • $hour:$minute WIB';
   }
 
   /// Format tanggal saja: '03 Oktober 2026'

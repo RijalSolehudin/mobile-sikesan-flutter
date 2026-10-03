@@ -17,12 +17,20 @@ import 'core/navigation/navigation_keys.dart';
 import 'core/widgets/app_snackbar.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/dashboard/bloc/dashboard_bloc.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'features/spp/bloc/spp_payment_bloc.dart';
 import 'core/services/session_timeout_listener.dart';
 import 'router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi locale data bahasa Indonesia (id_ID) untuk intl
+  try {
+    await initializeDateFormatting('id_ID', null);
+  } catch (e) {
+    debugPrint('Failed to initialize date formatting: $e');
+  }
 
   // Tangkap error rendering Flutter UI
   FlutterError.onError = (FlutterErrorDetails details) {

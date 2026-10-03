@@ -6,6 +6,7 @@ import 'package:printing/printing.dart';
 import '../../data/models/spp_models.dart';
 import '../../data/models/top_up_models.dart';
 import '../../data/models/withdraw_models.dart';
+import '../utils/date_formatter.dart';
 
 class ReceiptPdfService {
   static Future<Uint8List> generateReceiptPdf(SppReceiptModel receipt) async {
@@ -774,10 +775,7 @@ class ReceiptPdfService {
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
         build: (pw.Context context) {
-          final dateStr = DateFormat(
-            'dd MMMM yyyy, HH:mm',
-            'id_ID',
-          ).format(receipt.date);
+          final dateStr = DateFormatter.formatFull(receipt.date);
 
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,

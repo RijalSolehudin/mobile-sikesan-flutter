@@ -33,11 +33,18 @@ class AppConfig {
     if (customBaseUrl != null && customBaseUrl!.isNotEmpty) {
       return customBaseUrl!;
     }
-    if (_apiBaseUrl.isNotEmpty) {
+    if (kIsWeb) {
+      // Pada Flutter Web, utamakan relative URL '/api/v1' agar request
+      // selalu menuju host aktif (localhost / tunnel / gateway) tanpa CORS/DNS timeout
+      if (_apiBaseUrl.isEmpty ||
+          _apiBaseUrl.startsWith('/') ||
+          _apiBaseUrl.contains('api-staging.sikesan.ponpes.id')) {
+        return '/api/v1';
+      }
       return _apiBaseUrl;
     }
-    if (kIsWeb) {
-      return '/api/v1';
+    if (_apiBaseUrl.isNotEmpty) {
+      return _apiBaseUrl;
     }
     switch (environment) {
       case AppEnvironment.dev:

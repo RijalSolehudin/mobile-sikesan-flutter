@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_sikesan_flutter/data/models/top_up_models.dart';
+import 'package:mobile_sikesan_flutter/data/models/withdraw_models.dart';
 
 void main() {
   group('Top Up Models Unit Tests', () {
@@ -67,6 +68,34 @@ void main() {
       expect(receipt.amount, 300000);
       expect(receipt.isApproved, true);
       expect(receipt.studentName, 'Zaid bin Tsabit');
+    });
+
+    test('WithdrawReceiptModel parses JSON from backend correctly', () {
+      final json = {
+        'receipt_number': 'WD-20261003-ABCDEF',
+        'transaction_id': '01HA123456789',
+        'student_id': 1,
+        'student_name': 'Ahmad Santri',
+        'student_nis': '12345',
+        'student_class': '7 - A',
+        'amount': 50000,
+        'balance_before': 150000,
+        'balance_after': 100000,
+        'date': '2026-10-03T14:30:00.000Z',
+        'processed_by': 'Bendahara Utama',
+        'description': 'Uang Saku Mingguan',
+        'status': 'SUCCESS',
+      };
+
+      final receipt = WithdrawReceiptModel.fromJson(json);
+      expect(receipt.receiptNumber, 'WD-20261003-ABCDEF');
+      expect(receipt.transactionId, '01HA123456789');
+      expect(receipt.studentId, 1);
+      expect(receipt.studentName, 'Ahmad Santri');
+      expect(receipt.amount, 50000);
+      expect(receipt.balanceBefore, 150000);
+      expect(receipt.balanceAfter, 100000);
+      expect(receipt.status, 'SUCCESS');
     });
   });
 }

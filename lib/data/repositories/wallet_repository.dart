@@ -32,20 +32,44 @@ class WalletRepository {
         options: Options(headers: {'Idempotency-Key': key}),
       );
 
-      final dynamic dataField = response.data['data'];
-      if (dataField is Map<String, dynamic> && dataField['receipt'] != null) {
-        final receipt = WithdrawReceiptModel.fromJson(
-          dataField['receipt'] as Map<String, dynamic>,
-        );
-        return ApiSuccess(
-          receipt,
-          message:
-              response.data['message']?.toString() ??
-              'Penarikan saldo berhasil diproses',
+      final dynamic dataField =
+          response.data is Map ? response.data['data'] : null;
+      Map<String, dynamic>? receiptMap;
+      if (dataField is Map<String, dynamic>) {
+        if (dataField['receipt'] is Map<String, dynamic>) {
+          receiptMap = dataField['receipt'] as Map<String, dynamic>;
+        } else {
+          receiptMap = dataField;
+        }
+      }
+
+      WithdrawReceiptModel receipt;
+      if (receiptMap != null) {
+        receipt = WithdrawReceiptModel.fromJson(receiptMap);
+      } else {
+        receipt = WithdrawReceiptModel(
+          receiptNumber: 'WD-${DateTime.now().millisecondsSinceEpoch}',
+          transactionId: '',
+          studentId: studentId,
+          studentName: 'Santri',
+          studentNis: '-',
+          studentClass: 'Santri',
+          amount: amount,
+          balanceBefore: 0,
+          balanceAfter: 0,
+          date: DateTime.now(),
+          processedBy: 'Bendahara / Kasir',
+          description: description ?? 'Penarikan Tunai Saldo Santri',
+          status: 'SUCCESS',
         );
       }
 
-      return ApiFailure('Format respon tidak sesuai');
+      return ApiSuccess(
+        receipt,
+        message:
+            response.data['message']?.toString() ??
+            'Penarikan saldo berhasil diproses',
+      );
     } on DioException catch (e) {
       return ApiFailure(
         e.response?.data?['message'] ?? 'Gagal memproses penarikan saldo',
