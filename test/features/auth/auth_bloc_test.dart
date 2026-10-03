@@ -41,6 +41,10 @@ class MockAuthRepository extends AuthRepository {
   }
 
   @override
+  Future<ApiResult<UserModel>> getProfile() async =>
+      mockUser != null ? ApiSuccess(mockUser!) : const ApiFailure('No user');
+
+  @override
   Future<void> logout() async {
     hasToken = false;
     mockUser = null;

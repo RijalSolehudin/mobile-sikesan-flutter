@@ -69,11 +69,8 @@ class AuthRepository {
     try {
       final response = await _dioClient.dio.get('/auth/me');
       final dynamic raw = response.data;
-      final dynamic userData = (raw is Map && raw.containsKey('data'))
-          ? raw['data']
-          : raw;
-      if (userData is Map<String, dynamic>) {
-        final user = UserModel.fromJson(userData);
+      if (raw is Map<String, dynamic>) {
+        final user = UserModel.fromJson(raw);
         await _secureStorage.saveUser(user);
         return ApiSuccess(user);
       }

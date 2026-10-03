@@ -1,4 +1,6 @@
-class UserModel {
+import 'package:equatable/equatable.dart';
+
+class UserModel extends Equatable {
   final int id;
   final String name;
   final String username;
@@ -15,21 +17,43 @@ class UserModel {
     this.phone,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
+  factory UserModel.fromJson(Map<String, dynamic> rawJson) {
+    Map<String, dynamic> json = rawJson;
+    // Unwrap if wrapped in 'user' or 'data'
+    if (json['user'] is Map<String, dynamic>) {
+      json = json['user'] as Map<String, dynamic>;
+    } else if (json['data'] is Map<String, dynamic>) {
+      final data = json['data'] as Map<String, dynamic>;
+      if (data['user'] is Map<String, dynamic>) {
+        json = data['user'] as Map<String, dynamic>;
+      } else {
+        json = data;
+      }
+    }
+
     String roleName = 'Wali Santri';
     if (json['roles'] != null && (json['roles'] as List).isNotEmpty) {
       final firstRole = json['roles'][0];
       if (firstRole is Map<String, dynamic>) {
-        roleName = firstRole['name'] ?? 'Wali Santri';
+        roleName = firstRole['name']?.toString() ?? 'Wali Santri';
       } else if (firstRole is String) {
         roleName = firstRole;
       }
+    } else if (json['role'] != null) {
+      if (json['role'] is String && (json['role'] as String).isNotEmpty) {
+        roleName = json['role'] as String;
+      } else if (json['role'] is Map<String, dynamic>) {
+        roleName = json['role']['name']?.toString() ?? 'Wali Santri';
+      }
     }
+
     return UserModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? json['username'] ?? 'Pengguna',
-      username: json['username'] ?? '',
-      email: json['email'] ?? '',
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      name: json['name']?.toString() ?? json['username']?.toString() ?? 'Pengguna',
+      username: json['username']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
       role: roleName,
       phone: json['phone']?.toString(),
     );
@@ -41,10 +65,14 @@ class UserModel {
       'name': name,
       'username': username,
       'email': email,
+      'role': role,
       'phone': phone,
       'roles': [
         {'id': 1, 'name': role},
       ],
     };
   }
+
+  @override
+  List<Object?> get props => [id, name, username, email, role, phone];
 }
