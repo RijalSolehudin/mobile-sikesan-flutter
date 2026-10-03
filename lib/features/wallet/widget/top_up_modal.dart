@@ -1068,8 +1068,44 @@ class _TopUpModalState extends State<TopUpModal> {
                       const SizedBox(height: 10),
 
                       if (isGuardian) ...[
-                        // Guardian: Bank Accounts
-                        GridView.builder(
+                        if (bankAccounts.isEmpty) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 20,
+                                  color: Colors.amber.shade800,
+                                ),
+                                const SizedBox(width: 10),
+                                const Expanded(
+                                  child: Text(
+                                    'Daftar nomor rekening resmi belum terintegrasi dengan data backend.',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Color(0xFF64748B),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ] else ...[
+                          // Guardian: Bank Accounts
+                          GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: bankAccounts.length,
@@ -1175,6 +1211,7 @@ class _TopUpModalState extends State<TopUpModal> {
                             );
                           },
                         ),
+                        ],
                         const SizedBox(height: 12),
 
                         // QRIS Button

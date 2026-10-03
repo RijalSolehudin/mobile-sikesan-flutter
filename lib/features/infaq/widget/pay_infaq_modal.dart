@@ -1412,73 +1412,93 @@ class _PayInfaqModalState extends State<PayInfaqModal>
                           ],
                         ),
                         const SizedBox(height: 8),
-                        ...bankAccounts.map((acc) {
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 6),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
+                        if (bankAccounts.isEmpty) ...[
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: const Color(0xFFE2E8F0),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                            ),
+                            child: const Text(
+                              'Daftar rekening bank pembayaran belum terintegrasi dengan data backend.',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF64748B),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2.5,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFFEF3C7),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        acc.bankName,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 10.5,
-                                          color: const Color(0xFFB45309),
+                          ),
+                        ] else ...[
+                          ...bankAccounts.map((acc) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8F0),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2.5,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFEF3C7),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          acc.bankName,
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 10.5,
+                                            color: const Color(0xFFB45309),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        acc.accountNumber,
+                                        style: const TextStyle(
+                                          fontFamily: 'monospace',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 11.5,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  InkWell(
+                                    onTap: () => _copyToClipboard(
                                       acc.accountNumber,
-                                      style: const TextStyle(
-                                        fontFamily: 'monospace',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 11.5,
-                                        color: Color(0xFF0F172A),
+                                      acc.bankName,
+                                    ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(4),
+                                      child: Icon(
+                                        Icons.copy_rounded,
+                                        size: 15,
+                                        color: Color(0xFFF59E0B),
                                       ),
                                     ),
-                                  ],
-                                ),
-                                InkWell(
-                                  onTap: () => _copyToClipboard(
-                                    acc.accountNumber,
-                                    acc.bankName,
                                   ),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4),
-                                    child: Icon(
-                                      Icons.copy_rounded,
-                                      size: 15,
-                                      color: Color(0xFFF59E0B),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
                       ],
 
                       // 5. Upload Bukti Transfer (Boleh kosong untuk Admin)

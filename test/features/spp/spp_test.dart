@@ -54,12 +54,21 @@ void main() {
       expect(billMenunggu.isPending, true);
     });
 
-    test('BankAccountModel returns default accounts with valid numbers', () {
+    test('BankAccountModel serializes correctly and defaultAccounts placeholder is empty', () {
       final accounts = BankAccountModel.defaultAccounts();
-      expect(accounts.length, 3);
-      expect(accounts.any((a) => a.bankName == 'BSI'), true);
-      expect(accounts.any((a) => a.bankName == 'BCA'), true);
-      expect(accounts.any((a) => a.bankName == 'Mandiri'), true);
+      expect(accounts, isEmpty);
+
+      final json = {
+        'bank_name': 'BSI',
+        'account_number': '7145892301',
+        'account_holder': 'Pesantren Sikesan',
+        'code': 'bsi',
+      };
+      final parsed = BankAccountModel.fromJson(json);
+      expect(parsed.bankName, 'BSI');
+      expect(parsed.accountNumber, '7145892301');
+      expect(parsed.accountHolder, 'Pesantren Sikesan');
+      expect(parsed.code, 'bsi');
     });
 
     test('SppReceiptModel parses receipt JSON correctly', () {

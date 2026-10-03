@@ -17,6 +17,14 @@ class UserModel extends Equatable {
     this.phone,
   });
 
+  bool get isGuardian => role.toLowerCase().contains('wali');
+  bool get isTreasurer =>
+      role.toLowerCase().contains('bendahara') ||
+      role.toLowerCase().contains('kasir');
+  bool get isAdmin =>
+      role.toLowerCase().contains('admin') ||
+      role.toLowerCase().contains('super');
+
   factory UserModel.fromJson(Map<String, dynamic> rawJson) {
     Map<String, dynamic> json = rawJson;
     // Unwrap if wrapped in 'user' or 'data'

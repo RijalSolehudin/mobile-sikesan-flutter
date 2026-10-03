@@ -90,7 +90,7 @@ class SppMonthGridSelector extends StatelessWidget {
                 studentId: selectedStudentId ?? 0,
                 periodMonth: monthNumber,
                 periodYear: selectedYear,
-                amountBilled: 750000,
+                amountBilled: 0,
                 status: 'UNPAID',
               ),
             );

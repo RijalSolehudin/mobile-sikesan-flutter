@@ -63,3 +63,21 @@ Setiap BLoC memiliki 3 elemen:
 ## 4. Local Storage Strategy
 - **`FlutterSecureStorage`:** Khusus data sensitif (`access_token`, user credentials).
 - **`SharedPreferences`:** Konfigurasi UI (Dark/Light mode, caching dynamic role menu config).
+
+---
+
+## 5. Acuan Arsitektur & Modularitas (SOT Panduan AI & Developer)
+1. **Komponen Global & Reusable (Tempatkan di folder `core/` atau `data/`):**
+   - Jika suatu elemen digunakan berulang kali di berbagai fitur (cross-feature), wajib dibuat secara generik dan diletakkan di `core/` (misal: `core/constants/` untuk enum dan konstanta, `core/utils/` untuk helper/formatter, `core/widgets/` untuk modal/snackbar/dialog/button generik, `core/services/` untuk service global) atau `data/` (models, repositories).
+2. **Komponen Spesifik Fitur (Cegah God File):**
+   - Jika suatu elemen spesifik untuk satu fitur saja (tidak reusable), pisahkan ke dalam file/class tersendiri di dalam fitur tersebut (`features/<feature_name>/widget/`, `screen/`, `bloc/`). Dilarang mencampur semua logika ke dalam satu file besar (god file).
+3. **Standar Penggunaan Enum:**
+   - Himpunan data terbatas (metode pembayaran, status tagihan, status transaksi, peran pengguna) wajib menggunakan `enum` type-safe, bukan magic string.
+
+---
+
+## 6. Larangan Data Dummy, Statis, & Hardcoded
+- Dilarang keras menyematkan data dummy, statis, atau hardcoded di dalam source code tanpa integrasi data backend yang riil (misal rekening bank statis, tarif SPP fiktif, mock berita).
+- Jika ada fitur atau bagian UI yang belum tersedia atau belum selesai terhubung dengan API backend, wajib ditandai secara eksplisit dengan placeholder:
+  `"belum terintegrasi dengan data backend"`
+

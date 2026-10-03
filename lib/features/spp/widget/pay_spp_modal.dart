@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../core/constants/payment_enums.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -57,7 +58,7 @@ class _PaySppModalState extends State<PaySppModal> {
   bool _isLoadingBills = false;
   bool _isSubmitting = false;
 
-  String _selectedPaymentMethod = 'TRANSFER';
+  SppPaymentMethod _selectedPaymentMethod = SppPaymentMethod.transfer;
   Uint8List? _proofBytes;
   String? _proofFilename;
 
@@ -82,8 +83,8 @@ class _PaySppModalState extends State<PaySppModal> {
   }
 
   void _initDefaultStudent() {
-    final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
-    final isGuardian = userRole.toLowerCase().contains('wali');
+    final isGuardian =
+        context.read<AuthBloc>().state.user?.isGuardian ?? true;
 
     if (isGuardian) {
       final dashboardStudents = context
@@ -135,7 +136,7 @@ class _PaySppModalState extends State<PaySppModal> {
         studentId: _selectedStudentId ?? 0,
         periodMonth: monthNumber,
         periodYear: _selectedYear,
-        amountBilled: 750000,
+        amountBilled: 0,
         status: 'UNPAID',
       ),
     );
@@ -153,7 +154,7 @@ class _PaySppModalState extends State<PaySppModal> {
           studentId: _selectedStudentId ?? 0,
           periodMonth: m,
           periodYear: _selectedYear,
-          amountBilled: 750000,
+          amountBilled: 0,
           status: 'UNPAID',
         ),
       );
@@ -226,10 +227,21 @@ class _PaySppModalState extends State<PaySppModal> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Pindai QRIS ini melalui aplikasi BCA, Mandiri, GoPay, OVO, atau ShopeePay.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 11.5, color: Colors.grey),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Fitur QRIS dinamis belum terintegrasi dengan data backend',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFFB45309),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
@@ -312,8 +324,8 @@ class _PaySppModalState extends State<PaySppModal> {
       return;
     }
 
-    final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
-    final isGuardian = userRole.toLowerCase().contains('wali');
+    final isGuardian =
+        context.read<AuthBloc>().state.user?.isGuardian ?? true;
 
     if (isGuardian && _proofBytes == null) {
       _showError('Harap unggah bukti transfer pembayaran terlebih dahulu.');
@@ -346,7 +358,7 @@ class _PaySppModalState extends State<PaySppModal> {
 
     if (!mounted) return;
     final paymentBloc = context.read<SppPaymentBloc>();
-    if (!isGuardian && _selectedPaymentMethod == 'CASH') {
+    if (!isGuardian && _selectedPaymentMethod == SppPaymentMethod.cash) {
       paymentBloc.add(
         SppPaymentEvent.submitCash(
           studentId: _selectedStudentId!,
@@ -427,16 +439,16 @@ class _PaySppModalState extends State<PaySppModal> {
 
   @override
   Widget build(BuildContext context) {
-    final userRole =
-        context.watch<AuthBloc>().state.user?.role ?? 'Wali Santri';
-    final isGuardian = userRole.toLowerCase().contains('wali');
+    final user = context.watch<AuthBloc>().state.user;
+    final userRole = user?.role ?? 'Wali Santri';
+    final isGuardian = user?.isGuardian ?? true;
     final dashboardStudents = context
         .watch<DashboardBloc>()
         .state
         .metrics
         .students;
 
-    final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 750000;
+    final num rate = _bills.isNotEmpty ? _bills.first.amountBilled : 0;
     final num totalAmount = _selectedMonths.length * rate;
     final bankAccounts = BankAccountModel.defaultAccounts();
 

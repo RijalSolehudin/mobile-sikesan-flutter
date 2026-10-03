@@ -1,10 +1,12 @@
+import '../../core/constants/payment_enums.dart';
+
 class SppBillModel {
   final String id;
   final int studentId;
   final int periodMonth;
   final int periodYear;
   final num amountBilled;
-  final String status; // 'PAID', 'UNPAID', 'PARTIAL'
+  final String status; // 'PAID', 'UNPAID', 'PARTIAL', 'PENDING'
 
   const SppBillModel({
     required this.id,
@@ -15,11 +17,9 @@ class SppBillModel {
     required this.status,
   });
 
-  bool get isPaid => status.toUpperCase() == 'PAID';
-  bool get isPending =>
-      status.toUpperCase() == 'PENDING' ||
-      status.toUpperCase() == 'MENUNGGU' ||
-      status.toUpperCase() == 'MENUNGGU_VERIFIKASI';
+  SppBillStatus get billStatus => SppBillStatus.fromString(status);
+  bool get isPaid => billStatus.isPaid;
+  bool get isPending => billStatus.isPending;
 
   factory SppBillModel.fromJson(Map<String, dynamic> json) {
     return SppBillModel(
@@ -96,27 +96,27 @@ class BankAccountModel {
     required this.code,
   });
 
+  factory BankAccountModel.fromJson(Map<String, dynamic> json) {
+    return BankAccountModel(
+      bankName: json['bank_name']?.toString() ?? '',
+      accountNumber: json['account_number']?.toString() ?? '',
+      accountHolder: json['account_holder']?.toString() ?? '',
+      code: json['code']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'bank_name': bankName,
+      'account_number': accountNumber,
+      'account_holder': accountHolder,
+      'code': code,
+    };
+  }
+
+  /// Data rekening resmi pesantren (placeholder: belum terintegrasi dengan data backend)
   static List<BankAccountModel> defaultAccounts() {
-    return const [
-      BankAccountModel(
-        bankName: 'BSI',
-        accountNumber: '7145892301',
-        accountHolder: 'Pesantren Sikesan',
-        code: 'bsi',
-      ),
-      BankAccountModel(
-        bankName: 'BCA',
-        accountNumber: '8820491823',
-        accountHolder: 'Yayasan Sikesan',
-        code: 'bca',
-      ),
-      BankAccountModel(
-        bankName: 'Mandiri',
-        accountNumber: '131009823412',
-        accountHolder: 'Ponpes Sikesan',
-        code: 'mandiri',
-      ),
-    ];
+    return const [];
   }
 }
 

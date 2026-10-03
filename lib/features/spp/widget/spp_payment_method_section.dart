@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import '../../../core/constants/payment_enums.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/models/spp_models.dart';
 
@@ -7,8 +8,8 @@ import '../../../data/models/spp_models.dart';
 /// Memenuhi TASK-CONC-02 untuk modularitas UI
 class SppPaymentMethodSection extends StatelessWidget {
   final bool isGuardian;
-  final String selectedPaymentMethod;
-  final ValueChanged<String> onPaymentMethodChanged;
+  final SppPaymentMethod selectedPaymentMethod;
+  final ValueChanged<SppPaymentMethod> onPaymentMethodChanged;
   final List<BankAccountModel> bankAccounts;
   final Uint8List? proofBytes;
   final String? proofFilename;
@@ -52,99 +53,131 @@ class SppPaymentMethodSection extends StatelessWidget {
         const SizedBox(height: 10),
 
         if (isGuardian) ...[
-          // Grid 3 Rekening Bank
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: bankAccounts.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 1.1,
-            ),
-            itemBuilder: (context, index) {
-              final acc = bankAccounts[index];
-              return GestureDetector(
-                onTap: () => onCopyAccount(acc.accountNumber, acc.bankName),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.02),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
+          if (bankAccounts.isEmpty) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 20,
+                    color: Colors.amber.shade800,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Daftar nomor rekening resmi belum terintegrasi dengan data backend.',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            // Grid Rekening Bank
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: bankAccounts.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 1.1,
+              ),
+              itemBuilder: (context, index) {
+                final acc = bankAccounts[index];
+                return GestureDetector(
+                  onTap: () => onCopyAccount(acc.accountNumber, acc.bankName),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
                         ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF5B58EB).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          acc.bankName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 11,
-                            color: Color(0xFF5B58EB),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        acc.accountNumber,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        acc.accountHolder,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 9, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(
-                            Icons.copy_rounded,
-                            size: 10,
-                            color: Color(0xFF5B58EB),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF5B58EB).withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          SizedBox(width: 2),
-                          Text(
-                            'Salin',
-                            style: TextStyle(
-                              fontSize: 8.5,
+                          child: Text(
+                            acc.bankName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 11,
                               color: Color(0xFF5B58EB),
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          acc.accountNumber,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          acc.accountHolder,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 9, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(
+                              Icons.copy_rounded,
+                              size: 10,
+                              color: Color(0xFF5B58EB),
+                            ),
+                            SizedBox(width: 2),
+                            Text(
+                              'Salin',
+                              style: TextStyle(
+                                fontSize: 8.5,
+                                color: Color(0xFF5B58EB),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
+                );
+              },
+            ),
+          ],
           const SizedBox(height: 14),
 
           // Divider QRIS
@@ -202,8 +235,8 @@ class SppPaymentMethodSection extends StatelessWidget {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Klik untuk scan barcode dari BCA, Mandiri, GoPay, Dana, dll.',
-                          style: TextStyle(fontSize: 10.5, color: Colors.grey),
+                          'Fitur QRIS dinamis belum terintegrasi dengan data backend',
+                          style: TextStyle(fontSize: 10.5, color: Color(0xFFD97706)),
                         ),
                       ],
                     ),
@@ -223,19 +256,22 @@ class SppPaymentMethodSection extends StatelessWidget {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onPaymentMethodChanged('TRANSFER'),
+                  onTap: () =>
+                      onPaymentMethodChanged(SppPaymentMethod.transfer),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: selectedPaymentMethod == 'TRANSFER'
+                      color: selectedPaymentMethod == SppPaymentMethod.transfer
                           ? const Color(0xFFF0F1FE)
                           : Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: selectedPaymentMethod == 'TRANSFER'
+                        color: selectedPaymentMethod == SppPaymentMethod.transfer
                             ? const Color(0xFF5B58EB)
                             : const Color(0xFFE2E8F0),
-                        width: selectedPaymentMethod == 'TRANSFER' ? 1.5 : 1,
+                        width: selectedPaymentMethod == SppPaymentMethod.transfer
+                            ? 1.5
+                            : 1,
                       ),
                     ),
                     child: Center(
@@ -244,7 +280,8 @@ class SppPaymentMethodSection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.bold,
-                          color: selectedPaymentMethod == 'TRANSFER'
+                          color:
+                              selectedPaymentMethod == SppPaymentMethod.transfer
                               ? const Color(0xFF5B58EB)
                               : const Color(0xFF64748B),
                         ),
@@ -256,19 +293,21 @@ class SppPaymentMethodSection extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onPaymentMethodChanged('CASH'),
+                  onTap: () => onPaymentMethodChanged(SppPaymentMethod.cash),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: selectedPaymentMethod == 'CASH'
+                      color: selectedPaymentMethod == SppPaymentMethod.cash
                           ? const Color(0xFFF0F1FE)
                           : Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: selectedPaymentMethod == 'CASH'
+                        color: selectedPaymentMethod == SppPaymentMethod.cash
                             ? const Color(0xFF5B58EB)
                             : const Color(0xFFE2E8F0),
-                        width: selectedPaymentMethod == 'CASH' ? 1.5 : 1,
+                        width: selectedPaymentMethod == SppPaymentMethod.cash
+                            ? 1.5
+                            : 1,
                       ),
                     ),
                     child: Center(
@@ -277,7 +316,7 @@ class SppPaymentMethodSection extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.bold,
-                          color: selectedPaymentMethod == 'CASH'
+                          color: selectedPaymentMethod == SppPaymentMethod.cash
                               ? const Color(0xFF5B58EB)
                               : const Color(0xFF64748B),
                         ),
@@ -288,7 +327,7 @@ class SppPaymentMethodSection extends StatelessWidget {
               ),
             ],
           ),
-          if (selectedPaymentMethod == 'TRANSFER') ...[
+          if (selectedPaymentMethod == SppPaymentMethod.transfer) ...[
             const SizedBox(height: 16),
             _buildProofUploadBox(),
           ],

@@ -55,12 +55,10 @@ class AnnouncementRepository {
 
       return ApiSuccess(announcements);
     } on DioException catch (e) {
-      // Jika endpoint belum ada (404), fallback ke mock data
       if (e.response?.statusCode == 404) {
-        return _getMockAnnouncements(
-          category: category,
-          status: status,
-          search: search,
+        return const ApiFailure(
+          'Fitur pengumuman belum terintegrasi dengan data backend.',
+          statusCode: 404,
         );
       }
       return ApiFailure(
@@ -68,12 +66,7 @@ class AnnouncementRepository {
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
-      // Fallback ke mock data jika terjadi error koneksi atau lainnya
-      return _getMockAnnouncements(
-        category: category,
-        status: status,
-        search: search,
-      );
+      return ApiFailure('Terjadi kesalahan: ${e.toString()}');
     }
   }
 
@@ -95,63 +88,17 @@ class AnnouncementRepository {
       return ApiSuccess(AnnouncementModel.fromJson(item));
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) {
-        // Fallback ke mock
-        final mockList = AnnouncementModel.mockAnnouncements();
-        final found = mockList.where((a) => a.id == id);
-        if (found.isNotEmpty) {
-          return ApiSuccess(found.first);
-        }
+        return const ApiFailure(
+          'Detail pengumuman belum terintegrasi dengan data backend.',
+          statusCode: 404,
+        );
       }
       return ApiFailure(
         e.response?.data?['message'] ?? 'Gagal memuat detail pengumuman',
         statusCode: e.response?.statusCode,
       );
     } catch (e) {
-      // Fallback ke mock
-      final mockList = AnnouncementModel.mockAnnouncements();
-      final found = mockList.where((a) => a.id == id);
-      if (found.isNotEmpty) {
-        return ApiSuccess(found.first);
-      }
       return ApiFailure('Terjadi kesalahan: ${e.toString()}');
     }
-  }
-
-  /// Fallback mock data yang terfilter
-  ApiResult<List<AnnouncementModel>> _getMockAnnouncements({
-    String? category,
-    String? status,
-    String? search,
-  }) {
-    var mockData = AnnouncementModel.mockAnnouncements();
-
-    if (category != null && category != 'Semua') {
-      mockData = mockData.where((a) => a.category == category).toList();
-    }
-
-    if (status != null && status != 'Semua') {
-      final statusMap = {
-        'Draft': 'draft',
-        'Terjadwal': 'scheduled',
-        'Dipublikasikan': 'published',
-        'Expired': 'expired',
-        'Arsip': 'archived',
-      };
-      final statusKey = statusMap[status] ?? status.toLowerCase();
-      mockData = mockData.where((a) => a.status == statusKey).toList();
-    }
-
-    if (search != null && search.isNotEmpty) {
-      final query = search.toLowerCase();
-      mockData = mockData
-          .where(
-            (a) =>
-                a.title.toLowerCase().contains(query) ||
-                a.content.toLowerCase().contains(query),
-          )
-          .toList();
-    }
-
-    return ApiSuccess(mockData);
   }
 }
