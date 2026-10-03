@@ -7,11 +7,6 @@ import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/screen/login_screen.dart';
 import '../features/auth/screen/role_selection_screen.dart';
 import '../features/splash/screen/splash_screen.dart';
-import '../features/dashboard/screen/home_screen.dart';
-import '../features/mutation/screen/mutation_screen.dart';
-import '../features/information/screen/information_screen.dart';
-import '../features/cs_sikesan/screen/cs_screen.dart';
-import '../features/profile/screen/profile_screen.dart';
 import '../features/kwitansi/screen/kwitansi_screen.dart';
 import '../features/navigation/screen/main_navigation_shell.dart';
 
@@ -110,62 +105,39 @@ class AppRouter {
             return LoginScreen(initialRole: initialRole);
           },
         ),
-        StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) {
-            return MainNavigationShell(navigationShell: navigationShell);
+        GoRoute(
+          path: '/home',
+          builder: (context, state) {
+            final tabParam = state.uri.queryParameters['tab'];
+            final initialIndex = int.tryParse(tabParam ?? '') ?? 0;
+            return MainNavigationShell(initialIndex: initialIndex);
           },
-          branches: [
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/home',
-                  builder: (context, state) => const HomeScreen(),
-                  routes: [
-                    GoRoute(
-                      path: 'kwitansi',
-                      builder: (context, state) => const KwitansiScreen(),
-                    ),
-                  ],
-                ),
-                GoRoute(
-                  path: '/kwitansi',
-                  redirect: (context, state) => '/home/kwitansi',
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/mutation',
-                  builder: (context, state) => const MutationScreen(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/information',
-                  builder: (context, state) => const InformationScreen(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/cs',
-                  builder: (context, state) => const CsScreen(),
-                ),
-              ],
-            ),
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/profile',
-                  builder: (context, state) => const ProfileScreen(),
-                ),
-              ],
+          routes: [
+            GoRoute(
+              path: 'kwitansi',
+              builder: (context, state) => const KwitansiScreen(),
             ),
           ],
+        ),
+        GoRoute(
+          path: '/kwitansi',
+          redirect: (context, state) => '/home/kwitansi',
+        ),
+        GoRoute(
+          path: '/mutation',
+          redirect: (context, state) => '/home?tab=1',
+        ),
+        GoRoute(
+          path: '/information',
+          redirect: (context, state) => '/home?tab=2',
+        ),
+        GoRoute(
+          path: '/cs',
+          redirect: (context, state) => '/home?tab=3',
+        ),
+        GoRoute(
+          path: '/profile',
+          redirect: (context, state) => '/home?tab=4',
         ),
       ],
     );

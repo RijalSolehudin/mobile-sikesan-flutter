@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../core/navigation/navigation_keys.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../../data/repositories/kwitansi_repository.dart';
@@ -122,7 +124,28 @@ class _KwitansiScreenBodyState extends State<_KwitansiScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        // Prioritas 1: Tutup modal/dialog aktif jika ada di root navigator
+        final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+        if (!isCurrent && (rootNavigatorKey.currentState?.canPop() ?? false)) {
+          rootNavigatorKey.currentState?.pop();
+          return;
+        }
+
+        // Prioritas 2: Pop halaman kwitansi kembali ke /home
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go('/home');
+        }
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       floatingActionButton: FloatingActionButton(
         onPressed: _handleCreateNew,
@@ -217,8 +240,9 @@ class _KwitansiScreenBodyState extends State<_KwitansiScreenBody> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildDateTag(DateTime date) {
     return Row(

@@ -12,7 +12,6 @@ import 'package:mobile_sikesan_flutter/data/repositories/dashboard_repository.da
 import 'package:mobile_sikesan_flutter/data/repositories/spp_repository.dart';
 import 'package:mobile_sikesan_flutter/features/auth/bloc/auth_bloc.dart';
 import 'package:mobile_sikesan_flutter/features/dashboard/bloc/dashboard_bloc.dart';
-import 'package:mobile_sikesan_flutter/features/navigation/screen/main_navigation_shell.dart';
 import 'package:mobile_sikesan_flutter/features/spp/bloc/spp_payment_bloc.dart';
 import 'package:mobile_sikesan_flutter/features/spp/widget/pay_spp_modal.dart';
 
@@ -62,27 +61,16 @@ void main() {
       navigatorKey: rootNavigatorKey,
       initialLocation: '/home',
       routes: [
-        StatefulShellRoute.indexedStack(
-          builder: (context, state, navigationShell) {
-            return MainNavigationShell(navigationShell: navigationShell);
-          },
-          branches: [
-            StatefulShellBranch(
-              routes: [
-                GoRoute(
-                  path: '/home',
-                  builder: (context, state) => Scaffold(
-                    body: Center(
-                      child: ElevatedButton(
-                        onPressed: () => PaySppModal.show(context),
-                        child: const Text('Open Pay SPP'),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+        GoRoute(
+          path: '/home',
+          builder: (context, state) => Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () => PaySppModal.show(context),
+                child: const Text('Open Pay SPP'),
+              ),
             ),
-          ],
+          ),
         ),
       ],
     );

@@ -1,44 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/navigation/navigation_keys.dart';
+import '../../cs_sikesan/screen/cs_screen.dart';
+import '../../dashboard/screen/home_screen.dart';
+import '../../information/screen/information_screen.dart';
+import '../../mutation/screen/mutation_screen.dart';
+import '../../profile/screen/profile_screen.dart';
 import '../widget/custom_curved_bottom_bar.dart';
 
 class MainNavigationShell extends StatefulWidget {
-  final StatefulNavigationShell navigationShell;
+  final int initialIndex;
+  final List<Widget>? tabs;
 
-  const MainNavigationShell({super.key, required this.navigationShell});
+  const MainNavigationShell({
+    super.key,
+    this.initialIndex = 0,
+    this.tabs,
+  });
+
+  static void switchToTab(BuildContext context, int index) {
+    final state = context.findAncestorStateOfType<_MainNavigationShellState>();
+    state?.setTab(index);
+  }
 
   @override
   State<MainNavigationShell> createState() => _MainNavigationShellState();
 }
 
 class _MainNavigationShellState extends State<MainNavigationShell> {
+  late int _currentIndex;
   DateTime? _lastBackPressTime;
 
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
+
+  void setTab(int index) {
+    if (_currentIndex != index) {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
+  }
+
   void _handleBackPress() {
-    // 1. Prioritas 1: Jika ada modal/dialog/sheet aktif di root navigator -> tutup modal
+    // 1. Prioritas 1: Jika ada modal/dialog/sheet aktif di root navigator -> tutup modal teratas
     final isShellCurrent = ModalRoute.of(context)?.isCurrent ?? true;
     if (!isShellCurrent && (rootNavigatorKey.currentState?.canPop() ?? false)) {
       rootNavigatorKey.currentState?.pop();
       return;
     }
 
-    // 2. Prioritas 2: Jika ada sub-halaman di branch navigator (misal /home/kwitansi) -> pop sub-halaman
-    final branchNav =
-        widget.navigationShell.shellRouteContext.navigatorKey.currentState;
-    if (branchNav != null && branchNav.canPop()) {
-      branchNav.pop();
+    // 2. Prioritas 2: Jika ada sub-halaman di navigator -> pop sub-halaman
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
       return;
     }
 
-    // Prioritas 2: Jika posisi BUKAN di tab Beranda (index != 0) -> kembali ke Beranda (index 0)
-    if (widget.navigationShell.currentIndex != 0) {
-      widget.navigationShell.goBranch(0);
-      return;
-    }
-
-    // Prioritas 3: Jika sudah di Beranda dan tidak ada modal/sub-rute -> Konfirmasi keluar aplikasi
+    // 3. Prioritas 3: Berada di rootpage dari tab manapun (Beranda, Mutasi, Info, CS, Profil)
+    // -> Konfirmasi keluar aplikasi (double back press)
     final now = DateTime.now();
     if (_lastBackPressTime == null ||
         now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
@@ -54,7 +76,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
       return;
     }
 
-    // Menutup aplikasi jika ditekan 2x dalam 2 detik di halaman Beranda
+    // Menutup aplikasi jika ditekan 2x dalam 2 detik di rootpage
     SystemNavigator.pop();
   }
 
@@ -67,18 +89,24 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
         _handleBackPress();
       },
       child: Scaffold(
-        body: widget.navigationShell,
+        body: IndexedStack(
+          index: _currentIndex,
+          children: widget.tabs ??
+              const [
+                HomeScreen(),
+                MutationScreen(),
+                InformationScreen(),
+                CsScreen(),
+                ProfileScreen(),
+              ],
+        ),
         bottomNavigationBar: CustomCurvedBottomBar(
-          currentIndex: widget.navigationShell.currentIndex,
+          currentIndex: _currentIndex,
           onTap: (index) {
-            widget.navigationShell.goBranch(
-              index,
-              initialLocation: index == widget.navigationShell.currentIndex,
-            );
+            setTab(index);
           },
         ),
       ),
     );
   }
 }
-

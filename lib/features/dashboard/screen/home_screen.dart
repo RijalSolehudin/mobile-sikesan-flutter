@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
@@ -14,6 +13,7 @@ import '../widget/dashboard_metrics_slider.dart';
 import '../widget/student_wallet_slider.dart';
 import '../widget/dashboard_menu_grid.dart';
 import '../widget/dashboard_history_section.dart';
+import '../../navigation/screen/main_navigation_shell.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -319,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   transactions: displayTransactions,
                                   isLoading: isLoading,
                                   onViewAllTransactions: () {
-                                    context.go('/mutation');
+                                    MainNavigationShell.switchToTab(context, 1);
                                   },
                                 ),
                               ],

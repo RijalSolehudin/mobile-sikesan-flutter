@@ -358,6 +358,7 @@ _SIKESAN Digital_''';
 
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (dContext) => StatefulBuilder(
         builder: (dContext, setDialogState) => AlertDialog(
           shape: RoundedRectangleBorder(

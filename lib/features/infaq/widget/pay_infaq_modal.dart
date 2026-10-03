@@ -286,6 +286,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
   void _showQrisDialog() {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(

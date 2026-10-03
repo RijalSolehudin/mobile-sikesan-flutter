@@ -188,6 +188,7 @@ class _PaySppModalState extends State<PaySppModal> {
   void _showQrisDialog() {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(

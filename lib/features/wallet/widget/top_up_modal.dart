@@ -252,6 +252,7 @@ class _TopUpModalState extends State<TopUpModal> {
   void _showQrisDialog() {
     showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         child: Padding(
