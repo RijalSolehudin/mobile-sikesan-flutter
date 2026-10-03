@@ -51,14 +51,20 @@ class DashboardRepository {
   Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({
     int page = 1,
     int perPage = 10,
+    int? month,
+    int? year,
   }) async {
     try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'per_page': perPage,
+      };
+      if (month != null) queryParams['month'] = month;
+      if (year != null) queryParams['year'] = year;
+
       final response = await dioClient.dio.get(
         ApiEndpoints.walletTransactions,
-        queryParameters: {
-          'page': page,
-          'per_page': perPage,
-        },
+        queryParameters: queryParams,
       );
 
       final dynamic responseData = response.data;
@@ -146,14 +152,20 @@ class DashboardRepository {
     bool isGuardian = true,
     int page = 1,
     int perPage = 15,
+    int? month,
+    int? year,
   }) async {
     try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'per_page': perPage,
+      };
+      if (month != null) queryParams['month'] = month;
+      if (year != null) queryParams['year'] = year;
+
       final response = await dioClient.dio.get(
         '/transactions/spp',
-        queryParameters: {
-          'page': page,
-          'per_page': perPage,
-        },
+        queryParameters: queryParams,
       );
       final dynamic responseData = response.data;
       List<dynamic> items = [];
@@ -186,14 +198,20 @@ class DashboardRepository {
     bool isGuardian = true,
     int page = 1,
     int perPage = 15,
+    int? month,
+    int? year,
   }) async {
     try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'per_page': perPage,
+      };
+      if (month != null) queryParams['month'] = month;
+      if (year != null) queryParams['year'] = year;
+
       final response = await dioClient.dio.get(
         '/transactions/infaq',
-        queryParameters: {
-          'page': page,
-          'per_page': perPage,
-        },
+        queryParameters: queryParams,
       );
       final dynamic responseData = response.data;
       List<dynamic> items = [];

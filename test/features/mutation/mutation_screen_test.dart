@@ -22,6 +22,8 @@ class MockDashboardRepository extends DashboardRepository {
   Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({
     int page = 1,
     int perPage = 15,
+    int? month,
+    int? year,
   }) async {
     final list = pageData[page] ?? [];
     return ApiSuccess(list);
@@ -32,6 +34,8 @@ class MockDashboardRepository extends DashboardRepository {
     bool isGuardian = true,
     int page = 1,
     int perPage = 15,
+    int? month,
+    int? year,
   }) async {
     return ApiSuccess(pageData[page] ?? []);
   }
@@ -41,6 +45,8 @@ class MockDashboardRepository extends DashboardRepository {
     bool isGuardian = true,
     int page = 1,
     int perPage = 15,
+    int? month,
+    int? year,
   }) async {
     return ApiSuccess(pageData[page] ?? []);
   }
@@ -152,6 +158,54 @@ void main() {
       // Verify that page 2 items are now loaded and rendered
       expect(find.text('Transaksi Page 2 Item 0'), findsOneWidget);
       expect(find.text('Semua transaksi telah dimuat'), findsOneWidget);
+
+      authBloc.close();
+    });
+
+    testWidgets('renders MutationPeriodFilter and displays month/year options', (
+      tester,
+    ) async {
+      final mockRepo = MockDashboardRepository(
+        pageData: {
+          1: page1Transactions,
+        },
+      );
+
+      final authBloc = AuthBloc(
+        authRepository: MockAuthRepository(),
+      )..emit(
+          const AuthState.authenticated(
+            UserModel(
+              id: 1,
+              name: 'Wali Demo',
+              username: 'wali',
+              email: 'wali@test.com',
+              role: 'Wali Santri',
+            ),
+          ),
+        );
+
+      await tester.pumpWidget(
+        MultiRepositoryProvider(
+          providers: [
+            RepositoryProvider<DashboardRepository>.value(value: mockRepo),
+          ],
+          child: MultiBlocProvider(
+            providers: [
+              BlocProvider<AuthBloc>.value(value: authBloc),
+            ],
+            child: const MaterialApp(
+              home: MutationScreen(),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Ensure period filter dropdowns are rendered
+      expect(find.text('Semua Bulan'), findsOneWidget);
+      expect(find.text('Semua Tahun'), findsOneWidget);
 
       authBloc.close();
     });

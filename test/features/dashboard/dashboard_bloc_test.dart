@@ -37,6 +37,8 @@ class MockDashboardRepository extends DashboardRepository {
   Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({
     int page = 1,
     int perPage = 5,
+    int? month,
+    int? year,
   }) async {
     return txResult ??
         ApiSuccess([

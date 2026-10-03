@@ -11,6 +11,7 @@ import '../../auth/bloc/auth_bloc.dart';
 import '../widget/mutation_header.dart';
 import '../widget/mutation_segmented_tabs.dart';
 import '../widget/mutation_search_bar.dart';
+import '../widget/mutation_period_filter.dart';
 import '../widget/mutation_class_filter.dart';
 import '../widget/mutation_summary_cards.dart';
 import '../widget/mutation_chart_card.dart';
@@ -28,6 +29,8 @@ class _MutationScreenState extends State<MutationScreen> {
   int _selectedTab = 0; // 0: Uang Saku, 1: Pembayaran SPP, 2: Infak Kesantrian
   int _selectedClassIndex = 0;
   int _selectedFilterType = 0; // 0: Semua, 1: Pemasukan, 2: Pengeluaran
+  int? _selectedMonth;
+  int? _selectedYear;
   final String _timeRange = 'Harian';
   String _searchQuery = '';
   bool _isLoading = false;
@@ -36,6 +39,25 @@ class _MutationScreenState extends State<MutationScreen> {
   int _page = 1;
   static const int _perPage = 15;
   bool _hasInitialLoaded = false;
+
+  void _onPeriodChanged({int? month, int? year}) {
+    setState(() {
+      _selectedMonth = month;
+      _selectedYear = year;
+    });
+    _loadTransactions();
+  }
+
+  void _openPeriodPicker() {
+    MutationPeriodFilter.showPeriodPicker(
+      context,
+      currentMonth: _selectedMonth,
+      currentYear: _selectedYear,
+      onApplied: (m, y) {
+        _onPeriodChanged(month: m, year: y);
+      },
+    );
+  }
 
   final List<String> _tabs = [
     'Uang Saku',
@@ -99,18 +121,27 @@ class _MutationScreenState extends State<MutationScreen> {
 
     ApiResult<List<TransactionItemModel>> result;
     if (_selectedTab == 0) {
-      result = await repo.getRecentTransactions(page: 1, perPage: _perPage);
+      result = await repo.getRecentTransactions(
+        page: 1,
+        perPage: _perPage,
+        month: _selectedMonth,
+        year: _selectedYear,
+      );
     } else if (_selectedTab == 1) {
       result = await repo.getSppTransactions(
         isGuardian: isGuardian,
         page: 1,
         perPage: _perPage,
+        month: _selectedMonth,
+        year: _selectedYear,
       );
     } else {
       result = await repo.getInfaqTransactions(
         isGuardian: isGuardian,
         page: 1,
         perPage: _perPage,
+        month: _selectedMonth,
+        year: _selectedYear,
       );
     }
 
@@ -145,18 +176,24 @@ class _MutationScreenState extends State<MutationScreen> {
       result = await repo.getRecentTransactions(
         page: nextPage,
         perPage: _perPage,
+        month: _selectedMonth,
+        year: _selectedYear,
       );
     } else if (_selectedTab == 1) {
       result = await repo.getSppTransactions(
         isGuardian: isGuardian,
         page: nextPage,
         perPage: _perPage,
+        month: _selectedMonth,
+        year: _selectedYear,
       );
     } else {
       result = await repo.getInfaqTransactions(
         isGuardian: isGuardian,
         page: nextPage,
         perPage: _perPage,
+        month: _selectedMonth,
+        year: _selectedYear,
       );
     }
 
@@ -204,6 +241,16 @@ class _MutationScreenState extends State<MutationScreen> {
             !txClass.contains(selectedClass.replaceAll('kelas ', ''))) {
           return false;
         }
+      }
+
+      // Filter by month
+      if (_selectedMonth != null && tx.date.month != _selectedMonth) {
+        return false;
+      }
+
+      // Filter by year
+      if (_selectedYear != null && tx.date.year != _selectedYear) {
+        return false;
       }
 
       return true;
@@ -255,6 +302,20 @@ class _MutationScreenState extends State<MutationScreen> {
                           onChanged: (val) {
                             setState(() => _searchQuery = val);
                           },
+                          onCalendarTap: _openPeriodPicker,
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Month & Year Filter Dropdown Selector
+                        MutationPeriodFilter(
+                          selectedMonth: _selectedMonth,
+                          selectedYear: _selectedYear,
+                          onMonthChanged: (m) =>
+                              _onPeriodChanged(month: m, year: _selectedYear),
+                          onYearChanged: (y) =>
+                              _onPeriodChanged(month: _selectedMonth, year: y),
+                          onReset: () =>
+                              _onPeriodChanged(month: null, year: null),
                         ),
                         const SizedBox(height: 12),
 
