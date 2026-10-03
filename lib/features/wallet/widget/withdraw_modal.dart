@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -30,17 +31,26 @@ class WithdrawModal extends StatefulWidget {
     int? preselectedStudentId,
     String? preselectedStudentName,
   }) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => WithdrawModal(
-        preselectedStudentId: preselectedStudentId,
-        preselectedStudentName: preselectedStudentName,
-      ),
-    );
+    try {
+      return context.push(
+        '/home/withdraw',
+        extra: {
+          'studentId': preselectedStudentId,
+          'studentName': preselectedStudentName,
+        },
+      );
+    } catch (_) {
+      return showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => WithdrawModal(
+          preselectedStudentId: preselectedStudentId,
+          preselectedStudentName: preselectedStudentName,
+        ),
+      );
+    }
   }
 
   @override

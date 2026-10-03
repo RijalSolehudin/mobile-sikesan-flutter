@@ -14,6 +14,11 @@ import '../features/cs_sikesan/screen/cs_screen.dart';
 import '../features/profile/screen/profile_screen.dart';
 import '../features/kwitansi/screen/kwitansi_screen.dart';
 import '../features/navigation/screen/main_navigation_shell.dart';
+import '../core/navigation/modal_bottom_sheet_page.dart';
+import '../features/spp/widget/pay_spp_modal.dart';
+import '../features/wallet/widget/top_up_modal.dart';
+import '../features/wallet/widget/withdraw_modal.dart';
+import '../features/infaq/widget/pay_infaq_modal.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
@@ -44,7 +49,15 @@ class AppRouter {
         final isRoleSelection = loc == '/role-selection';
         final isLogin = loc == '/login';
 
-        // While on splash, let SplashScreen perform branding delay and transition
+        final isLoggedIn = authState.isAuthenticated;
+
+        // If user is ALREADY logged in and attempts to access splash screen (e.g. via back button),
+        // redirect immediately to /home so splash screen is NEVER shown again!
+        if (isLoggedIn && isSplash) {
+          return '/home';
+        }
+
+        // While on splash during cold start, let SplashScreen perform branding delay and transition
         if (isSplash) {
           return null;
         }
@@ -53,8 +66,6 @@ class AppRouter {
         if (authState is AuthInitial) {
           return '/splash';
         }
-
-        final isLoggedIn = authState.isAuthenticated;
 
         // If not logged in and not on login or role-selection page, redirect to role-selection
         if (!isLoggedIn && !isLogin && !isRoleSelection) {
@@ -115,6 +126,42 @@ class AppRouter {
                   path: '/home',
                   builder: (context, state) => const HomeScreen(),
                   routes: [
+                    GoRoute(
+                      path: 'spp',
+                      pageBuilder: (context, state) =>
+                          const ModalBottomSheetPage(child: PaySppModal()),
+                    ),
+                    GoRoute(
+                      path: 'top-up',
+                      pageBuilder: (context, state) {
+                        final extra = state.extra as Map<String, dynamic>?;
+                        return ModalBottomSheetPage(
+                          child: TopUpModal(
+                            preselectedStudentId: extra?['studentId'] as int?,
+                            preselectedStudentName:
+                                extra?['studentName'] as String?,
+                          ),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: 'withdraw',
+                      pageBuilder: (context, state) {
+                        final extra = state.extra as Map<String, dynamic>?;
+                        return ModalBottomSheetPage(
+                          child: WithdrawModal(
+                            preselectedStudentId: extra?['studentId'] as int?,
+                            preselectedStudentName:
+                                extra?['studentName'] as String?,
+                          ),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: 'infaq',
+                      pageBuilder: (context, state) =>
+                          const ModalBottomSheetPage(child: PayInfaqModal()),
+                    ),
                     GoRoute(
                       path: 'kwitansi',
                       builder: (context, state) => const KwitansiScreen(),

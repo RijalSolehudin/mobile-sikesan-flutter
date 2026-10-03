@@ -49,12 +49,6 @@ void main() async {
     ),
   );
 
-  // Pada Web / PWA, gunakan single-entry history agar perpindahan tab bottom bar
-  // tidak menumpuk riwayat browser history tak berujung (pola standar mobile app)
-  if (kIsWeb) {
-    SystemNavigator.selectSingleEntryHistory();
-  }
-
   // Initialize Core Services via InjectionContainer (TASK-CONC-06)
   late final AuthBloc authBloc;
   InjectionContainer.init(

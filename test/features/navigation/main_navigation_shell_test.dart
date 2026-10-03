@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_sikesan_flutter/core/navigation/navigation_keys.dart';
+import 'package:mobile_sikesan_flutter/core/navigation/modal_bottom_sheet_page.dart';
 import 'package:mobile_sikesan_flutter/features/navigation/screen/main_navigation_shell.dart';
 
 void main() {
@@ -184,6 +185,74 @@ void main() {
         find.text('Tekan sekali lagi untuk keluar dari aplikasi'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('ModalBottomSheetPage subroute pops on back and stays on /home', (
+      tester,
+    ) async {
+      final router = GoRouter(
+        navigatorKey: rootNavigatorKey,
+        initialLocation: '/home',
+        routes: [
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, navigationShell) {
+              return MainNavigationShell(navigationShell: navigationShell);
+            },
+            branches: [
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: '/home',
+                    builder: (context, state) => Scaffold(
+                      body: Center(
+                        child: ElevatedButton(
+                          onPressed: () => context.push('/home/spp'),
+                          child: const Text('Buka SPP'),
+                        ),
+                      ),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'spp',
+                        pageBuilder: (context, state) =>
+                            const ModalBottomSheetPage(
+                          child: SizedBox(
+                            height: 200,
+                            child: Text('Modal SPP Route'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: router,
+          scaffoldMessengerKey: rootScaffoldMessengerKey,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Open SPP via context.push
+      await tester.tap(find.text('Buka SPP'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Modal SPP Route'), findsOneWidget);
+
+      // Simulate system back button
+      final dynamic widgetsBinding = tester.binding;
+      await widgetsBinding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      // Modal should be closed and user stays on /home
+      expect(find.text('Modal SPP Route'), findsNothing);
+      expect(find.text('Buka SPP'), findsOneWidget);
     });
   });
 }
