@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,6 +48,12 @@ void main() async {
       statusBarBrightness: Brightness.dark,
     ),
   );
+
+  // Pada Web / PWA, gunakan single-entry history agar perpindahan tab bottom bar
+  // tidak menumpuk riwayat browser history tak berujung (pola standar mobile app)
+  if (kIsWeb) {
+    SystemNavigator.selectSingleEntryHistory();
+  }
 
   // Initialize Core Services via InjectionContainer (TASK-CONC-06)
   late final AuthBloc authBloc;

@@ -14,6 +14,8 @@ class TopUpReceiptModal extends StatelessWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) => TopUpReceiptModal(receipt: receipt),
     );

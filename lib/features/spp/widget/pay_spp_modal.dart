@@ -34,6 +34,7 @@ class PaySppModal extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const PaySppModal(),
     );
@@ -230,6 +231,7 @@ class _PaySppModalState extends State<PaySppModal> {
   void _showImagePickerOptions() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

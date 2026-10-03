@@ -37,6 +37,7 @@ class TopUpModal extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) => TopUpModal(
         preselectedStudentId: preselectedStudentId,
@@ -212,6 +213,7 @@ class _TopUpModalState extends State<TopUpModal> {
   void _showImagePickerOptions() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

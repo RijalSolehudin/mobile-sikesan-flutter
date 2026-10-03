@@ -33,6 +33,8 @@ class WithdrawModal extends StatefulWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) => WithdrawModal(
         preselectedStudentId: preselectedStudentId,

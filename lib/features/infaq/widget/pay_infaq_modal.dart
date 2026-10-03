@@ -25,6 +25,7 @@ class PayInfaqModal extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (context) => const PayInfaqModal(),
     );
@@ -240,6 +241,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
   void _showImagePickerOptions() {
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

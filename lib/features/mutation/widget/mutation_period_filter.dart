@@ -49,6 +49,7 @@ class MutationPeriodFilter extends StatelessWidget {
 
     await showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (ctx) {

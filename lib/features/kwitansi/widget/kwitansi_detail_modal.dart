@@ -251,6 +251,7 @@ _SIKESAN Digital_''';
 
     showModalBottomSheet(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (bContext) => StatefulBuilder(

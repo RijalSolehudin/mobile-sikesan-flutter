@@ -32,6 +32,7 @@ class TransactionSecurityHelper {
     // Fallback ke PIN Transaksi Finansial
     final pinSuccess = await showModalBottomSheet<bool>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       isDismissible: true,
