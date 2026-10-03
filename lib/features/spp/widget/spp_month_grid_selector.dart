@@ -96,6 +96,7 @@ class SppMonthGridSelector extends StatelessWidget {
             );
 
             final isPaid = bill.isPaid;
+            final isPending = bill.isPending;
             final isSelected = selectedMonths.contains(monthNumber);
 
             if (isPaid) {
@@ -125,6 +126,40 @@ class SppMonthGridSelector extends StatelessWidget {
                         Icons.check_circle_rounded,
                         size: 16,
                         color: Color(0xFF10B981),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (isPending) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 218, 216, 253),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF5B58EB),
+                    width: 1.2,
+                  ),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text(
+                      monthName,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF5B58EB),
+                      ),
+                    ),
+                    const Positioned(
+                      right: 8,
+                      child: Icon(
+                        Icons.access_time_rounded,
+                        size: 16,
+                        color: Color(0xFF5B58EB),
                       ),
                     ),
                   ],
@@ -183,7 +218,7 @@ class SppMonthGridSelector extends StatelessWidget {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                'Pilih satu atau lebih bulan. Bulan dengan centang hijau sudah lunas.',
+                'Pilih bulan tagihan. Hijau: Lunas. Ungu: Menunggu Verifikasi.',
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.blue.shade700,

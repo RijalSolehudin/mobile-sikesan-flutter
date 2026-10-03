@@ -16,6 +16,10 @@ class SppBillModel {
   });
 
   bool get isPaid => status.toUpperCase() == 'PAID';
+  bool get isPending =>
+      status.toUpperCase() == 'PENDING' ||
+      status.toUpperCase() == 'MENUNGGU' ||
+      status.toUpperCase() == 'MENUNGGU_VERIFIKASI';
 
   factory SppBillModel.fromJson(Map<String, dynamic> json) {
     return SppBillModel(

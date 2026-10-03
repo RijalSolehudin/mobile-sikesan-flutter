@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile_sikesan_flutter/data/models/spp_models.dart';
 import 'package:mobile_sikesan_flutter/features/spp/utils/spp_fifo_helper.dart';
 import 'package:mobile_sikesan_flutter/features/spp/widget/spp_bill_summary_card.dart';
+import 'package:mobile_sikesan_flutter/features/spp/widget/spp_month_grid_selector.dart';
 import 'package:mobile_sikesan_flutter/features/spp/widget/spp_submit_button.dart';
 
 void main() {
@@ -160,6 +162,72 @@ void main() {
         expect(find.text('Total Tagihan'), findsOneWidget);
         expect(find.text('3 bulan x Rp 750.000'), findsOneWidget);
         expect(find.text('Rp 2.250.000'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'SppMonthGridSelector disables pending months and displays pending styling',
+      (tester) async {
+        int? tappedMonth;
+        final bills = [
+          SppBillModel(
+            id: 'b1',
+            studentId: 1,
+            periodMonth: 1,
+            periodYear: 2026,
+            amountBilled: 750000,
+            status: 'PAID',
+          ),
+          SppBillModel(
+            id: 'b2',
+            studentId: 1,
+            periodMonth: 2,
+            periodYear: 2026,
+            amountBilled: 750000,
+            status: 'PENDING',
+          ),
+          SppBillModel(
+            id: 'b3',
+            studentId: 1,
+            periodMonth: 3,
+            periodYear: 2026,
+            amountBilled: 750000,
+            status: 'UNPAID',
+          ),
+        ];
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: SppMonthGridSelector(
+                  selectedYear: 2026,
+                  selectedStudentId: 1,
+                  selectedMonths: const {},
+                  bills: bills,
+                  isLoadingBills: false,
+                  onMonthTapped: (m) => tappedMonth = m,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Month 1 (Jan) is PAID -> has check icon
+        expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+
+        // Month 2 (Feb) is PENDING -> has access_time_rounded icon
+        expect(find.byIcon(Icons.access_time_rounded), findsOneWidget);
+
+        // Tapping Month 2 (Feb) should not trigger onMonthTapped
+        await tester.tap(find.text('Feb'));
+        await tester.pump();
+        expect(tappedMonth, isNull);
+
+        // Tapping Month 3 (Mar - UNPAID) triggers onMonthTapped
+        await tester.tap(find.text('Mar'));
+        await tester.pump();
+        expect(tappedMonth, 3);
       },
     );
   });

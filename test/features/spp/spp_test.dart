@@ -28,6 +28,30 @@ void main() {
       };
       final billUnpaid = SppBillModel.fromJson(jsonUnpaid);
       expect(billUnpaid.isPaid, false);
+      expect(billUnpaid.isPending, false);
+
+      final jsonPending = {
+        'id': 'BILL-03',
+        'student_id': 10,
+        'period_month': 3,
+        'period_year': 2026,
+        'amount_billed': 750000,
+        'status': 'PENDING',
+      };
+      final billPending = SppBillModel.fromJson(jsonPending);
+      expect(billPending.isPaid, false);
+      expect(billPending.isPending, true);
+
+      final jsonMenunggu = {
+        'id': 'BILL-04',
+        'student_id': 10,
+        'period_month': 4,
+        'period_year': 2026,
+        'amount_billed': 750000,
+        'status': 'MENUNGGU_VERIFIKASI',
+      };
+      final billMenunggu = SppBillModel.fromJson(jsonMenunggu);
+      expect(billMenunggu.isPending, true);
     });
 
     test('BankAccountModel returns default accounts with valid numbers', () {

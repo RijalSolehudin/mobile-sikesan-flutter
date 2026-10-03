@@ -128,6 +128,23 @@ class _PaySppModalState extends State<PaySppModal> {
   }
 
   void _onMonthTapped(int monthNumber) {
+    final tappedBill = _bills.firstWhere(
+      (bill) => bill.periodMonth == monthNumber && bill.periodYear == _selectedYear,
+      orElse: () => SppBillModel(
+        id: '',
+        studentId: _selectedStudentId ?? 0,
+        periodMonth: monthNumber,
+        periodYear: _selectedYear,
+        amountBilled: 750000,
+        status: 'UNPAID',
+      ),
+    );
+
+    // Bulan lunas atau yang masih menunggu verifikasi tidak dapat dipilih
+    if (tappedBill.isPaid || tappedBill.isPending) {
+      return;
+    }
+
     final unpaidMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].where((m) {
       final b = _bills.firstWhere(
         (bill) => bill.periodMonth == m && bill.periodYear == _selectedYear,
@@ -140,7 +157,7 @@ class _PaySppModalState extends State<PaySppModal> {
           status: 'UNPAID',
         ),
       );
-      return !b.isPaid;
+      return !b.isPaid && !b.isPending;
     }).toList();
 
     setState(() {
@@ -307,6 +324,11 @@ class _PaySppModalState extends State<PaySppModal> {
         .where((b) => _selectedMonths.contains(b.periodMonth))
         .toList();
     final billIds = selectedBills.map((b) => b.id).toList();
+
+    if (selectedBills.any((b) => b.isPending)) {
+      _showError('Terdapat bulan yang sedang menunggu verifikasi pembayaran.');
+      return;
+    }
 
     if (billIds.isEmpty || billIds.length != _selectedMonths.length) {
       _showError(
