@@ -13,11 +13,7 @@ class ReceiptPreviewModal extends StatelessWidget {
 
   static Future<void> show(BuildContext context, SppReceiptModel receipt) {
     try {
-      final loc = GoRouterState.of(context).matchedLocation;
-      if (loc.startsWith('/home')) {
-        return context.push('$loc/receipt', extra: receipt);
-      }
-      return context.push('/home/spp/receipt', extra: receipt);
+      return context.push('/home/receipt', extra: receipt);
     } catch (_) {
       return showModalBottomSheet(
         context: context,

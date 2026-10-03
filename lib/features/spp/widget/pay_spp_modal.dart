@@ -441,9 +441,17 @@ class _PaySppModalState extends State<PaySppModal> {
             final navigator = Navigator.of(context);
             final parentContext = navigator.context;
             final sppRepo = RepositoryProvider.of<SppRepository>(context);
+            final sppPaymentBloc = context.read<SppPaymentBloc>();
+            final dashboardBloc = context.read<DashboardBloc>();
+
+            // Refresh dashboard metrics
+            dashboardBloc.add(DashboardRefreshRequested(role: userRole));
 
             await _showSuccessAnimation();
             navigator.pop();
+
+            // Reset payment state for future transactions
+            sppPaymentBloc.add(const SppPaymentEvent.reset());
 
             final receiptResult = await sppRepo.getReceipt(paymentId);
             if (!parentContext.mounted) return;
