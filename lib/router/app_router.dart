@@ -19,6 +19,10 @@ import '../features/spp/widget/pay_spp_modal.dart';
 import '../features/wallet/widget/top_up_modal.dart';
 import '../features/wallet/widget/withdraw_modal.dart';
 import '../features/infaq/widget/pay_infaq_modal.dart';
+import '../core/navigation/dialog_page.dart';
+import '../features/kwitansi/widget/create_kwitansi_modal.dart';
+import '../features/kwitansi/widget/kwitansi_detail_modal.dart';
+import '../features/kwitansi/models/kwitansi_model.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
@@ -165,12 +169,84 @@ class AppRouter {
                     GoRoute(
                       path: 'kwitansi',
                       builder: (context, state) => const KwitansiScreen(),
+                      routes: [
+                        GoRoute(
+                          path: 'create',
+                          pageBuilder: (context, state) {
+                            final extra = state.extra as Map<String, dynamic>?;
+                            return DialogPage(
+                              child: CreateKwitansiModal(
+                                existingCategories: (extra?['categories']
+                                        as List<String>?) ??
+                                    const ['Pondok'],
+                                onCreated: (extra?['onCreated'] as Function(
+                                        KwitansiModel, String?)?) ??
+                                    (kwitansi, category) {},
+                              ),
+                            );
+                          },
+                        ),
+                        GoRoute(
+                          path: 'detail',
+                          pageBuilder: (context, state) {
+                            final extra = state.extra as Map<String, dynamic>?;
+                            final item = extra?['item'] as KwitansiModel?;
+                            if (item == null) {
+                              return const DialogPage(child: SizedBox.shrink());
+                            }
+                            return DialogPage(
+                              child: KwitansiDetailModal(
+                                item: item,
+                                onDeleted: extra?['onDeleted'] as VoidCallback?,
+                                onUpdated: extra?['onUpdated']
+                                    as Function(KwitansiModel)?,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
                 GoRoute(
                   path: '/kwitansi',
                   builder: (context, state) => const KwitansiScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'create',
+                      pageBuilder: (context, state) {
+                        final extra = state.extra as Map<String, dynamic>?;
+                        return DialogPage(
+                          child: CreateKwitansiModal(
+                            existingCategories: (extra?['categories']
+                                    as List<String>?) ??
+                                const ['Pondok'],
+                            onCreated: (extra?['onCreated'] as Function(
+                                    KwitansiModel, String?)?) ??
+                                (kwitansi, category) {},
+                          ),
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: 'detail',
+                      pageBuilder: (context, state) {
+                        final extra = state.extra as Map<String, dynamic>?;
+                        final item = extra?['item'] as KwitansiModel?;
+                        if (item == null) {
+                          return const DialogPage(child: SizedBox.shrink());
+                        }
+                        return DialogPage(
+                          child: KwitansiDetailModal(
+                            item: item,
+                            onDeleted: extra?['onDeleted'] as VoidCallback?,
+                            onUpdated: extra?['onUpdated']
+                                as Function(KwitansiModel)?,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

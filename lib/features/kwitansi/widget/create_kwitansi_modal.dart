@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,14 +22,28 @@ class CreateKwitansiModal extends StatefulWidget {
     required List<String> existingCategories,
     required Function(KwitansiModel newKwitansi, String? newCategory) onCreated,
   }) {
-    return showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (context) => CreateKwitansiModal(
-        existingCategories: existingCategories,
-        onCreated: onCreated,
-      ),
-    );
+    try {
+      final currentLoc = GoRouterState.of(context).matchedLocation;
+      final targetPath = currentLoc.endsWith('/')
+          ? '${currentLoc}create'
+          : '$currentLoc/create';
+      return context.push(
+        targetPath,
+        extra: {
+          'categories': existingCategories,
+          'onCreated': onCreated,
+        },
+      );
+    } catch (_) {
+      return showDialog(
+        context: context,
+        barrierColor: Colors.black.withValues(alpha: 0.5),
+        builder: (context) => CreateKwitansiModal(
+          existingCategories: existingCategories,
+          onCreated: onCreated,
+        ),
+      );
+    }
   }
 
   @override

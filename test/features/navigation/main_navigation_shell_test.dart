@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_sikesan_flutter/core/navigation/navigation_keys.dart';
 import 'package:mobile_sikesan_flutter/core/navigation/modal_bottom_sheet_page.dart';
+import 'package:mobile_sikesan_flutter/core/navigation/dialog_page.dart';
 import 'package:mobile_sikesan_flutter/features/navigation/screen/main_navigation_shell.dart';
 
 void main() {
@@ -253,6 +254,86 @@ void main() {
       // Modal should be closed and user stays on /home
       expect(find.text('Modal SPP Route'), findsNothing);
       expect(find.text('Buka SPP'), findsOneWidget);
+    });
+
+    testWidgets(
+        'DialogPage in subroute (/home/kwitansi/create) dismisses on back and stays on /home/kwitansi',
+        (tester) async {
+      final router = GoRouter(
+        navigatorKey: rootNavigatorKey,
+        initialLocation: '/home/kwitansi',
+        routes: [
+          StatefulShellRoute.indexedStack(
+            builder: (context, state, navigationShell) {
+              return MainNavigationShell(navigationShell: navigationShell);
+            },
+            branches: [
+              StatefulShellBranch(
+                routes: [
+                  GoRoute(
+                    path: '/home',
+                    builder: (context, state) => const Scaffold(
+                      body: Text('Halaman Beranda'),
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'kwitansi',
+                        builder: (context, state) => Scaffold(
+                          body: Center(
+                            child: ElevatedButton(
+                              onPressed: () =>
+                                  context.push('/home/kwitansi/create'),
+                              child: const Text('Tambah Kwitansi'),
+                            ),
+                          ),
+                        ),
+                        routes: [
+                          GoRoute(
+                            path: 'create',
+                            pageBuilder: (context, state) =>
+                                const DialogPage(
+                              child: AlertDialog(
+                                title: Text('Modal Tambah Kwitansi'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(
+          routerConfig: router,
+          scaffoldMessengerKey: rootScaffoldMessengerKey,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Ensure we are on kwitansi page
+      expect(find.text('Tambah Kwitansi'), findsOneWidget);
+
+      // Open create modal
+      await tester.tap(find.text('Tambah Kwitansi'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Modal Tambah Kwitansi'), findsOneWidget);
+
+      // Simulate system back press
+      final dynamic widgetsBinding = tester.binding;
+      await widgetsBinding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      // Modal is dismissed, user is STILL on kwitansi page
+      expect(find.text('Modal Tambah Kwitansi'), findsNothing);
+      expect(find.text('Tambah Kwitansi'), findsOneWidget);
+      expect(find.text('Halaman Beranda'), findsNothing);
     });
   });
 }
