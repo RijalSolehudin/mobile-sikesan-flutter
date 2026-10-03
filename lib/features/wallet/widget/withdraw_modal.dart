@@ -12,7 +12,6 @@ import '../../../data/repositories/wallet_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
 import '../../../core/widgets/app_snackbar.dart';
-import '../../../core/widgets/transaction_security_sheet.dart';
 import 'withdraw_receipt_modal.dart';
 
 class WithdrawModal extends StatefulWidget {
@@ -245,20 +244,6 @@ class _WithdrawModalState extends State<WithdrawModal> {
 
     if (_amount > _selectedStudentBalance && _selectedStudentBalance > 0) {
       _showError('Saldo tidak mencukupi untuk melakukan penarikan');
-      return;
-    }
-
-    final isAuthorized = await TransactionSecurityHelper.authorizeTransaction(
-      context: context,
-      actionTitle: 'Tarik Tunai Saldo',
-      formattedAmount: CurrencyFormatter.formatRupiah(_amount),
-      subtitle: 'Santri: $_selectedStudentName',
-    );
-
-    if (!isAuthorized) {
-      if (mounted) {
-        _showError('Otorisasi keamanan transaksi dibatalkan');
-      }
       return;
     }
 

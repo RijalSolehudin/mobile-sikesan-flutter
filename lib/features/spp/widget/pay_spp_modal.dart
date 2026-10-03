@@ -6,10 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/image_upload_helper.dart';
 import '../../../core/widgets/app_snackbar.dart';
-import '../../../core/widgets/transaction_security_sheet.dart';
 import '../../../data/models/spp_models.dart';
 import '../../../data/repositories/spp_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
@@ -46,7 +44,6 @@ class PaySppModal extends StatefulWidget {
 
 class _PaySppModalState extends State<PaySppModal> {
   int? _selectedStudentId;
-  String _selectedStudentName = '';
   int _selectedYear = DateTime.now().year;
   final List<int> _availableYears = [
     DateTime.now().year - 1,
@@ -103,7 +100,6 @@ class _PaySppModalState extends State<PaySppModal> {
   void _selectStudent(int studentId, String studentName) {
     setState(() {
       _selectedStudentId = studentId;
-      _selectedStudentName = studentName;
       _selectedMonths.clear();
       _searchedStudents.clear();
       _searchController.text = studentName;
@@ -316,21 +312,6 @@ class _PaySppModalState extends State<PaySppModal> {
       0,
       (sum, b) => sum + b.amountBilled,
     );
-
-    // Otentikasi Lapis Kedua (TASK-CONC-15)
-    final isAuthorized = await TransactionSecurityHelper.authorizeTransaction(
-      context: context,
-      actionTitle: 'Bayar Tagihan SPP',
-      formattedAmount: CurrencyFormatter.formatRupiah(total),
-      subtitle: 'Santri: $_selectedStudentName (${selectedBills.length} Bulan)',
-    );
-
-    if (!isAuthorized) {
-      if (mounted) {
-        _showError('Otorisasi keamanan transaksi dibatalkan.');
-      }
-      return;
-    }
 
     setState(() => _isSubmitting = true);
 

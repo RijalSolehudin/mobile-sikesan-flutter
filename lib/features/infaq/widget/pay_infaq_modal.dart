@@ -15,7 +15,6 @@ import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
 import '../../spp/widget/receipt_preview_modal.dart';
 import '../../../core/widgets/app_snackbar.dart';
-import '../../../core/widgets/transaction_security_sheet.dart';
 
 class PayInfaqModal extends StatefulWidget {
   const PayInfaqModal({super.key});
@@ -450,23 +449,6 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       0,
       (sum, b) => sum + b.amountBilled,
     );
-
-    final isAuthorized = await TransactionSecurityHelper.authorizeTransaction(
-      context: context,
-      actionTitle: 'Bayar Infak Santri',
-      formattedAmount: CurrencyFormatter.formatRupiah(total),
-      subtitle: 'Santri: $_selectedStudentName (${selectedBills.length} Bulan)',
-    );
-
-    if (!isAuthorized) {
-      if (mounted) {
-        AppSnackBar.showError(
-          context,
-          'Otorisasi keamanan transaksi dibatalkan.',
-        );
-      }
-      return;
-    }
 
     setState(() => _isSubmitting = true);
 

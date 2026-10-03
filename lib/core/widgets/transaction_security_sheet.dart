@@ -13,37 +13,8 @@ class TransactionSecurityHelper {
     required String formattedAmount,
     String? subtitle,
   }) async {
-    final biometric = InjectionContainer.biometricAuth;
-    final isBiometricReady = await biometric.isBiometricAvailable();
-
-    if (isBiometricReady) {
-      final bioSuccess = await biometric.authenticate(
-        reason: 'Otorisasi $actionTitle sebesar $formattedAmount',
-        biometricOnly: false,
-      );
-
-      if (bioSuccess) {
-        return true;
-      }
-    }
-
-    if (!context.mounted) return false;
-
-    // Fallback ke PIN Transaksi Finansial
-    final pinSuccess = await showModalBottomSheet<bool>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      isDismissible: true,
-      builder: (ctx) => TransactionPinSheet(
-        actionTitle: actionTitle,
-        formattedAmount: formattedAmount,
-        subtitle: subtitle,
-      ),
-    );
-
-    return pinSuccess ?? false;
+    // Validasi PIN & Biometrik dinonaktifkan
+    return true;
   }
 }
 
