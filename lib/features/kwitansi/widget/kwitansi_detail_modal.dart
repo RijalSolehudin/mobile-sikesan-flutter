@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/network/api_result.dart';
@@ -29,26 +28,16 @@ class KwitansiDetailModal extends StatefulWidget {
     VoidCallback? onDeleted,
     Function(KwitansiModel)? onUpdated,
   }) {
-    try {
-      final currentLoc = GoRouterState.of(context).matchedLocation;
-      final targetPath = currentLoc.endsWith('/')
-          ? '${currentLoc}detail'
-          : '$currentLoc/detail';
-      return context.push(
-        targetPath,
-        extra: {'item': item, 'onDeleted': onDeleted, 'onUpdated': onUpdated},
-      );
-    } catch (_) {
-      return showDialog(
-        context: context,
-        barrierColor: Colors.black.withValues(alpha: 0.5),
-        builder: (context) => KwitansiDetailModal(
-          item: item,
-          onDeleted: onDeleted,
-          onUpdated: onUpdated,
-        ),
-      );
-    }
+    return showDialog(
+      context: context,
+      useRootNavigator: true,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) => KwitansiDetailModal(
+        item: item,
+        onDeleted: onDeleted,
+        onUpdated: onUpdated,
+      ),
+    );
   }
 
   @override

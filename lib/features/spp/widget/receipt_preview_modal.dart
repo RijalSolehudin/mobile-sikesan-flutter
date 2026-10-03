@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/services/receipt_pdf_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -12,18 +11,14 @@ class ReceiptPreviewModal extends StatelessWidget {
   const ReceiptPreviewModal({super.key, required this.receipt});
 
   static Future<void> show(BuildContext context, SppReceiptModel receipt) {
-    try {
-      return context.push('/home/receipt', extra: receipt);
-    } catch (_) {
-      return showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        useRootNavigator: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => ReceiptPreviewModal(receipt: receipt),
-      );
-    }
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ReceiptPreviewModal(receipt: receipt),
+    );
   }
 
   @override

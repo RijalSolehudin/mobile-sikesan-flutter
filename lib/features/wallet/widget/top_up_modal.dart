@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/network/api_result.dart';
@@ -34,26 +33,17 @@ class TopUpModal extends StatefulWidget {
     int? preselectedStudentId,
     String? preselectedStudentName,
   }) {
-    try {
-      return context.push(
-        '/home/top-up',
-        extra: {
-          'studentId': preselectedStudentId,
-          'studentName': preselectedStudentName,
-        },
-      );
-    } catch (_) {
-      return showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => TopUpModal(
-          preselectedStudentId: preselectedStudentId,
-          preselectedStudentName: preselectedStudentName,
-        ),
-      );
-    }
+    return showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => TopUpModal(
+        preselectedStudentId: preselectedStudentId,
+        preselectedStudentName: preselectedStudentName,
+      ),
+    );
   }
 
   @override

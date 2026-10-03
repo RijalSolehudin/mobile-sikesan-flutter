@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../core/services/receipt_pdf_service.dart';
 import '../../../core/theme/app_colors.dart';
@@ -13,18 +12,14 @@ class WithdrawReceiptModal extends StatelessWidget {
   const WithdrawReceiptModal({super.key, required this.receipt});
 
   static Future<void> show(BuildContext context, WithdrawReceiptModel receipt) {
-    try {
-      return context.push('/home/withdraw/receipt', extra: receipt);
-    } catch (_) {
-      return showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        useRootNavigator: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => WithdrawReceiptModal(receipt: receipt),
-      );
-    }
+    return showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => WithdrawReceiptModal(receipt: receipt),
+    );
   }
 
   @override

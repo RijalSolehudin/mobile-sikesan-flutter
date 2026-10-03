@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_sikesan_flutter/core/navigation/navigation_keys.dart';
-import 'package:mobile_sikesan_flutter/core/navigation/modal_bottom_sheet_page.dart';
 import 'package:mobile_sikesan_flutter/core/network/api_result.dart';
 import 'package:mobile_sikesan_flutter/core/network/dio_client.dart';
 import 'package:mobile_sikesan_flutter/data/local/secure_storage_service.dart';
@@ -16,7 +15,6 @@ import 'package:mobile_sikesan_flutter/features/dashboard/bloc/dashboard_bloc.da
 import 'package:mobile_sikesan_flutter/features/navigation/screen/main_navigation_shell.dart';
 import 'package:mobile_sikesan_flutter/features/spp/bloc/spp_payment_bloc.dart';
 import 'package:mobile_sikesan_flutter/features/spp/widget/pay_spp_modal.dart';
-import 'package:mobile_sikesan_flutter/features/spp/widget/receipt_preview_modal.dart';
 
 class MockSppRepo extends SppRepository {
   MockSppRepo() : super(DioClient(secureStorage: SecureStorageService()));
@@ -76,48 +74,11 @@ void main() {
                   builder: (context, state) => Scaffold(
                     body: Center(
                       child: ElevatedButton(
-                        onPressed: () => context.push('/home/spp'),
+                        onPressed: () => PaySppModal.show(context),
                         child: const Text('Open Pay SPP'),
                       ),
                     ),
                   ),
-                  routes: [
-                    GoRoute(
-                      path: 'spp',
-                      pageBuilder: (context, state) =>
-                          const ModalBottomSheetPage(child: PaySppModal()),
-                      routes: [
-                        GoRoute(
-                          path: 'receipt',
-                          pageBuilder: (context, state) {
-                            final receipt = state.extra as SppReceiptModel?;
-                            if (receipt == null) {
-                              return const ModalBottomSheetPage(
-                                child: SizedBox.shrink(),
-                              );
-                            }
-                            return ModalBottomSheetPage(
-                              child: ReceiptPreviewModal(receipt: receipt),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    GoRoute(
-                      path: 'receipt',
-                      pageBuilder: (context, state) {
-                        final receipt = state.extra as SppReceiptModel?;
-                        if (receipt == null) {
-                          return const ModalBottomSheetPage(
-                            child: SizedBox.shrink(),
-                          );
-                        }
-                        return ModalBottomSheetPage(
-                          child: ReceiptPreviewModal(receipt: receipt),
-                        );
-                      },
-                    ),
-                  ],
                 ),
               ],
             ),

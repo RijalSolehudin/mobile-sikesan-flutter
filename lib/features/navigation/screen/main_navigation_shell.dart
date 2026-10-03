@@ -17,23 +17,14 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   DateTime? _lastBackPressTime;
 
   void _handleBackPress() {
-    // 1. Prioritas 1: Jika ada sub-rute GoRouter aktif (misal /home/spp, /home/top-up, /home/kwitansi/create)
-    if (GoRouter.of(context).canPop()) {
-      GoRouter.of(context).pop();
-      return;
-    }
-
-    // 2. Prioritas 1b: Jika ada modal/dialog/sheet aktif di root navigator -> tutup modal
-    // Pastikan hanya pop rootNavigator jika ada overlay/dialog di atas MainNavigationShell
-    // (isCurrent == false). Jika shell isCurrent, me-pop rootNavigator akan mengeluarkan
-    // shell dan kembali ke Splash/Login!
+    // 1. Prioritas 1: Jika ada modal/dialog/sheet aktif di root navigator -> tutup modal
     final isShellCurrent = ModalRoute.of(context)?.isCurrent ?? true;
     if (!isShellCurrent && (rootNavigatorKey.currentState?.canPop() ?? false)) {
       rootNavigatorKey.currentState?.pop();
       return;
     }
 
-    // 3. Prioritas 1c: Jika ada sub-rute atau modal aktif di branch navigator -> pop rute tersebut
+    // 2. Prioritas 2: Jika ada sub-halaman di branch navigator (misal /home/kwitansi) -> pop sub-halaman
     final branchNav =
         widget.navigationShell.shellRouteContext.navigatorKey.currentState;
     if (branchNav != null && branchNav.canPop()) {

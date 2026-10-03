@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/network/api_result.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -31,26 +30,17 @@ class WithdrawModal extends StatefulWidget {
     int? preselectedStudentId,
     String? preselectedStudentName,
   }) {
-    try {
-      return context.push(
-        '/home/withdraw',
-        extra: {
-          'studentId': preselectedStudentId,
-          'studentName': preselectedStudentName,
-        },
-      );
-    } catch (_) {
-      return showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => WithdrawModal(
-          preselectedStudentId: preselectedStudentId,
-          preselectedStudentName: preselectedStudentName,
-        ),
-      );
-    }
+    return showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => WithdrawModal(
+        preselectedStudentId: preselectedStudentId,
+        preselectedStudentName: preselectedStudentName,
+      ),
+    );
   }
 
   @override
@@ -275,7 +265,8 @@ class _WithdrawModalState extends State<WithdrawModal> {
     setState(() => _isLoading = true);
 
     if (!mounted) return;
-    final parentContext = context;
+    final navigator = Navigator.of(context);
+    final parentContext = navigator.context;
     final walletRepo = RepositoryProvider.of<WalletRepository>(context);
     final dashboardBloc = context.read<DashboardBloc>();
     final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
@@ -296,7 +287,8 @@ class _WithdrawModalState extends State<WithdrawModal> {
       // Refresh dashboard metrics
       dashboardBloc.add(DashboardRefreshRequested(role: userRole));
 
-      Navigator.of(parentContext).pop();
+      navigator.pop();
+      if (!parentContext.mounted) return;
       WithdrawReceiptModal.show(parentContext, receipt);
     } else {
       final msg = result is ApiFailure

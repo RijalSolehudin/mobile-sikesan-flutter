@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_sikesan_flutter/core/navigation/navigation_keys.dart';
-import 'package:mobile_sikesan_flutter/core/navigation/modal_bottom_sheet_page.dart';
-import 'package:mobile_sikesan_flutter/core/navigation/dialog_page.dart';
 import 'package:mobile_sikesan_flutter/features/navigation/screen/main_navigation_shell.dart';
 
 void main() {
@@ -188,7 +186,7 @@ void main() {
       );
     });
 
-    testWidgets('ModalBottomSheetPage subroute pops on back and stays on /home', (
+    testWidgets('Subroute in branch (/home/kwitansi) pops on back and returns to /home', (
       tester,
     ) async {
       final router = GoRouter(
@@ -207,20 +205,16 @@ void main() {
                     builder: (context, state) => Scaffold(
                       body: Center(
                         child: ElevatedButton(
-                          onPressed: () => context.push('/home/spp'),
-                          child: const Text('Buka SPP'),
+                          onPressed: () => context.push('/home/kwitansi'),
+                          child: const Text('Buka Kwitansi'),
                         ),
                       ),
                     ),
                     routes: [
                       GoRoute(
-                        path: 'spp',
-                        pageBuilder: (context, state) =>
-                            const ModalBottomSheetPage(
-                          child: SizedBox(
-                            height: 200,
-                            child: Text('Modal SPP Route'),
-                          ),
+                        path: 'kwitansi',
+                        builder: (context, state) => const Scaffold(
+                          body: Text('Halaman Kwitansi Digital'),
                         ),
                       ),
                     ],
@@ -240,24 +234,24 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Open SPP via context.push
-      await tester.tap(find.text('Buka SPP'));
+      // Open Kwitansi
+      await tester.tap(find.text('Buka Kwitansi'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Modal SPP Route'), findsOneWidget);
+      expect(find.text('Halaman Kwitansi Digital'), findsOneWidget);
 
       // Simulate system back button
       final dynamic widgetsBinding = tester.binding;
       await widgetsBinding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      // Modal should be closed and user stays on /home
-      expect(find.text('Modal SPP Route'), findsNothing);
-      expect(find.text('Buka SPP'), findsOneWidget);
+      // Subroute popped and user is back on /home
+      expect(find.text('Halaman Kwitansi Digital'), findsNothing);
+      expect(find.text('Buka Kwitansi'), findsOneWidget);
     });
 
     testWidgets(
-        'DialogPage in subroute (/home/kwitansi/create) dismisses on back and stays on /home/kwitansi',
+        'Dialog on subroute (/home/kwitansi) dismisses on back and stays on /home/kwitansi',
         (tester) async {
       final router = GoRouter(
         navigatorKey: rootNavigatorKey,
@@ -281,23 +275,19 @@ void main() {
                         builder: (context, state) => Scaffold(
                           body: Center(
                             child: ElevatedButton(
-                              onPressed: () =>
-                                  context.push('/home/kwitansi/create'),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  useRootNavigator: true,
+                                  builder: (ctx) => const AlertDialog(
+                                    title: Text('Modal Tambah Kwitansi'),
+                                  ),
+                                );
+                              },
                               child: const Text('Tambah Kwitansi'),
                             ),
                           ),
                         ),
-                        routes: [
-                          GoRoute(
-                            path: 'create',
-                            pageBuilder: (context, state) =>
-                                const DialogPage(
-                              child: AlertDialog(
-                                title: Text('Modal Tambah Kwitansi'),
-                              ),
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ),
