@@ -49,12 +49,16 @@ class DashboardRepository {
   }
 
   Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({
-    int perPage = 5,
+    int page = 1,
+    int perPage = 10,
   }) async {
     try {
       final response = await dioClient.dio.get(
         ApiEndpoints.walletTransactions,
-        queryParameters: {'per_page': perPage},
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+        },
       );
 
       final dynamic responseData = response.data;
@@ -140,11 +144,16 @@ class DashboardRepository {
 
   Future<ApiResult<List<TransactionItemModel>>> getSppTransactions({
     bool isGuardian = true,
+    int page = 1,
+    int perPage = 15,
   }) async {
     try {
       final response = await dioClient.dio.get(
         '/transactions/spp',
-        queryParameters: {'per_page': 20},
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+        },
       );
       final dynamic responseData = response.data;
       List<dynamic> items = [];
@@ -175,11 +184,16 @@ class DashboardRepository {
 
   Future<ApiResult<List<TransactionItemModel>>> getInfaqTransactions({
     bool isGuardian = true,
+    int page = 1,
+    int perPage = 15,
   }) async {
     try {
       final response = await dioClient.dio.get(
         '/transactions/infaq',
-        queryParameters: {'per_page': 20},
+        queryParameters: {
+          'page': page,
+          'per_page': perPage,
+        },
       );
       final dynamic responseData = response.data;
       List<dynamic> items = [];

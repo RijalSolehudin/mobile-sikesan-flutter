@@ -24,12 +24,17 @@ class MutationScreen extends StatefulWidget {
 }
 
 class _MutationScreenState extends State<MutationScreen> {
+  final ScrollController _scrollController = ScrollController();
   int _selectedTab = 0; // 0: Uang Saku, 1: Pembayaran SPP, 2: Infak Kesantrian
   int _selectedClassIndex = 0;
   int _selectedFilterType = 0; // 0: Semua, 1: Pemasukan, 2: Pengeluaran
   final String _timeRange = 'Harian';
   String _searchQuery = '';
   bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _page = 1;
+  static const int _perPage = 15;
   bool _hasInitialLoaded = false;
 
   final List<String> _tabs = [
@@ -50,6 +55,30 @@ class _MutationScreenState extends State<MutationScreen> {
   List<TransactionItemModel> _transactions = [];
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (currentScroll >= maxScroll - 200) {
+      if (!_isLoading && !_isLoadingMore && _hasMore) {
+        _loadMoreTransactions();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_hasInitialLoaded) {
@@ -59,31 +88,91 @@ class _MutationScreenState extends State<MutationScreen> {
   }
 
   Future<void> _loadTransactions() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _page = 1;
+      _hasMore = true;
+    });
     final repo = context.read<DashboardRepository>();
     final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
     final isGuardian = userRole.toLowerCase().contains('wali');
 
     ApiResult<List<TransactionItemModel>> result;
     if (_selectedTab == 0) {
-      result = await repo.getRecentTransactions(perPage: 30);
+      result = await repo.getRecentTransactions(page: 1, perPage: _perPage);
     } else if (_selectedTab == 1) {
-      result = await repo.getSppTransactions(isGuardian: isGuardian);
+      result = await repo.getSppTransactions(
+        isGuardian: isGuardian,
+        page: 1,
+        perPage: _perPage,
+      );
     } else {
-      result = await repo.getInfaqTransactions(isGuardian: isGuardian);
+      result = await repo.getInfaqTransactions(
+        isGuardian: isGuardian,
+        page: 1,
+        perPage: _perPage,
+      );
     }
 
     if (!mounted) return;
 
-    final res = result;
-    if (res is ApiSuccess<List<TransactionItemModel>>) {
+    if (result is ApiSuccess<List<TransactionItemModel>>) {
+      final items = result.data;
       setState(() {
-        _transactions = res.data;
+        _transactions = items;
+        _hasMore = items.length >= _perPage;
         _isLoading = false;
       });
     } else {
       setState(() {
         _isLoading = false;
+        _hasMore = false;
+      });
+    }
+  }
+
+  Future<void> _loadMoreTransactions() async {
+    if (_isLoadingMore || !_hasMore) return;
+
+    setState(() => _isLoadingMore = true);
+    final repo = context.read<DashboardRepository>();
+    final userRole = context.read<AuthBloc>().state.user?.role ?? 'Wali Santri';
+    final isGuardian = userRole.toLowerCase().contains('wali');
+    final nextPage = _page + 1;
+
+    ApiResult<List<TransactionItemModel>> result;
+    if (_selectedTab == 0) {
+      result = await repo.getRecentTransactions(
+        page: nextPage,
+        perPage: _perPage,
+      );
+    } else if (_selectedTab == 1) {
+      result = await repo.getSppTransactions(
+        isGuardian: isGuardian,
+        page: nextPage,
+        perPage: _perPage,
+      );
+    } else {
+      result = await repo.getInfaqTransactions(
+        isGuardian: isGuardian,
+        page: nextPage,
+        perPage: _perPage,
+      );
+    }
+
+    if (!mounted) return;
+
+    if (result is ApiSuccess<List<TransactionItemModel>>) {
+      final newItems = result.data;
+      setState(() {
+        _page = nextPage;
+        _transactions.addAll(newItems);
+        _hasMore = newItems.length >= _perPage;
+        _isLoadingMore = false;
+      });
+    } else {
+      setState(() {
+        _isLoadingMore = false;
       });
     }
   }
@@ -137,6 +226,7 @@ class _MutationScreenState extends State<MutationScreen> {
         color: AppColors.primary,
         onRefresh: _loadTransactions,
         child: SingleChildScrollView(
+          controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
@@ -262,7 +352,7 @@ class _MutationScreenState extends State<MutationScreen> {
                               ],
                             ),
                           )
-                        else
+                        else ...[
                           ListView.separated(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
@@ -274,6 +364,47 @@ class _MutationScreenState extends State<MutationScreen> {
                               return MutationItemTile(tx: tx);
                             },
                           ),
+                          if (_isLoadingMore)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.2,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Memuat transaksi lainnya...',
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          else if (!_hasMore && filteredList.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Center(
+                                child: Text(
+                                  'Semua transaksi telah dimuat',
+                                  style: AppTypography.itemSubtitle.copyWith(
+                                    color: AppColors.textMuted,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ],
                     ),
                   ),

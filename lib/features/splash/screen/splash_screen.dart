@@ -16,12 +16,19 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _animController;
-  late final Animation<double> _iconScaleAnim;
+
+  // Icon animations: fade + slide popup from bottom + scale pop
   late final Animation<double> _iconFadeAnim;
-  late final Animation<double> _glowScaleAnim;
-  late final Animation<double> _textFadeAnim;
-  late final Animation<Offset> _textSlideAnim;
+  late final Animation<Offset> _iconSlideAnim;
+  late final Animation<double> _iconScaleAnim;
+
+  // Title animations: fade + slide popup from bottom
+  late final Animation<double> _titleFadeAnim;
+  late final Animation<Offset> _titleSlideAnim;
+
+  // Subtitle animations: fade + slide popup from bottom
   late final Animation<double> _subtitleFadeAnim;
+  late final Animation<Offset> _subtitleSlideAnim;
 
   Timer? _timer;
 
@@ -31,68 +38,75 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(milliseconds: 1200),
     );
 
-    // Icon scale: spring bounce entry
-    _iconScaleAnim = Tween<double>(begin: 0.2, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.0, 0.70, curve: Curves.easeOutBack),
-      ),
-    );
-
-    // Icon fade: quick smooth opacity
+    // 1. Icon animations (pops up from bottom with spring bounce)
     _iconFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animController,
-        curve: const Interval(0.0, 0.45, curve: Curves.easeIn),
+        curve: const Interval(0.0, 0.40, curve: Curves.easeIn),
       ),
     );
 
-    // Background glow ring expansion
-    _glowScaleAnim = Tween<double>(begin: 0.4, end: 1.25).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.1, 0.85, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    // Title slide & fade
-    _textFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.40, 0.85, curve: Curves.easeOut),
-      ),
-    );
-
-    _textSlideAnim =
-        Tween<Offset>(begin: const Offset(0, 0.35), end: Offset.zero).animate(
+    _iconSlideAnim =
+        Tween<Offset>(begin: const Offset(0.0, 0.65), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _animController,
-            curve: const Interval(0.40, 0.85, curve: Curves.easeOutCubic),
+            curve: const Interval(0.0, 0.65, curve: Curves.easeOutBack),
           ),
         );
 
-    // Subtitle fade
+    _iconScaleAnim = Tween<double>(begin: 0.70, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.0, 0.65, curve: Curves.easeOutBack),
+      ),
+    );
+
+    // 2. Title "SIKESAN" animations (staggered slide popup from bottom)
+    _titleFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animController,
+        curve: const Interval(0.18, 0.60, curve: Curves.easeIn),
+      ),
+    );
+
+    _titleSlideAnim =
+        Tween<Offset>(begin: const Offset(0.0, 0.70), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.18, 0.78, curve: Curves.easeOutBack),
+          ),
+        );
+
+    // 3. Subtitle "Sistem Keuangan Santri" animations (staggered smooth slide up)
     _subtitleFadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _animController,
-        curve: const Interval(0.60, 1.0, curve: Curves.easeOut),
+        curve: const Interval(0.30, 0.72, curve: Curves.easeIn),
       ),
     );
+
+    _subtitleSlideAnim =
+        Tween<Offset>(begin: const Offset(0.0, 0.70), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.30, 0.90, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _animController.forward();
     _startTransition();
   }
 
   void _startTransition() {
-    // Show splash for 2.0 seconds, then navigate based on auth state
-    _timer = Timer(const Duration(milliseconds: 2000), () async {
+    // Show splash screen for 2.2 seconds to allow smooth branding presentation
+    _timer = Timer(const Duration(milliseconds: 2200), () async {
       if (!mounted) return;
 
       final authBloc = context.read<AuthBloc>();
-      // If auth is still checking initial token, wait briefly
+      // Wait if auth check is still pending
       if (authBloc.state is AuthInitial) {
         try {
           await authBloc.stream
@@ -121,81 +135,58 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFE8F8F2),
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF2FAF6), Color(0xFFE8F7F0)],
-          ),
+          color: Color(0xFFE8F8F2),
         ),
         child: SafeArea(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Subtle emerald pulse glow behind icon during entry
-                    AnimatedBuilder(
-                      animation: _animController,
-                      builder: (context, child) {
-                        return Opacity(
-                          opacity: ((1.0 - _animController.value) * 0.4).clamp(
-                            0.0,
-                            1.0,
-                          ),
-                          child: Transform.scale(
-                            scale: _glowScaleAnim.value,
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(
-                                  0xFF059669,
-                                ).withValues(alpha: 0.25),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    SplashBrandIcon(
-                      scaleAnimation: _iconScaleAnim,
-                      fadeAnimation: _iconFadeAnim,
-                    ),
-                  ],
+                // Brand Icon with Fade + Slide Popup + Scale
+                SplashBrandIcon(
+                  size: 84,
+                  slideAnimation: _iconSlideAnim,
+                  scaleAnimation: _iconScaleAnim,
+                  fadeAnimation: _iconFadeAnim,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 22),
+
+                // Title "SIKESAN" with Fade + Slide Popup
                 SlideTransition(
-                  position: _textSlideAnim,
+                  position: _titleSlideAnim,
                   child: FadeTransition(
-                    opacity: _textFadeAnim,
+                    opacity: _titleFadeAnim,
                     child: Text(
                       'SIKESAN',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 24,
+                        fontSize: 27,
                         fontWeight: FontWeight.w900,
                         color: const Color(0xFF064E3B),
-                        letterSpacing: 1.0,
+                        letterSpacing: 0.6,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 6),
-                FadeTransition(
-                  opacity: _subtitleFadeAnim,
-                  child: Text(
-                    'Sistem Keuangan Santri',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w500,
-                      color: const Color(0xFF475569),
-                      letterSpacing: 0.2,
+
+                // Subtitle "Sistem Keuangan Santri" with Fade + Slide
+                SlideTransition(
+                  position: _subtitleSlideAnim,
+                  child: FadeTransition(
+                    opacity: _subtitleFadeAnim,
+                    child: Text(
+                      'Sistem Keuangan Santri',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF234F40),
+                        letterSpacing: 0.2,
+                      ),
                     ),
                   ),
                 ),

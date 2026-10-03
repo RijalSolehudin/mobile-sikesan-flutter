@@ -1,19 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
@@ -45,7 +32,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #F2FAF6;
+      background-color: #E8F8F2;
       -webkit-text-size-adjust: 100%;
       touch-action: pan-x pan-y;
     }
@@ -57,6 +44,75 @@
       left: 0 !important;
       right: 0 !important;
       bottom: 0 !important;
+    }
+
+    #loading-splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #E8F8F2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      transition: opacity 0.4s ease-out;
+    }
+
+    .splash-card {
+      width: 84px;
+      height: 84px;
+      border-radius: 25px;
+      background: #FFFFFF;
+      box-shadow: 0 12px 32px rgba(5, 150, 105, 0.12), 0 4px 10px rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      animation: slidePopup 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .splash-card-inner {
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .splash-title {
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+      color: #064E3B;
+      margin-bottom: 6px;
+      animation: slidePopup 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.12s forwards;
+      opacity: 0;
+    }
+
+    .splash-subtitle {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #234F40;
+      letter-spacing: 0.2px;
+      animation: slidePopup 0.9s cubic-bezier(0.25, 1, 0.5, 1) 0.22s forwards;
+      opacity: 0;
+    }
+
+    @keyframes slidePopup {
+      0% {
+        opacity: 0;
+        transform: translateY(35px) scale(0.85);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
   </style>
 
@@ -74,13 +130,11 @@
         }
       }
 
-      // VisualViewport handling for mobile virtual keyboard
       if (window.visualViewport) {
         var lastHeight = window.visualViewport.height;
 
         window.visualViewport.addEventListener('resize', function() {
           var currentHeight = window.visualViewport.height;
-          // When keyboard collapses (viewport height returns or increases)
           if (currentHeight > lastHeight) {
             resetViewportScroll();
             if (document.activeElement && typeof document.activeElement.blur === 'function') {
@@ -96,7 +150,6 @@
         });
       }
 
-      // Back navigation / popstate
       window.addEventListener('popstate', function() {
         resetViewportScroll();
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
@@ -107,10 +160,36 @@
 
       window.addEventListener('scroll', resetViewportScroll, { passive: true });
       window.addEventListener('resize', resetViewportScroll, { passive: true });
+
+      // Smooth fade-out when Flutter renders first frame
+      window.addEventListener('flutter-first-frame', function() {
+        var splash = document.getElementById('loading-splash');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(function() {
+            if (splash.parentNode) splash.parentNode.removeChild(splash);
+          }, 400);
+        }
+      });
     })();
   </script>
 </head>
 <body>
+  <!-- Native Web Splash Screen matching screenshot -->
+  <div id="loading-splash">
+    <div class="splash-card">
+      <div class="splash-card-inner">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+          <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+          <path d="M18 12a2 2 0 0 0 0 4h4v-4z"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="splash-title">SIKESAN</div>
+    <div class="splash-subtitle">Sistem Keuangan Santri</div>
+  </div>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

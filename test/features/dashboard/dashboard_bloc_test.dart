@@ -35,6 +35,7 @@ class MockDashboardRepository extends DashboardRepository {
 
   @override
   Future<ApiResult<List<TransactionItemModel>>> getRecentTransactions({
+    int page = 1,
     int perPage = 5,
   }) async {
     return txResult ??

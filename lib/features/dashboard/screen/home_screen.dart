@@ -82,39 +82,29 @@ class _HomeScreenState extends State<HomeScreen> {
         DashboardMetricCard(
           title: 'TOTAL SALDO SANTRI',
           badge: 'Saldo Aktif',
-          mainValue: CurrencyFormatter.format(
-            metrics.totalBalance > 0 ? metrics.totalBalance : 1230500,
-          ),
+          mainValue: CurrencyFormatter.format(metrics.totalBalance),
           label1: 'TAGIHAN SPP',
-          value1: CurrencyFormatter.format(
-            metrics.totalUnpaidSpp > 0 ? metrics.totalUnpaidSpp : 750000,
-          ),
+          value1: CurrencyFormatter.format(metrics.totalUnpaidSpp),
           label2: 'TOTAL INFAK KESANTRIAN',
-          value2: CurrencyFormatter.format(
-            metrics.totalExpense > 0 ? metrics.totalExpense : 100000,
-          ),
+          value2: CurrencyFormatter.format(metrics.totalExpense),
         ),
         DashboardMetricCard(
           title: 'STATUS TAGIHAN SPP',
           badge: 'Semua Santri',
-          mainValue: CurrencyFormatter.format(
-            metrics.totalUnpaidSpp > 0 ? metrics.totalUnpaidSpp : 146250000,
-          ),
-          label1: 'TAGIHAN PERBULAN',
-          value1: CurrencyFormatter.format(
-            metrics.monthlyBill > 0 ? metrics.monthlyBill : 750000,
-          ),
-          label2: 'BELUM LUNAS',
-          value2: 'Bulan Juni',
+          mainValue: CurrencyFormatter.format(metrics.totalUnpaidSpp),
+          label1: 'STATUS',
+          value1: metrics.totalUnpaidSpp > 0 ? 'Belum Lunas' : 'Lunas',
+          label2: 'KETERANGAN',
+          value2: metrics.totalUnpaidSpp > 0 ? 'Tunggakan Aktif' : 'Semua Lunas',
         ),
-        const DashboardMetricCard(
+        DashboardMetricCard(
           title: 'TOTAL INFAK KESANTRIAN',
           badge: 'Semua Santri',
-          mainValue: 'Rp 21.050.000',
-          label1: 'TAGIHAN PERBULAN',
-          value1: 'Rp 100.000',
-          label2: 'BELUM LUNAS',
-          value2: 'Bulan Juni',
+          mainValue: CurrencyFormatter.format(metrics.totalExpense),
+          label1: 'STATUS',
+          value1: metrics.totalExpense > 0 ? 'Terbayar' : 'Belum Ada',
+          label2: 'KETERANGAN',
+          value2: 'Infak Kesantrian',
         ),
       ];
     } else {
@@ -122,39 +112,29 @@ class _HomeScreenState extends State<HomeScreen> {
         DashboardMetricCard(
           title: 'TOTAL TABUNGAN SANTRI',
           badge: 'Semua Santri',
-          mainValue: CurrencyFormatter.format(
-            metrics.totalBalance > 0 ? metrics.totalBalance : 1230500,
-          ),
-          label1: 'PEMASUKAN',
-          value1: CurrencyFormatter.format(
-            metrics.totalIncome > 0 ? metrics.totalIncome : 3410000,
-          ),
-          label2: 'PENGELUARAN',
-          value2: CurrencyFormatter.format(
-            metrics.totalExpense > 0 ? metrics.totalExpense : 2179500,
-          ),
+          mainValue: CurrencyFormatter.format(metrics.totalBalance),
+          label1: 'SPP BULAN INI',
+          value1: CurrencyFormatter.format(metrics.totalIncome),
+          label2: 'INFAK BULAN INI',
+          value2: CurrencyFormatter.format(metrics.totalExpense),
         ),
         DashboardMetricCard(
           title: 'TOTAL PEMBAYARAN SPP',
-          badge: 'Semua Santri',
-          mainValue: CurrencyFormatter.format(
-            metrics.totalUnpaidSpp > 0 ? metrics.totalUnpaidSpp : 146250000,
-          ),
-          label1: 'TAGIHAN PERBULAN',
-          value1: CurrencyFormatter.format(
-            metrics.monthlyBill > 0 ? metrics.monthlyBill : 750000,
-          ),
-          label2: 'BELUM LUNAS',
-          value2: 'Bulan Juni',
+          badge: 'Bulan Ini',
+          mainValue: CurrencyFormatter.format(metrics.totalIncome),
+          label1: 'STATUS',
+          value1: 'Terkumpul',
+          label2: 'PERIODE',
+          value2: 'Bulan Berjalan',
         ),
-        const DashboardMetricCard(
+        DashboardMetricCard(
           title: 'TOTAL INFAK KESANTRIAN',
-          badge: 'Semua Santri',
-          mainValue: 'Rp 21.050.000',
-          label1: 'TAGIHAN PERBULAN',
-          value1: 'Rp 100.000',
-          label2: 'BELUM LUNAS',
-          value2: 'Bulan Juni',
+          badge: 'Bulan Ini',
+          mainValue: CurrencyFormatter.format(metrics.totalExpense),
+          label1: 'STATUS',
+          value1: 'Terkumpul',
+          label2: 'PERIODE',
+          value2: 'Bulan Berjalan',
         ),
       ];
     }
@@ -211,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ? menuList
                         : menuList.take(8).toList());
               final cards = _buildCarouselCards(state, userRole);
-              final displayTransactions = state.transactions;
+              final displayTransactions = state.transactions.take(10).toList();
 
               return RefreshIndicator(
                 color: AppColors.primary,
@@ -337,25 +317,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 const SizedBox(height: 20),
 
-                                // History Section (Bills & Transactions)
+                                // History Section (Transactions)
                                 DashboardHistorySection(
-                                  selectedTab: state.selectedHistoryTab,
-                                  onTabChanged: (tabIndex) {
-                                    context.read<DashboardBloc>().add(
-                                      DashboardHistoryTabChanged(tabIndex),
-                                    );
-                                  },
-                                  billStatusFilter: state.billStatusFilter,
-                                  onStatusFilterChanged: (filter) {
-                                    context.read<DashboardBloc>().add(
-                                      DashboardBillStatusFilterChanged(filter),
-                                    );
-                                  },
-                                  bills: state.bills,
                                   transactions: displayTransactions,
                                   isLoading: isLoading,
-                                  isLoadingMoreBills: state.isLoadingMoreBills,
-                                  billsHasMore: state.billsHasMore,
                                   onViewAllTransactions: () {
                                     context.go('/mutation');
                                   },

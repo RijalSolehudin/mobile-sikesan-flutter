@@ -24,17 +24,26 @@ class TransactionItemModel {
     final bool isCredit =
         (type == 'CREDIT' || type == 'TOP_UP' || type == 'INCOME');
 
-    // Extract student name from wallet.student.name if available
+    // Extract student name and class
     String studentName = 'Santri';
+    String studentClass = json['student_class']?.toString() ?? '';
     if (json['student_name'] != null) {
       studentName = json['student_name'].toString();
     } else if (json['wallet'] != null && json['wallet'] is Map) {
       final wallet = json['wallet'] as Map<String, dynamic>;
       if (wallet['student'] != null && wallet['student'] is Map) {
-        studentName = wallet['student']['name']?.toString() ?? 'Santri';
+        final st = wallet['student'] as Map<String, dynamic>;
+        studentName = st['name']?.toString() ?? 'Santri';
+        if (studentClass.isEmpty && st['classroom'] != null && st['classroom'] is Map) {
+          studentClass = st['classroom']['name']?.toString() ?? '';
+        }
       }
     } else if (json['student'] != null && json['student'] is Map) {
-      studentName = json['student']['name']?.toString() ?? 'Santri';
+      final st = json['student'] as Map<String, dynamic>;
+      studentName = st['name']?.toString() ?? 'Santri';
+      if (studentClass.isEmpty && st['classroom'] != null && st['classroom'] is Map) {
+        studentClass = st['classroom']['name']?.toString() ?? '';
+      }
     }
 
     return TransactionItemModel(
@@ -53,7 +62,7 @@ class TransactionItemModel {
           ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
       studentName: studentName,
-      studentClass: json['student_class']?.toString() ?? '',
+      studentClass: studentClass,
     );
   }
 
@@ -62,8 +71,13 @@ class TransactionItemModel {
     bool isGuardian = true,
   }) {
     String studentName = 'Santri';
+    String studentClass = '';
     if (json['student'] != null && json['student'] is Map) {
-      studentName = json['student']['name']?.toString() ?? 'Santri';
+      final st = json['student'] as Map<String, dynamic>;
+      studentName = st['name']?.toString() ?? 'Santri';
+      if (st['classroom'] != null && st['classroom'] is Map) {
+        studentClass = st['classroom']['name']?.toString() ?? '';
+      }
     }
 
     final amount =
@@ -83,7 +97,7 @@ class TransactionItemModel {
           ? DateTime.tryParse(dateStr.toString()) ?? DateTime.now()
           : DateTime.now(),
       studentName: studentName,
-      studentClass: '',
+      studentClass: studentClass,
     );
   }
 
@@ -92,8 +106,13 @@ class TransactionItemModel {
     bool isGuardian = true,
   }) {
     String studentName = 'Santri';
+    String studentClass = '';
     if (json['student'] != null && json['student'] is Map) {
-      studentName = json['student']['name']?.toString() ?? 'Santri';
+      final st = json['student'] as Map<String, dynamic>;
+      studentName = st['name']?.toString() ?? 'Santri';
+      if (st['classroom'] != null && st['classroom'] is Map) {
+        studentClass = st['classroom']['name']?.toString() ?? '';
+      }
     }
 
     String categoryName = 'Infak Santri';
@@ -116,7 +135,7 @@ class TransactionItemModel {
           ? DateTime.tryParse(dateStr.toString()) ?? DateTime.now()
           : DateTime.now(),
       studentName: studentName,
-      studentClass: '',
+      studentClass: studentClass,
     );
   }
 }

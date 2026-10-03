@@ -6,7 +6,7 @@
 | **Prioritas** | **P1 - High** |
 | **Epic / Modul** | Informasi & Pengumuman Pesantren |
 | **Komponen Terkait** | `lib/features/information/`, `InformationScreen`, `InformationMetricCards`, `InformationFilterBar` |
-| **Status** | Backlog / Belum Terintegrasi |
+| **Status** | ✅ Implementasi Selesai (Mock Data) — Menunggu API Backend |
 
 ---
 

@@ -4,6 +4,7 @@ import 'package:mobile_sikesan_flutter/features/dashboard/bloc/dashboard_bloc.da
 import 'package:mobile_sikesan_flutter/data/repositories/spp_repository.dart';
 import 'package:mobile_sikesan_flutter/data/repositories/infaq_repository.dart';
 import 'package:mobile_sikesan_flutter/data/repositories/wallet_repository.dart';
+import 'package:mobile_sikesan_flutter/data/repositories/announcement_repository.dart';
 import 'package:mobile_sikesan_flutter/main.dart';
 import 'package:mobile_sikesan_flutter/router/app_router.dart';
 import 'features/auth/auth_bloc_test.dart';
@@ -16,6 +17,7 @@ void main() {
     final mockSppRepo = SppRepository(mockDashboardRepo.dioClient);
     final mockInfaqRepo = InfaqRepository(mockDashboardRepo.dioClient);
     final mockWalletRepo = WalletRepository(mockDashboardRepo.dioClient);
+    final mockAnnouncementRepo = AnnouncementRepository(mockDashboardRepo.dioClient);
 
     final authBloc = AuthBloc(authRepository: mockAuthRepo);
     final dashboardBloc = DashboardBloc(dashboardRepository: mockDashboardRepo);
@@ -28,6 +30,7 @@ void main() {
         sppRepository: mockSppRepo,
         infaqRepository: mockInfaqRepo,
         walletRepository: mockWalletRepo,
+        announcementRepository: mockAnnouncementRepo,
         authBloc: authBloc,
         dashboardBloc: dashboardBloc,
         router: router,

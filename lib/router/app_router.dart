@@ -33,12 +33,12 @@ class AppRouter {
   static GoRouter createRouter(AuthBloc authBloc) {
     return GoRouter(
       navigatorKey: _rootNavigatorKey,
-      initialLocation: '/splash',
+      initialLocation: '/',
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (BuildContext context, GoRouterState state) {
         final authState = authBloc.state;
         final loc = state.matchedLocation;
-        final isSplash = loc == '/splash';
+        final isSplash = loc == '/splash' || loc == '/';
         final isRoleSelection = loc == '/role-selection';
         final isLogin = loc == '/login';
 
@@ -49,8 +49,7 @@ class AppRouter {
 
         // Global Splash check: while checking token or during app startup, stay on /splash
         if (authState is AuthInitial) {
-          if (!isSplash) return '/splash';
-          return null;
+          return '/splash';
         }
 
         final isLoggedIn = authState.isAuthenticated;
@@ -60,14 +59,26 @@ class AppRouter {
           return '/role-selection';
         }
 
-        // If logged in and on login/role-selection/splash, redirect to home
-        if (isLoggedIn && (isLogin || isRoleSelection || isSplash)) {
+        // If logged in and on login/role-selection, redirect to home
+        if (isLoggedIn && (isLogin || isRoleSelection)) {
           return '/home';
         }
 
         return null;
       },
       routes: [
+        GoRoute(
+          path: '/',
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            child: const SplashScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            transitionDuration: const Duration(milliseconds: 450),
+          ),
+        ),
         GoRoute(
           path: '/splash',
           pageBuilder: (context, state) => CustomTransitionPage(
