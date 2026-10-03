@@ -6,6 +6,7 @@ import '../../spp/widget/pay_spp_modal.dart';
 import '../../wallet/widget/top_up_modal.dart';
 import '../../wallet/widget/withdraw_modal.dart';
 import '../../infaq/widget/pay_infaq_modal.dart';
+import '../../../core/widgets/app_snackbar.dart';
 
 class DashboardMenuGrid extends StatelessWidget {
   final List<MenuItemModel> displayedMenus;
@@ -41,6 +42,8 @@ class DashboardMenuGrid extends StatelessWidget {
         titleLower.contains('infak') ||
         titleLower.contains('infaq')) {
       PayInfaqModal.show(context);
+    } else {
+      AppSnackBar.showInfo(context, 'Menu ${menu.title} sedang disiapkan.');
     }
   }
 

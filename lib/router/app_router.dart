@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../core/navigation/navigation_keys.dart';
+import '../core/navigation/snackbar_cleanup_observer.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/screen/login_screen.dart';
 import '../features/auth/screen/role_selection_screen.dart';
@@ -27,13 +29,12 @@ class GoRouterRefreshStream extends ChangeNotifier {
   }
 }
 
-final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-
 class AppRouter {
   static GoRouter createRouter(AuthBloc authBloc) {
-    return GoRouter(
-      navigatorKey: _rootNavigatorKey,
+    final router = GoRouter(
+      navigatorKey: rootNavigatorKey,
       initialLocation: '/',
+      observers: [SnackBarCleanupObserver()],
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (BuildContext context, GoRouterState state) {
         final authState = authBloc.state;
@@ -151,5 +152,11 @@ class AppRouter {
         ),
       ],
     );
+
+    router.routerDelegate.addListener(() {
+      rootScaffoldMessengerKey.currentState?.clearSnackBars();
+    });
+
+    return router;
   }
 }

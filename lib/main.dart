@@ -12,14 +12,13 @@ import 'data/repositories/spp_repository.dart';
 import 'data/repositories/infaq_repository.dart';
 import 'data/repositories/wallet_repository.dart';
 import 'data/repositories/announcement_repository.dart';
+import 'core/navigation/navigation_keys.dart';
+import 'core/widgets/app_snackbar.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/dashboard/bloc/dashboard_bloc.dart';
 import 'features/spp/bloc/spp_payment_bloc.dart';
 import 'core/services/session_timeout_listener.dart';
 import 'router/app_router.dart';
-
-final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
-    GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -148,15 +147,10 @@ class SikesanMobileApp extends StatelessWidget {
                   authBloc: authBloc,
                   timeoutDuration: const Duration(minutes: 30),
                   onTimeout: () {
-                    rootScaffoldMessengerKey.currentState?.showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Sesi Bendahara berakhir otomatis setelah 30 menit tidak ada aktivitas demi keamanan.',
-                        ),
-                        backgroundColor: Color(0xFFEF4444),
-                        behavior: SnackBarBehavior.floating,
-                        duration: Duration(seconds: 5),
-                      ),
+                    AppSnackBar.showWarning(
+                      context,
+                      'Sesi Bendahara berakhir otomatis setelah 30 menit tidak ada aktivitas demi keamanan.',
+                      duration: const Duration(seconds: 4),
                     );
                   },
                   child: child ?? const SizedBox.shrink(),

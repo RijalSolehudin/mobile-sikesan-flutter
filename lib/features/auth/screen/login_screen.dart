@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../bloc/auth_bloc.dart';
 import '../widget/login_branding_card.dart';
 import '../widget/login_form.dart';
@@ -81,12 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = _passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Harap masukkan username dan password Anda'),
-          backgroundColor: AppColors.error,
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Harap masukkan username dan password Anda',
       );
       return;
     }
@@ -110,14 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
       listener: (context, state) {
         state.whenOrNull(
           failure: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 4),
-              ),
-            );
+            AppSnackBar.showError(context, message);
           },
         );
       },

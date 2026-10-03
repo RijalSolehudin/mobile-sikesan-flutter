@@ -9,6 +9,7 @@ import '../widget/information_filter_bar.dart';
 import '../widget/information_empty_state.dart';
 import '../widget/announcement_card_tile.dart';
 import '../../../core/widgets/shimmer_box.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import 'announcement_detail_screen.dart';
 
 class InformationScreen extends StatelessWidget {
@@ -38,13 +39,7 @@ class _InformationScreenBody extends StatelessWidget {
         listener: (context, state) {
           if (state.status == AnnouncementStatus.error &&
               state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            AppSnackBar.showError(context, state.errorMessage!);
           }
         },
         builder: (context, state) {
@@ -61,13 +56,9 @@ class _InformationScreenBody extends StatelessWidget {
                 children: [
                   InformationHeader(
                     onAddAnnouncement: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Form pengumuman sedang dalam pengembangan.',
-                          ),
-                          behavior: SnackBarBehavior.floating,
-                        ),
+                      AppSnackBar.showInfo(
+                        context,
+                        'Form pengumuman sedang dalam pengembangan.',
                       );
                     },
                   ),

@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/image_upload_helper.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/dashed_upload_box.dart';
 import '../../../data/models/dashboard_metric_model.dart';
 import '../../../data/models/spp_models.dart';
@@ -187,11 +188,9 @@ class _TopUpModalState extends State<TopUpModal> {
         final isValidSize = await ImageUploadHelper.validateFileSize(picked);
         if (!isValidSize) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(ImageUploadHelper.maxFileSizeExceededMessage),
-                backgroundColor: AppColors.error,
-              ),
+            AppSnackBar.showError(
+              context,
+              ImageUploadHelper.maxFileSizeExceededMessage,
             );
           }
           return;
@@ -205,12 +204,7 @@ class _TopUpModalState extends State<TopUpModal> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memilih gambar: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppSnackBar.showError(context, 'Gagal memilih gambar: $e');
       }
     }
   }
@@ -401,13 +395,9 @@ class _TopUpModalState extends State<TopUpModal> {
 
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Nomor rekening $label ($text) berhasil disalin'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: AppColors.primaryDark,
-        duration: const Duration(seconds: 2),
-      ),
+    AppSnackBar.showSuccess(
+      context,
+      'Nomor rekening $label ($text) berhasil disalin',
     );
   }
 
@@ -485,21 +475,17 @@ class _TopUpModalState extends State<TopUpModal> {
 
   Future<void> _handleTopUp() async {
     if (_selectedStudentId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan pilih santri terlebih dahulu'),
-          backgroundColor: AppColors.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Silakan pilih santri terlebih dahulu',
       );
       return;
     }
 
     if (_selectedAmount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Nominal top up harus lebih dari Rp 0'),
-          backgroundColor: AppColors.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Nominal top up harus lebih dari Rp 0',
       );
       return;
     }
@@ -509,11 +495,9 @@ class _TopUpModalState extends State<TopUpModal> {
     final isGuardian = userRole.toLowerCase().contains('wali');
 
     if (isGuardian && _proofBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan unggah bukti transfer/pembayaran'),
-          backgroundColor: AppColors.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Silakan unggah bukti transfer/pembayaran',
       );
       return;
     }
@@ -588,9 +572,7 @@ class _TopUpModalState extends State<TopUpModal> {
       final msg = result is ApiFailure
           ? (result as ApiFailure).message
           : 'Gagal mengajukan top up saldo';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-      );
+      AppSnackBar.showError(context, msg);
     }
   }
 

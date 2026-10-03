@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/image_upload_helper.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/transaction_security_sheet.dart';
 import '../../../data/models/spp_models.dart';
 import '../../../data/repositories/spp_repository.dart';
@@ -177,12 +178,9 @@ class _PaySppModalState extends State<PaySppModal> {
 
   void _copyToClipboard(String text, String bankName) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Nomor rekening $bankName berhasil disalin'),
-        duration: const Duration(seconds: 2),
-        backgroundColor: AppColors.primary,
-      ),
+    AppSnackBar.showSuccess(
+      context,
+      'Nomor rekening $bankName berhasil disalin',
     );
   }
 
@@ -357,9 +355,7 @@ class _PaySppModalState extends State<PaySppModal> {
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-    );
+    AppSnackBar.showError(context, msg);
   }
 
   Future<void> _showSuccessAnimation() async {

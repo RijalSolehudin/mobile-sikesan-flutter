@@ -5,6 +5,7 @@ import '../../../core/utils/currency_formatter.dart';
 import '../../../data/models/bill_history_model.dart';
 import '../../spp/widget/pay_spp_modal.dart';
 import '../../infaq/widget/pay_infaq_modal.dart';
+import '../../../core/widgets/app_snackbar.dart';
 
 class BillHistoryTile extends StatelessWidget {
   final BillHistoryModel bill;
@@ -18,31 +19,20 @@ class BillHistoryTile extends StatelessWidget {
       } else if (bill.billType == 'INFAQ') {
         PayInfaqModal.show(context);
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Silakan hubungi bendahara untuk ${bill.title}.'),
-            behavior: SnackBarBehavior.floating,
-          ),
+        AppSnackBar.showInfo(
+          context,
+          'Silakan hubungi bendahara untuk ${bill.title}.',
         );
       }
     } else if (bill.isPending) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Pembayaran ${bill.title} sedang diverifikasi oleh admin / bendahara.',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppSnackBar.showInfo(
+        context,
+        'Pembayaran ${bill.title} sedang diverifikasi oleh admin / bendahara.',
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Tagihan ${bill.title} untuk ${bill.studentName} sudah Lunas.',
-          ),
-          backgroundColor: AppColors.primaryDark,
-          behavior: SnackBarBehavior.floating,
-        ),
+      AppSnackBar.showSuccess(
+        context,
+        'Tagihan ${bill.title} untuk ${bill.studentName} sudah Lunas.',
       );
     }
   }

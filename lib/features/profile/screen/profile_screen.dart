@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../widget/profile_header.dart';
 import '../widget/profile_menu_tile.dart';
@@ -49,13 +50,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: 'Informasi Akun',
                         subtitle: 'Lihat dan ubah informasi akun',
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Halaman Informasi Akun segera hadir.',
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                            ),
+                          AppSnackBar.showInfo(
+                            context,
+                            'Halaman Informasi Akun segera hadir.',
                           );
                         },
                       ),
@@ -67,13 +64,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: 'Ubah Password',
                         subtitle: 'Perbarui password akun',
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Halaman Ubah Password segera hadir.',
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                            ),
+                          AppSnackBar.showInfo(
+                            context,
+                            'Halaman Ubah Password segera hadir.',
                           );
                         },
                       ),
@@ -85,11 +78,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         title: 'Bantuan',
                         subtitle: 'Panduan penggunaan aplikasi',
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Pusat Bantuan segera hadir.'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
+                          AppSnackBar.showInfo(
+                            context,
+                            'Pusat Bantuan segera hadir.',
                           );
                         },
                       ),

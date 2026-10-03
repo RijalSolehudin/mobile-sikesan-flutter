@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../data/models/menu_item_model.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -156,13 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
         listener: (context, state) {
           if (state.status == DashboardStatus.failure &&
               state.errorMessage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage!),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            AppSnackBar.showError(context, state.errorMessage!);
           }
         },
         builder: (context, state) {

@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../../core/network/api_result.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/utils/image_upload_helper.dart';
 import '../../../core/widgets/dashed_upload_box.dart';
@@ -15,6 +14,7 @@ import '../../../data/repositories/infaq_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
 import '../../spp/widget/receipt_preview_modal.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/transaction_security_sheet.dart';
 
 class PayInfaqModal extends StatefulWidget {
@@ -127,9 +127,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       final msg = result is ApiFailure
           ? (result as ApiFailure).message
           : 'Gagal memuat tagihan Infak Kesantrian';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: AppColors.error),
-      );
+      AppSnackBar.showError(context, msg);
       setState(() {
         _bills = [];
         _isLoadingBills = false;
@@ -218,11 +216,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
         final isValidSize = await ImageUploadHelper.validateFileSize(picked);
         if (!isValidSize) {
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(ImageUploadHelper.maxFileSizeExceededMessage),
-                backgroundColor: AppColors.error,
-              ),
+            AppSnackBar.showError(
+              context,
+              ImageUploadHelper.maxFileSizeExceededMessage,
             );
           }
           return;
@@ -236,12 +232,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal memilih gambar: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        AppSnackBar.showError(context, 'Gagal memilih gambar: $e');
       }
     }
   }
@@ -404,33 +395,25 @@ class _PayInfaqModalState extends State<PayInfaqModal>
 
   void _copyToClipboard(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Nomor rekening $label ($text) berhasil disalin'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF0F172A),
-        duration: const Duration(seconds: 2),
-      ),
+    AppSnackBar.showSuccess(
+      context,
+      'Nomor rekening $label ($text) berhasil disalin',
     );
   }
 
   Future<void> _handlePayment() async {
     if (_selectedStudentId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan pilih santri terlebih dahulu'),
-          backgroundColor: AppColors.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Silakan pilih santri terlebih dahulu',
       );
       return;
     }
 
     if (_selectedMonths.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan pilih minimal 1 bulan tagihan'),
-          backgroundColor: AppColors.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Silakan pilih minimal 1 bulan tagihan',
       );
       return;
     }
@@ -441,11 +424,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
     if (isGuardian &&
         _selectedPaymentMethod == 'TRANSFER' &&
         _proofBytes == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Silakan unggah bukti transfer/pembayaran'),
-          backgroundColor: AppColors.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Silakan unggah bukti transfer/pembayaran',
       );
       return;
     }
@@ -461,13 +442,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
     final List<String> billIds = selectedBills.map((b) => b.id).toList();
 
     if (billIds.isEmpty || billIds.length != _selectedMonths.length) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Tagihan Infak Kesantrian untuk sebagian periode yang dipilih belum diterbitkan.',
-          ),
-          backgroundColor: AppColors.error,
-        ),
+      AppSnackBar.showError(
+        context,
+        'Tagihan Infak Kesantrian untuk sebagian periode yang dipilih belum diterbitkan.',
       );
       return;
     }
@@ -486,11 +463,9 @@ class _PayInfaqModalState extends State<PayInfaqModal>
 
     if (!isAuthorized) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Otorisasi keamanan transaksi dibatalkan.'),
-            backgroundColor: AppColors.error,
-          ),
+        AppSnackBar.showError(
+          context,
+          'Otorisasi keamanan transaksi dibatalkan.',
         );
       }
       return;
@@ -499,7 +474,6 @@ class _PayInfaqModalState extends State<PayInfaqModal>
     setState(() => _isSubmitting = true);
 
     if (!mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
     final infaqRepo = RepositoryProvider.of<InfaqRepository>(context);
     final navigator = Navigator.of(context);
     final parentContext = navigator.context;
@@ -577,9 +551,7 @@ class _PayInfaqModalState extends State<PayInfaqModal>
       final errorMsg = result is ApiFailure
           ? (result as ApiFailure).message
           : 'Gagal memproses pembayaran';
-      messenger.showSnackBar(
-        SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
-      );
+      AppSnackBar.showError(null, errorMsg);
     }
   }
 

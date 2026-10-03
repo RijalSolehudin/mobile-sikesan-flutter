@@ -11,6 +11,7 @@ import '../../../data/models/withdraw_models.dart';
 import '../../../data/repositories/wallet_repository.dart';
 import '../../auth/bloc/auth_bloc.dart';
 import '../../dashboard/bloc/dashboard_bloc.dart';
+import '../../../core/widgets/app_snackbar.dart';
 import '../../../core/widgets/transaction_security_sheet.dart';
 import 'withdraw_receipt_modal.dart';
 
@@ -294,13 +295,7 @@ class _WithdrawModalState extends State<WithdrawModal> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppColors.error,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    AppSnackBar.showError(context, message);
   }
 
   @override
