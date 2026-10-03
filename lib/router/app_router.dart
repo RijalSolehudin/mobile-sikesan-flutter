@@ -23,6 +23,12 @@ import '../core/navigation/dialog_page.dart';
 import '../features/kwitansi/widget/create_kwitansi_modal.dart';
 import '../features/kwitansi/widget/kwitansi_detail_modal.dart';
 import '../features/kwitansi/models/kwitansi_model.dart';
+import '../data/models/spp_models.dart';
+import '../data/models/top_up_models.dart';
+import '../data/models/withdraw_models.dart';
+import '../features/spp/widget/receipt_preview_modal.dart';
+import '../features/wallet/widget/top_up_receipt_modal.dart';
+import '../features/wallet/widget/withdraw_receipt_modal.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
@@ -134,6 +140,22 @@ class AppRouter {
                       path: 'spp',
                       pageBuilder: (context, state) =>
                           const ModalBottomSheetPage(child: PaySppModal()),
+                      routes: [
+                        GoRoute(
+                          path: 'receipt',
+                          pageBuilder: (context, state) {
+                            final receipt = state.extra as SppReceiptModel?;
+                            if (receipt == null) {
+                              return const ModalBottomSheetPage(
+                                child: SizedBox.shrink(),
+                              );
+                            }
+                            return ModalBottomSheetPage(
+                              child: ReceiptPreviewModal(receipt: receipt),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     GoRoute(
                       path: 'top-up',
@@ -147,6 +169,22 @@ class AppRouter {
                           ),
                         );
                       },
+                      routes: [
+                        GoRoute(
+                          path: 'receipt',
+                          pageBuilder: (context, state) {
+                            final receipt = state.extra as TopUpReceiptModel?;
+                            if (receipt == null) {
+                              return const ModalBottomSheetPage(
+                                child: SizedBox.shrink(),
+                              );
+                            }
+                            return ModalBottomSheetPage(
+                              child: TopUpReceiptModal(receipt: receipt),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     GoRoute(
                       path: 'withdraw',
@@ -160,11 +198,58 @@ class AppRouter {
                           ),
                         );
                       },
+                      routes: [
+                        GoRoute(
+                          path: 'receipt',
+                          pageBuilder: (context, state) {
+                            final receipt =
+                                state.extra as WithdrawReceiptModel?;
+                            if (receipt == null) {
+                              return const ModalBottomSheetPage(
+                                child: SizedBox.shrink(),
+                              );
+                            }
+                            return ModalBottomSheetPage(
+                              child: WithdrawReceiptModal(receipt: receipt),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                     GoRoute(
                       path: 'infaq',
                       pageBuilder: (context, state) =>
                           const ModalBottomSheetPage(child: PayInfaqModal()),
+                      routes: [
+                        GoRoute(
+                          path: 'receipt',
+                          pageBuilder: (context, state) {
+                            final receipt = state.extra as SppReceiptModel?;
+                            if (receipt == null) {
+                              return const ModalBottomSheetPage(
+                                child: SizedBox.shrink(),
+                              );
+                            }
+                            return ModalBottomSheetPage(
+                              child: ReceiptPreviewModal(receipt: receipt),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    GoRoute(
+                      path: 'receipt',
+                      pageBuilder: (context, state) {
+                        final receipt = state.extra as SppReceiptModel?;
+                        if (receipt == null) {
+                          return const ModalBottomSheetPage(
+                            child: SizedBox.shrink(),
+                          );
+                        }
+                        return ModalBottomSheetPage(
+                          child: ReceiptPreviewModal(receipt: receipt),
+                        );
+                      },
                     ),
                     GoRoute(
                       path: 'kwitansi',

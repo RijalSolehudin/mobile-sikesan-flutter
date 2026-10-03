@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/services/receipt_pdf_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -11,14 +12,18 @@ class TopUpReceiptModal extends StatelessWidget {
   const TopUpReceiptModal({super.key, required this.receipt});
 
   static Future<void> show(BuildContext context, TopUpReceiptModel receipt) {
-    return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => TopUpReceiptModal(receipt: receipt),
-    );
+    try {
+      return context.push('/home/top-up/receipt', extra: receipt);
+    } catch (_) {
+      return showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        useRootNavigator: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => TopUpReceiptModal(receipt: receipt),
+      );
+    }
   }
 
   @override
