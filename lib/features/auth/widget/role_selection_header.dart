@@ -19,10 +19,11 @@ class RoleSelectionHeader extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.account_balance_wallet_rounded,
-                size: 13,
-                color: Color(0xFF059669),
+              Image.asset(
+                'assets/images/logo_icon.png',
+                width: 14,
+                height: 14,
+                fit: BoxFit.contain,
               ),
               const SizedBox(width: 5),
               Text(

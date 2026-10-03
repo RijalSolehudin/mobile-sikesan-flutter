@@ -36,23 +36,10 @@ class SplashBrandIcon extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.all(size * 0.12),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(size * 0.22),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF059669), Color(0xFF047857)],
-          ),
-        ),
-        child: Center(
-          child: Icon(
-            Icons.account_balance_wallet_rounded,
-            color: Colors.white,
-            size: size * 0.44,
-          ),
-        ),
+      padding: EdgeInsets.all(size * 0.09),
+      child: Image.asset(
+        'assets/images/logo_icon.png',
+        fit: BoxFit.contain,
       ),
     );
 

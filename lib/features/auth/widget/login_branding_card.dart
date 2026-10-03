@@ -29,17 +29,13 @@ class LoginBrandingCard extends StatelessWidget {
           // Logo & Brand Name
           Row(
             children: [
-              Container(
-                width: isWide ? 56 : 48,
-                height: isWide ? 56 : 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF059669),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet_rounded,
-                  color: Colors.white,
-                  size: isWide ? 28 : 24,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/images/logo_icon.png',
+                  width: isWide ? 56 : 48,
+                  height: isWide ? 56 : 48,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(width: 14),
