@@ -475,18 +475,12 @@ class _TopUpModalState extends State<TopUpModal> {
 
   Future<void> _handleTopUp() async {
     if (_selectedStudentId == null) {
-      AppSnackBar.showError(
-        context,
-        'Silakan pilih santri terlebih dahulu',
-      );
+      AppSnackBar.showError(context, 'Silakan pilih santri terlebih dahulu');
       return;
     }
 
     if (_selectedAmount <= 0) {
-      AppSnackBar.showError(
-        context,
-        'Nominal top up harus lebih dari Rp 0',
-      );
+      AppSnackBar.showError(context, 'Nominal top up harus lebih dari Rp 0');
       return;
     }
 

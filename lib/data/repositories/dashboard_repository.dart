@@ -55,10 +55,7 @@ class DashboardRepository {
     int? year,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
       if (month != null) queryParams['month'] = month;
       if (year != null) queryParams['year'] = year;
 
@@ -156,10 +153,7 @@ class DashboardRepository {
     int? year,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
       if (month != null) queryParams['month'] = month;
       if (year != null) queryParams['year'] = year;
 
@@ -202,10 +196,7 @@ class DashboardRepository {
     int? year,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
       if (month != null) queryParams['month'] = month;
       if (year != null) queryParams['year'] = year;
 

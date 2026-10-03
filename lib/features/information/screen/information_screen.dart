@@ -155,9 +155,8 @@ class _InformationScreenBody extends StatelessWidget {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => AnnouncementDetailScreen(
-                  announcement: announcement,
-                ),
+                builder: (_) =>
+                    AnnouncementDetailScreen(announcement: announcement),
               ),
             );
           },

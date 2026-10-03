@@ -209,10 +209,7 @@ class AnnouncementDetailScreen extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       // Divider
-                      Container(
-                        height: 1,
-                        color: AppColors.borderLight,
-                      ),
+                      Container(height: 1, color: AppColors.borderLight),
                       const SizedBox(height: 20),
 
                       // Content body
@@ -242,8 +239,9 @@ class AnnouncementDetailScreen extends StatelessWidget {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFEF4444)
-                                      .withValues(alpha: 0.1),
+                                  color: const Color(
+                                    0xFFEF4444,
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: const Icon(
@@ -267,11 +265,11 @@ class AnnouncementDetailScreen extends StatelessWidget {
                                     const SizedBox(height: 2),
                                     Text(
                                       'Klik untuk mengunduh berkas PDF',
-                                      style:
-                                          AppTypography.itemSubtitle.copyWith(
-                                        fontSize: 11,
-                                        color: AppColors.textMuted,
-                                      ),
+                                      style: AppTypography.itemSubtitle
+                                          .copyWith(
+                                            fontSize: 11,
+                                            color: AppColors.textMuted,
+                                          ),
                                     ),
                                   ],
                                 ),

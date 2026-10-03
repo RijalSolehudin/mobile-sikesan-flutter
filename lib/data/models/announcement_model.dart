@@ -4,7 +4,8 @@ class AnnouncementModel {
   final String title;
   final String content;
   final String category; // 'SPP', 'Infak', 'Uang Saku', 'Umum'
-  final String status; // 'draft', 'scheduled', 'published', 'expired', 'archived'
+  final String
+  status; // 'draft', 'scheduled', 'published', 'expired', 'archived'
   final String? bannerUrl;
   final String? attachmentUrl;
   final String authorName;

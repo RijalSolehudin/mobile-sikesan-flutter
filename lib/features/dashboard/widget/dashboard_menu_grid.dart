@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/models/menu_item_model.dart';
@@ -42,6 +43,8 @@ class DashboardMenuGrid extends StatelessWidget {
         titleLower.contains('infak') ||
         titleLower.contains('infaq')) {
       PayInfaqModal.show(context);
+    } else if (menu.id == 'kwitansi' || titleLower.contains('kwitansi')) {
+      context.push('/home/kwitansi');
     } else {
       AppSnackBar.showInfo(context, 'Menu ${menu.title} sedang disiapkan.');
     }

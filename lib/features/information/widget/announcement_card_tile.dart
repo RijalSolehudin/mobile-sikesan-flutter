@@ -76,9 +76,9 @@ class AnnouncementCardTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('dd MMM yyyy, HH:mm').format(
-      announcement.publishedAt,
-    );
+    final dateStr = DateFormat(
+      'dd MMM yyyy, HH:mm',
+    ).format(announcement.publishedAt);
 
     return GestureDetector(
       onTap: onTap,

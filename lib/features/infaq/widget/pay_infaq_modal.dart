@@ -403,18 +403,12 @@ class _PayInfaqModalState extends State<PayInfaqModal>
 
   Future<void> _handlePayment() async {
     if (_selectedStudentId == null) {
-      AppSnackBar.showError(
-        context,
-        'Silakan pilih santri terlebih dahulu',
-      );
+      AppSnackBar.showError(context, 'Silakan pilih santri terlebih dahulu');
       return;
     }
 
     if (_selectedMonths.isEmpty) {
-      AppSnackBar.showError(
-        context,
-        'Silakan pilih minimal 1 bulan tagihan',
-      );
+      AppSnackBar.showError(context, 'Silakan pilih minimal 1 bulan tagihan');
       return;
     }
 

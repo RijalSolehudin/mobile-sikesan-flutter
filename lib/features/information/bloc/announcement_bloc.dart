@@ -82,12 +82,13 @@ class AnnouncementBloc extends Bloc<AnnouncementEvent, AnnouncementState> {
     switch (result) {
       case ApiSuccess(data: final announcements):
         final totalCount = announcements.length;
-        final publishedCount =
-            announcements.where((a) => a.status == 'published').length;
-        final draftCount =
-            announcements.where((a) => a.status == 'draft').length;
-        final importantCount =
-            announcements.where((a) => a.isImportant).length;
+        final publishedCount = announcements
+            .where((a) => a.status == 'published')
+            .length;
+        final draftCount = announcements
+            .where((a) => a.status == 'draft')
+            .length;
+        final importantCount = announcements.where((a) => a.isImportant).length;
 
         emit(
           state.copyWith(

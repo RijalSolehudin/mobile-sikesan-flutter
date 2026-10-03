@@ -1,0 +1,1033 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:printing/printing.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/currency_formatter.dart';
+import '../../../core/widgets/app_snackbar.dart';
+import '../models/kwitansi_model.dart';
+import 'kwitansi_card.dart';
+
+class KwitansiDetailModal extends StatefulWidget {
+  final KwitansiModel item;
+  final VoidCallback? onDeleted;
+  final Function(KwitansiModel)? onUpdated;
+
+  const KwitansiDetailModal({
+    super.key,
+    required this.item,
+    this.onDeleted,
+    this.onUpdated,
+  });
+
+  static Future<void> show(
+    BuildContext context, {
+    required KwitansiModel item,
+    VoidCallback? onDeleted,
+    Function(KwitansiModel)? onUpdated,
+  }) {
+    return showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (context) => KwitansiDetailModal(
+        item: item,
+        onDeleted: onDeleted,
+        onUpdated: onUpdated,
+      ),
+    );
+  }
+
+  @override
+  State<KwitansiDetailModal> createState() => _KwitansiDetailModalState();
+}
+
+class _KwitansiDetailModalState extends State<KwitansiDetailModal> {
+  late KwitansiModel _currentItem;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentItem = widget.item;
+  }
+
+  Future<void> _handlePrint(BuildContext context) async {
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.roll80,
+        build: (pw.Context ctx) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Text(
+                'SIKESAN',
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text(
+                'Kwitansi Digital Terintegrasi',
+                style: const pw.TextStyle(fontSize: 10),
+              ),
+              pw.SizedBox(height: 8),
+              pw.Divider(thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'No. Kwitansi:',
+                    style: const pw.TextStyle(fontSize: 9),
+                  ),
+                  pw.Text(
+                    _currentItem.receiptNumber,
+                    style: pw.TextStyle(
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('Waktu:', style: const pw.TextStyle(fontSize: 9)),
+                  pw.Text(
+                    _currentItem.dateTime,
+                    style: const pw.TextStyle(fontSize: 9),
+                  ),
+                ],
+              ),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Terima Dari:',
+                    style: const pw.TextStyle(fontSize: 9),
+                  ),
+                  pw.Text(
+                    _currentItem.recipientName,
+                    style: pw.TextStyle(
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('Terbilang:', style: const pw.TextStyle(fontSize: 8)),
+                  pw.Text(
+                    _currentItem.spelledAmount,
+                    style: const pw.TextStyle(fontSize: 8),
+                  ),
+                ],
+              ),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('Metode:', style: const pw.TextStyle(fontSize: 9)),
+                  pw.Text(
+                    _currentItem.paymentMethod,
+                    style: const pw.TextStyle(fontSize: 9),
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 8),
+              pw.Divider(thickness: 0.5),
+              pw.SizedBox(height: 6),
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'Total Kwitansi:',
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    _currentItem.formattedAmount,
+                    style: pw.TextStyle(
+                      fontSize: 12,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              pw.SizedBox(height: 12),
+              pw.Text(
+                'Terima kasih atas pembayaran Anda',
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontStyle: pw.FontStyle.italic,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    try {
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+        name: 'kwitansi_${_currentItem.receiptNumber.replaceAll('/', '_')}',
+      );
+    } catch (_) {
+      if (context.mounted) {
+        AppSnackBar.showError(context, 'Gagal mencetak kwitansi');
+      }
+    }
+  }
+
+  void _handleDownload() {
+    AppSnackBar.showSuccess(
+      context,
+      'Kwitansi ${_currentItem.receiptNumber} berhasil diunduh ke PDF',
+    );
+  }
+
+  Future<void> _handleWhatsApp() async {
+    final rawPhone = _currentItem.whatsappNumber?.trim() ?? '';
+    String phone = rawPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    if (phone.startsWith('0')) {
+      phone = '62${phone.substring(1)}';
+    }
+    if (phone.isEmpty) {
+      AppSnackBar.showError(context, 'Nomor WhatsApp tidak valid');
+      return;
+    }
+
+    final message =
+        '''Assalamualaikum Wr. Wb.
+Berikut konfirmasi kwitansi pembayaran digital SIKESAN:
+
+*No. Invoice:* ${_currentItem.receiptNumber}
+*Tanggal:* ${_currentItem.dateTime}
+*Nama Penerima:* ${_currentItem.recipientName}
+*Total:* ${_currentItem.formattedAmount} (${_currentItem.spelledAmount})
+*Kategori:* ${_currentItem.category}
+*Metode:* ${_currentItem.paymentMethod}
+*Status:* ${_currentItem.status}
+
+Terima kasih atas pembayaran Anda.
+Wassalamu'alaikum Wr. Wb.
+_SIKESAN Digital_''';
+
+    final uri = Uri.parse(
+      'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
+    );
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched && mounted) {
+        AppSnackBar.showInfo(context, 'Membuka WhatsApp ke $phone...');
+      }
+    } catch (_) {
+      if (mounted) {
+        AppSnackBar.showSuccess(
+          context,
+          'Pesan kwitansi berhasil disiapkan untuk $phone',
+        );
+      }
+    }
+  }
+
+  void _handleEdit() {
+    final nameCtrl = TextEditingController(text: _currentItem.recipientName);
+    final amountCtrl = TextEditingController(
+      text: CurrencyFormatter.formatWithoutSymbol(_currentItem.amount),
+    );
+    final detailCtrl = TextEditingController(
+      text: _currentItem.displayItemDetail,
+    );
+    String selectedMethod = _currentItem.paymentMethod;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bContext) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 500),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  16,
+                  20,
+                  MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Edit Kwitansi',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: nameCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Nama Penerima',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: amountCtrl,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [CurrencyInputFormatter()],
+                      decoration: const InputDecoration(
+                        labelText: 'Nominal (Rp)',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: detailCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Detail Item',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      initialValue: selectedMethod,
+                      decoration: const InputDecoration(
+                        labelText: 'Metode Pembayaran',
+                        isDense: true,
+                        border: OutlineInputBorder(),
+                      ),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'Transfer',
+                          child: Text('Transfer'),
+                        ),
+                        DropdownMenuItem(value: 'Tunai', child: Text('Tunai')),
+                        DropdownMenuItem(
+                          value: 'Saldo Santri',
+                          child: Text('Saldo Santri'),
+                        ),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setModalState(() => selectedMethod = val);
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00B074),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          final newAmount = CurrencyFormatter.parseClean(
+                            amountCtrl.text,
+                          );
+                          final updated = _currentItem.copyWith(
+                            recipientName: nameCtrl.text.trim(),
+                            amount: newAmount > 0
+                                ? newAmount
+                                : _currentItem.amount,
+                            itemDetailTitle: detailCtrl.text.trim(),
+                            paymentMethod: selectedMethod,
+                          );
+                          setState(() {
+                            _currentItem = updated;
+                          });
+                          widget.onUpdated?.call(updated);
+                          Navigator.of(bContext).pop();
+                          AppSnackBar.showSuccess(
+                            context,
+                            'Kwitansi berhasil diperbarui',
+                          );
+                        },
+                        child: Text(
+                          'Simpan Perubahan',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _handleDelete() {
+    showDialog(
+      context: context,
+      builder: (dContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Text(
+          'Hapus Kwitansi?',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus kwitansi ${_currentItem.receiptNumber}? Tindakan ini tidak dapat dibatalkan.',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 13,
+            color: const Color(0xFF64748B),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dContext).pop(),
+            child: Text(
+              'Batal',
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF64748B),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(dContext).pop(); // pop confirm dialog
+              Navigator.of(context).pop(); // pop detail modal
+              widget.onDeleted?.call();
+              AppSnackBar.showSuccess(
+                context,
+                'Kwitansi ${_currentItem.receiptNumber} telah dihapus',
+              );
+            },
+            child: Text(
+              'Hapus',
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 390, maxHeight: 660),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.18),
+                  blurRadius: 28,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 1. Top Green Header Card
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF00B074),
+                    borderRadius: BorderRadius.all(Radius.circular(26)),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+                  child: Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      // Close button on top-right
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withValues(alpha: 0.28),
+                              ),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Center Header Content
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Document/Receipt Icon
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.22),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: const Icon(
+                              Icons.receipt_long_rounded,
+                              color: Colors.white,
+                              size: 26,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Invoice Number
+                          Text(
+                            _currentItem.receiptNumber,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+
+                          // Timestamp
+                          Text(
+                            _currentItem.dateTime,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.92),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Category Badge (e.g. Pondok)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 3.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.28),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _currentItem.category,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 2. Scrollable Body Content
+                Flexible(
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    thickness: 3.5,
+                    radius: const Radius.circular(8),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Total Kwitansi Box
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 14,
+                              horizontal: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'TOTAL KWITANSI',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF64748B),
+                                    letterSpacing: 1.1,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  _currentItem.formattedAmount,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 27,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF00895E),
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Row: Terima Dari
+                          _buildDetailRow(
+                            'Terima Dari',
+                            _currentItem.recipientName,
+                            isBoldValue: true,
+                          ),
+                          const SizedBox(height: 10),
+                          const DashedLineDivider(color: Color(0xFFE2E8F0)),
+                          const SizedBox(height: 10),
+
+                          // Row: Uang Sebesar
+                          _buildDetailRow(
+                            'Uang Sebesar',
+                            _currentItem.spelledAmount,
+                            isItalicValue: true,
+                          ),
+                          const SizedBox(height: 10),
+                          const DashedLineDivider(color: Color(0xFFE2E8F0)),
+                          const SizedBox(height: 10),
+
+                          // Detail Item
+                          Text(
+                            'Detail Item',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _currentItem.displayItemDetail,
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      color: const Color(0xFF334155),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  _currentItem.formattedAmount,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (_currentItem.email != null &&
+                              _currentItem.email!.trim().isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            const DashedLineDivider(color: Color(0xFFE2E8F0)),
+                            const SizedBox(height: 10),
+                            _buildDetailRow(
+                              'Email',
+                              _currentItem.email!,
+                              isBoldValue: true,
+                            ),
+                          ],
+                          if (_currentItem.address != null &&
+                              _currentItem.address!.trim().isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            const DashedLineDivider(color: Color(0xFFE2E8F0)),
+                            const SizedBox(height: 10),
+                            _buildDetailRow('Alamat', _currentItem.address!),
+                          ],
+                          const SizedBox(height: 10),
+                          const DashedLineDivider(color: Color(0xFFE2E8F0)),
+                          const SizedBox(height: 10),
+
+                          // Metode Pembayaran
+                          _buildDetailRow(
+                            'Metode Pembayaran',
+                            _currentItem.paymentMethod,
+                            isBoldValue: true,
+                          ),
+                          const SizedBox(height: 10),
+                          const DashedLineDivider(color: Color(0xFFE2E8F0)),
+                          const SizedBox(height: 10),
+
+                          // Hormat Kami
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Hormat Kami',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF64748B),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      _currentItem.signerName,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w800,
+                                        color: const Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _currentItem.signerRole,
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w400,
+                                        color: const Color(0xFF64748B),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          const DashedLineDivider(color: Color(0xFFE2E8F0)),
+                          const SizedBox(height: 8),
+
+                          // Signature Box Watermark
+                          Center(
+                            child: Container(
+                              width: 66,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(0xFFE2E8F0),
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.verified_outlined,
+                                size: 20,
+                                color: Color(0xFFCBD5E1),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 3. Bottom Action Buttons (2x2 Grid or 3+2 with WhatsApp)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Column(
+                    children: [
+                      // Row 1: Unduh PDF & Print (& WhatsApp if available)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: ElevatedButton.icon(
+                                onPressed: _handleDownload,
+                                icon: const Icon(
+                                  Icons.download_rounded,
+                                  size: 15,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  'Unduh PDF',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF00B074),
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: OutlinedButton.icon(
+                                onPressed: () => _handlePrint(context),
+                                icon: const Icon(
+                                  Icons.print_rounded,
+                                  size: 15,
+                                  color: Color(0xFF0F172A),
+                                ),
+                                label: Text(
+                                  'Print',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  side: const BorderSide(
+                                    color: Color(0xFFE2E8F0),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (_currentItem.whatsappNumber != null &&
+                              _currentItem.whatsappNumber!
+                                  .trim()
+                                  .isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: SizedBox(
+                                height: 42,
+                                child: OutlinedButton.icon(
+                                  onPressed: _handleWhatsApp,
+                                  icon: const Icon(
+                                    Icons.chat_bubble_outline_rounded,
+                                    size: 15,
+                                    color: Color(0xFF16A34A),
+                                  ),
+                                  label: Text(
+                                    'WhatsApp',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF16A34A),
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFF0FDF4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                    ),
+                                    side: const BorderSide(
+                                      color: Color(0xFF86EFAC),
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Row 2: Edit & Hapus
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: OutlinedButton.icon(
+                                onPressed: _handleEdit,
+                                icon: const Icon(
+                                  Icons.edit_rounded,
+                                  size: 16,
+                                  color: Color(0xFF0F172A),
+                                ),
+                                label: Text(
+                                  'Edit',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  side: const BorderSide(
+                                    color: Color(0xFFE2E8F0),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: SizedBox(
+                              height: 42,
+                              child: OutlinedButton.icon(
+                                onPressed: _handleDelete,
+                                icon: const Icon(
+                                  Icons.delete_rounded,
+                                  size: 16,
+                                  color: Color(0xFFEF4444),
+                                ),
+                                label: Text(
+                                  'Hapus',
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFFEF4444),
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFEF2F2),
+                                  side: const BorderSide(
+                                    color: Color(0xFFFECACA),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    bool isBoldValue = false,
+    bool isItalicValue = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: isItalicValue ? 12 : 13,
+              fontWeight: isBoldValue ? FontWeight.w800 : FontWeight.w600,
+              fontStyle: isItalicValue ? FontStyle.italic : FontStyle.normal,
+              color: isItalicValue
+                  ? const Color(0xFF334155)
+                  : (isBoldValue
+                        ? const Color(0xFF0F172A)
+                        : const Color(0xFF334155)),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

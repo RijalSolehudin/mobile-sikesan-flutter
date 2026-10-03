@@ -64,12 +64,12 @@ class MockAuthRepository extends AuthRepository {
 
   @override
   Future<UserModel?> getCachedUser() async => const UserModel(
-        id: 1,
-        name: 'Wali Santri Demo',
-        username: 'wali',
-        email: 'wali@example.com',
-        role: 'Wali Santri',
-      );
+    id: 1,
+    name: 'Wali Santri Demo',
+    username: 'wali',
+    email: 'wali@example.com',
+    role: 'Wali Santri',
+  );
 }
 
 void main() {
@@ -100,114 +100,104 @@ void main() {
       ),
     );
 
-    testWidgets('renders initial transactions and supports lazy loading on scroll', (
-      tester,
-    ) async {
-      final mockRepo = MockDashboardRepository(
-        pageData: {
-          1: page1Transactions,
-          2: page2Transactions,
-        },
-      );
+    testWidgets(
+      'renders initial transactions and supports lazy loading on scroll',
+      (tester) async {
+        final mockRepo = MockDashboardRepository(
+          pageData: {1: page1Transactions, 2: page2Transactions},
+        );
 
-      final authBloc = AuthBloc(
-        authRepository: MockAuthRepository(),
-      )..emit(
-          const AuthState.authenticated(
-            UserModel(
-              id: 1,
-              name: 'Wali Demo',
-              username: 'wali',
-              email: 'wali@test.com',
-              role: 'Wali Santri',
+        final authBloc = AuthBloc(authRepository: MockAuthRepository())
+          ..emit(
+            const AuthState.authenticated(
+              UserModel(
+                id: 1,
+                name: 'Wali Demo',
+                username: 'wali',
+                email: 'wali@test.com',
+                role: 'Wali Santri',
+              ),
+            ),
+          );
+
+        await tester.pumpWidget(
+          MultiRepositoryProvider(
+            providers: [
+              RepositoryProvider<DashboardRepository>.value(value: mockRepo),
+            ],
+            child: MultiBlocProvider(
+              providers: [BlocProvider<AuthBloc>.value(value: authBloc)],
+              child: const MaterialApp(home: MutationScreen()),
             ),
           ),
         );
 
-      await tester.pumpWidget(
-        MultiRepositoryProvider(
-          providers: [
-            RepositoryProvider<DashboardRepository>.value(value: mockRepo),
-          ],
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider<AuthBloc>.value(value: authBloc),
-            ],
-            child: const MaterialApp(
-              home: MutationScreen(),
+        await tester.pumpAndSettle();
+
+        // Ensure tabs and initial items are rendered
+        expect(find.text('Uang Saku'), findsOneWidget);
+        expect(find.text('Pembayaran SPP'), findsOneWidget);
+        expect(find.text('Infak Kesantrian'), findsOneWidget);
+
+        // Verify that initial page items are rendered
+        expect(find.byType(MutationItemTile), findsWidgets);
+        expect(find.text('Transaksi Page 1 Item 0'), findsOneWidget);
+
+        // Trigger lazy load scroll
+        await tester.drag(
+          find.byType(SingleChildScrollView),
+          const Offset(0, -3000),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify that page 2 items are now loaded and rendered
+        expect(find.text('Transaksi Page 2 Item 0'), findsOneWidget);
+        expect(find.text('Semua transaksi telah dimuat'), findsOneWidget);
+
+        authBloc.close();
+      },
+    );
+
+    testWidgets(
+      'renders MutationPeriodFilter and displays month/year options',
+      (tester) async {
+        final mockRepo = MockDashboardRepository(
+          pageData: {1: page1Transactions},
+        );
+
+        final authBloc = AuthBloc(authRepository: MockAuthRepository())
+          ..emit(
+            const AuthState.authenticated(
+              UserModel(
+                id: 1,
+                name: 'Wali Demo',
+                username: 'wali',
+                email: 'wali@test.com',
+                role: 'Wali Santri',
+              ),
             ),
-          ),
-        ),
-      );
+          );
 
-      await tester.pumpAndSettle();
-
-      // Ensure tabs and initial items are rendered
-      expect(find.text('Uang Saku'), findsOneWidget);
-      expect(find.text('Pembayaran SPP'), findsOneWidget);
-      expect(find.text('Infak Kesantrian'), findsOneWidget);
-
-      // Verify that initial page items are rendered
-      expect(find.byType(MutationItemTile), findsWidgets);
-      expect(find.text('Transaksi Page 1 Item 0'), findsOneWidget);
-
-      // Trigger lazy load scroll
-      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -3000));
-      await tester.pumpAndSettle();
-
-      // Verify that page 2 items are now loaded and rendered
-      expect(find.text('Transaksi Page 2 Item 0'), findsOneWidget);
-      expect(find.text('Semua transaksi telah dimuat'), findsOneWidget);
-
-      authBloc.close();
-    });
-
-    testWidgets('renders MutationPeriodFilter and displays month/year options', (
-      tester,
-    ) async {
-      final mockRepo = MockDashboardRepository(
-        pageData: {
-          1: page1Transactions,
-        },
-      );
-
-      final authBloc = AuthBloc(
-        authRepository: MockAuthRepository(),
-      )..emit(
-          const AuthState.authenticated(
-            UserModel(
-              id: 1,
-              name: 'Wali Demo',
-              username: 'wali',
-              email: 'wali@test.com',
-              role: 'Wali Santri',
+        await tester.pumpWidget(
+          MultiRepositoryProvider(
+            providers: [
+              RepositoryProvider<DashboardRepository>.value(value: mockRepo),
+            ],
+            child: MultiBlocProvider(
+              providers: [BlocProvider<AuthBloc>.value(value: authBloc)],
+              child: const MaterialApp(home: MutationScreen()),
             ),
           ),
         );
 
-      await tester.pumpWidget(
-        MultiRepositoryProvider(
-          providers: [
-            RepositoryProvider<DashboardRepository>.value(value: mockRepo),
-          ],
-          child: MultiBlocProvider(
-            providers: [
-              BlocProvider<AuthBloc>.value(value: authBloc),
-            ],
-            child: const MaterialApp(
-              home: MutationScreen(),
-            ),
-          ),
-        ),
-      );
+        await tester.pumpAndSettle();
 
-      await tester.pumpAndSettle();
+        // Ensure period filter dropdowns are rendered
+        expect(find.text('Semua Bulan'), findsOneWidget);
+        expect(find.text('Semua Tahun'), findsOneWidget);
 
-      // Ensure period filter dropdowns are rendered
-      expect(find.text('Semua Bulan'), findsOneWidget);
-      expect(find.text('Semua Tahun'), findsOneWidget);
-
-      authBloc.close();
-    });
+        authBloc.close();
+      },
+    );
   });
 }

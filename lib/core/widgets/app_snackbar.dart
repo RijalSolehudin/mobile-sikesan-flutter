@@ -26,7 +26,8 @@ class AppSnackBar {
     VoidCallback? onAction,
   }) {
     final messenger = (context != null && context.mounted)
-        ? ScaffoldMessenger.maybeOf(context) ?? rootScaffoldMessengerKey.currentState
+        ? ScaffoldMessenger.maybeOf(context) ??
+              rootScaffoldMessengerKey.currentState
         : rootScaffoldMessengerKey.currentState;
 
     if (messenger == null) return;
@@ -51,11 +52,7 @@ class AppSnackBar {
       ),
       content: Row(
         children: [
-          Icon(
-            config.icon,
-            color: config.iconColor,
-            size: 22,
-          ),
+          Icon(config.icon, color: config.iconColor, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -176,7 +173,8 @@ class AppSnackBar {
   /// Immediately clear all active and pending SnackBars
   static void clear(BuildContext? context) {
     final messenger = (context != null && context.mounted)
-        ? ScaffoldMessenger.maybeOf(context) ?? rootScaffoldMessengerKey.currentState
+        ? ScaffoldMessenger.maybeOf(context) ??
+              rootScaffoldMessengerKey.currentState
         : rootScaffoldMessengerKey.currentState;
     messenger?.clearSnackBars();
   }

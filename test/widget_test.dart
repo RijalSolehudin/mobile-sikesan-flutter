@@ -17,7 +17,9 @@ void main() {
     final mockSppRepo = SppRepository(mockDashboardRepo.dioClient);
     final mockInfaqRepo = InfaqRepository(mockDashboardRepo.dioClient);
     final mockWalletRepo = WalletRepository(mockDashboardRepo.dioClient);
-    final mockAnnouncementRepo = AnnouncementRepository(mockDashboardRepo.dioClient);
+    final mockAnnouncementRepo = AnnouncementRepository(
+      mockDashboardRepo.dioClient,
+    );
 
     final authBloc = AuthBloc(authRepository: mockAuthRepo);
     final dashboardBloc = DashboardBloc(dashboardRepository: mockDashboardRepo);

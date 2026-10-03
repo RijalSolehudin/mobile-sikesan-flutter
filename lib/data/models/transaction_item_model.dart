@@ -34,14 +34,18 @@ class TransactionItemModel {
       if (wallet['student'] != null && wallet['student'] is Map) {
         final st = wallet['student'] as Map<String, dynamic>;
         studentName = st['name']?.toString() ?? 'Santri';
-        if (studentClass.isEmpty && st['classroom'] != null && st['classroom'] is Map) {
+        if (studentClass.isEmpty &&
+            st['classroom'] != null &&
+            st['classroom'] is Map) {
           studentClass = st['classroom']['name']?.toString() ?? '';
         }
       }
     } else if (json['student'] != null && json['student'] is Map) {
       final st = json['student'] as Map<String, dynamic>;
       studentName = st['name']?.toString() ?? 'Santri';
-      if (studentClass.isEmpty && st['classroom'] != null && st['classroom'] is Map) {
+      if (studentClass.isEmpty &&
+          st['classroom'] != null &&
+          st['classroom'] is Map) {
         studentClass = st['classroom']['name']?.toString() ?? '';
       }
     }

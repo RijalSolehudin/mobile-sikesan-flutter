@@ -18,10 +18,7 @@ class AnnouncementRepository {
     String? search,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
       if (category != null && category != 'Semua') {
         queryParams['category'] = category;
       }

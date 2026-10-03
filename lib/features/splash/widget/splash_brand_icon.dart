@@ -43,10 +43,7 @@ class SplashBrandIcon extends StatelessWidget {
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF059669),
-              Color(0xFF047857),
-            ],
+            colors: [Color(0xFF059669), Color(0xFF047857)],
           ),
         ),
         child: Center(
@@ -64,7 +61,10 @@ class SplashBrandIcon extends StatelessWidget {
     }
 
     if (slideAnimation != null) {
-      iconContent = SlideTransition(position: slideAnimation!, child: iconContent);
+      iconContent = SlideTransition(
+        position: slideAnimation!,
+        child: iconContent,
+      );
     }
 
     if (fadeAnimation != null) {

@@ -201,7 +201,9 @@ class MutationPeriodFilter extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: hasActiveFilter ? AppColors.primary.withValues(alpha: 0.3) : AppColors.border,
+          color: hasActiveFilter
+              ? AppColors.primary.withValues(alpha: 0.3)
+              : AppColors.border,
         ),
       ),
       child: Row(
@@ -209,7 +211,9 @@ class MutationPeriodFilter extends StatelessWidget {
           Icon(
             Icons.filter_alt_outlined,
             size: 20,
-            color: hasActiveFilter ? AppColors.primary : AppColors.textSecondary,
+            color: hasActiveFilter
+                ? AppColors.primary
+                : AppColors.textSecondary,
           ),
           const SizedBox(width: 10),
 
@@ -260,11 +264,7 @@ class MutationPeriodFilter extends StatelessWidget {
           ),
 
           const SizedBox(width: 8),
-          Container(
-            height: 24,
-            width: 1,
-            color: AppColors.border,
-          ),
+          Container(height: 24, width: 1, color: AppColors.border),
           const SizedBox(width: 8),
 
           // Dropdown Tahun

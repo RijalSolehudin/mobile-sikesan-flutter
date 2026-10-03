@@ -50,37 +50,38 @@ void main() {
       expect(find.byType(TransactionHistoryTile), findsNWidgets(10));
     });
 
-    testWidgets('triggers onViewAllTransactions callback when Lihat Semua is tapped', (
-      tester,
-    ) async {
-      var callbackCalled = false;
+    testWidgets(
+      'triggers onViewAllTransactions callback when Lihat Semua is tapped',
+      (tester) async {
+        var callbackCalled = false;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: DashboardHistorySection(
-                transactions: mockTransactions,
-                isLoading: false,
-                onViewAllTransactions: () {
-                  callbackCalled = true;
-                },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: DashboardHistorySection(
+                  transactions: mockTransactions,
+                  isLoading: false,
+                  onViewAllTransactions: () {
+                    callbackCalled = true;
+                  },
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      final viewAllFinder = find.text('Lihat Semua');
-      expect(viewAllFinder, findsOneWidget);
+        final viewAllFinder = find.text('Lihat Semua');
+        expect(viewAllFinder, findsOneWidget);
 
-      await tester.tap(viewAllFinder);
-      await tester.pumpAndSettle();
+        await tester.tap(viewAllFinder);
+        await tester.pumpAndSettle();
 
-      expect(callbackCalled, isTrue);
-    });
+        expect(callbackCalled, isTrue);
+      },
+    );
 
     testWidgets('displays empty state when transactions list is empty', (
       tester,

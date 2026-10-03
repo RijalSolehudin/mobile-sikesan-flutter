@@ -12,6 +12,7 @@ import '../features/mutation/screen/mutation_screen.dart';
 import '../features/information/screen/information_screen.dart';
 import '../features/cs_sikesan/screen/cs_screen.dart';
 import '../features/profile/screen/profile_screen.dart';
+import '../features/kwitansi/screen/kwitansi_screen.dart';
 import '../features/navigation/screen/main_navigation_shell.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
@@ -113,6 +114,16 @@ class AppRouter {
                 GoRoute(
                   path: '/home',
                   builder: (context, state) => const HomeScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'kwitansi',
+                      builder: (context, state) => const KwitansiScreen(),
+                    ),
+                  ],
+                ),
+                GoRoute(
+                  path: '/kwitansi',
+                  builder: (context, state) => const KwitansiScreen(),
                 ),
               ],
             ),

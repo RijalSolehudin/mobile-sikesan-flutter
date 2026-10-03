@@ -96,7 +96,9 @@ class _HomeScreenState extends State<HomeScreen> {
           label1: 'STATUS',
           value1: metrics.totalUnpaidSpp > 0 ? 'Belum Lunas' : 'Lunas',
           label2: 'KETERANGAN',
-          value2: metrics.totalUnpaidSpp > 0 ? 'Tunggakan Aktif' : 'Semua Lunas',
+          value2: metrics.totalUnpaidSpp > 0
+              ? 'Tunggakan Aktif'
+              : 'Semua Lunas',
         ),
         DashboardMetricCard(
           title: 'TOTAL INFAK KESANTRIAN',
