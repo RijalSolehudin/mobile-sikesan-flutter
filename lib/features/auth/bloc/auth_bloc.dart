@@ -63,6 +63,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(const AuthState.unauthenticated());
       }
     } else {
+      _log('No valid cached user found, clearing session');
+      await _authRepository.logout();
       emit(const AuthState.unauthenticated());
     }
   }

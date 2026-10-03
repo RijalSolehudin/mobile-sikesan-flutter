@@ -6,7 +6,6 @@ import '../core/navigation/snackbar_cleanup_observer.dart';
 import '../core/navigation/web_modal_history_observer.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/screen/login_screen.dart';
-import '../features/auth/screen/role_selection_screen.dart';
 import '../features/splash/screen/splash_screen.dart';
 import '../features/kwitansi/screen/kwitansi_screen.dart';
 import '../features/navigation/screen/main_navigation_shell.dart';
@@ -61,12 +60,13 @@ class AppRouter {
           return '/splash';
         }
 
-        // If not logged in and not on login or role-selection page, redirect to role-selection
-        if (!isLoggedIn && !isLogin && !isRoleSelection) {
-          return '/role-selection';
+        // Skenario 1: Jika sesi TIDAK ditemukan (unauthenticated), redirect langsung ke /login
+        if (!isLoggedIn && !isLogin) {
+          return '/login';
         }
 
-        // If logged in and on login/role-selection, redirect to home
+        // Skenario 2: Jika sesi DITEMUKAN (authenticated) dan berada di login/role-selection,
+        // redirect default selalu ke /home (Beranda)
         if (isLoggedIn && (isLogin || isRoleSelection)) {
           return '/home';
         }
@@ -100,7 +100,7 @@ class AppRouter {
         ),
         GoRoute(
           path: '/role-selection',
-          builder: (context, state) => const RoleSelectionScreen(),
+          redirect: (context, state) => '/login',
         ),
         GoRoute(
           path: '/login',
@@ -111,11 +111,7 @@ class AppRouter {
         ),
         GoRoute(
           path: '/home',
-          builder: (context, state) {
-            final tabParam = state.uri.queryParameters['tab'];
-            final initialIndex = int.tryParse(tabParam ?? '') ?? 0;
-            return MainNavigationShell(initialIndex: initialIndex);
-          },
+          builder: (context, state) => const MainNavigationShell(initialIndex: 0),
           routes: [
             GoRoute(
               path: 'kwitansi',
@@ -129,19 +125,19 @@ class AppRouter {
         ),
         GoRoute(
           path: '/mutation',
-          redirect: (context, state) => '/home?tab=1',
+          redirect: (context, state) => '/home',
         ),
         GoRoute(
           path: '/information',
-          redirect: (context, state) => '/home?tab=2',
+          redirect: (context, state) => '/home',
         ),
         GoRoute(
           path: '/cs',
-          redirect: (context, state) => '/home?tab=3',
+          redirect: (context, state) => '/home',
         ),
         GoRoute(
           path: '/profile',
-          redirect: (context, state) => '/home?tab=4',
+          redirect: (context, state) => '/home',
         ),
       ],
     );

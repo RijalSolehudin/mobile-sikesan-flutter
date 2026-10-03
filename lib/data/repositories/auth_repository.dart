@@ -62,7 +62,9 @@ class AuthRepository {
   }
 
   Future<UserModel?> getCachedUser() async {
-    return await _secureStorage.getUser();
+    final user = await _secureStorage.getUser();
+    if (user == null || user.id <= 0 || user.name.trim().isEmpty) return null;
+    return user;
   }
 
   Future<ApiResult<UserModel>> getProfile() async {

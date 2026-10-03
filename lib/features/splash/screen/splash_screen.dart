@@ -120,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (authBloc.state.isAuthenticated) {
         context.go('/home');
       } else {
-        context.go('/role-selection');
+        context.go('/login');
       }
     });
   }
