@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../../core/navigation/navigation_keys.dart';
+import '../../../core/navigation/web_history_manager.dart';
 import '../../cs_sikesan/screen/cs_screen.dart';
 import '../../dashboard/screen/home_screen.dart';
 import '../../information/screen/information_screen.dart';
@@ -35,6 +35,23 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    WebHistoryManager.instance.init(
+      onModalPop: () {
+        if (rootNavigatorKey.currentState?.canPop() ?? false) {
+          rootNavigatorKey.currentState?.pop();
+        }
+      },
+      onRootBack: () {
+        _handleBackPress();
+      },
+    );
+    WebHistoryManager.instance.enableRootGuard();
+  }
+
+  @override
+  void dispose() {
+    WebHistoryManager.instance.disableRootGuard();
+    super.dispose();
   }
 
   void setTab(int index) {
@@ -77,7 +94,8 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
     }
 
     // Menutup aplikasi jika ditekan 2x dalam 2 detik di rootpage
-    SystemNavigator.pop();
+    WebHistoryManager.instance.disableRootGuard();
+    WebHistoryManager.instance.exitApp();
   }
 
   @override

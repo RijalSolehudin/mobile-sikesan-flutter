@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../core/navigation/navigation_keys.dart';
 import '../core/navigation/snackbar_cleanup_observer.dart';
+import '../core/navigation/web_modal_history_observer.dart';
 import '../features/auth/bloc/auth_bloc.dart';
 import '../features/auth/screen/login_screen.dart';
 import '../features/auth/screen/role_selection_screen.dart';
@@ -30,7 +31,10 @@ class AppRouter {
     final router = GoRouter(
       navigatorKey: rootNavigatorKey,
       initialLocation: '/',
-      observers: [SnackBarCleanupObserver()],
+      observers: [
+        SnackBarCleanupObserver(),
+        WebModalHistoryObserver(),
+      ],
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
       redirect: (BuildContext context, GoRouterState state) {
         final authState = authBloc.state;

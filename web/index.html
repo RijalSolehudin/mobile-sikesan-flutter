@@ -150,12 +150,91 @@
         });
       }
 
-      window.addEventListener('popstate', function() {
+      var modalDepth = 0;
+      var isPoppingFromFlutter = false;
+      var onModalPopHandler = null;
+      var onRootBackHandler = null;
+      var rootGuardActive = false;
+
+      window.sikesanRegisterPopHandler = function(fn) {
+        onModalPopHandler = fn;
+      };
+
+      window.sikesanRegisterRootBackHandler = function(fn) {
+        onRootBackHandler = fn;
+      };
+
+      window.sikesanPushModal = function() {
+        modalDepth++;
+        try {
+          window.history.pushState({ sikesanModal: modalDepth }, '', window.location.href);
+        } catch (e) {}
+      };
+
+      window.sikesanPopModal = function() {
+        if (modalDepth > 0) {
+          modalDepth--;
+          isPoppingFromFlutter = true;
+          try {
+            window.history.back();
+          } catch (e) {}
+        }
+      };
+
+      window.sikesanEnableRootGuard = function() {
+        if (!rootGuardActive) {
+          rootGuardActive = true;
+          try {
+            window.history.pushState({ sikesanRootGuard: true }, '', window.location.href);
+          } catch (e) {}
+        }
+      };
+
+      window.sikesanDisableRootGuard = function() {
+        rootGuardActive = false;
+      };
+
+      window.sikesanExitApp = function() {
+        rootGuardActive = false;
+        try {
+          window.history.back();
+        } catch (e) {}
+      };
+
+      window.addEventListener('popstate', function(event) {
         resetViewportScroll();
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
           document.activeElement.blur();
         }
         window.dispatchEvent(new Event('resize'));
+
+        // 1. If Flutter closed the modal from UI (tap barrier/close button), we already called history.back(), so ignore this popstate
+        if (isPoppingFromFlutter) {
+          isPoppingFromFlutter = false;
+          return;
+        }
+
+        // 2. If a modal is open and user swiped back (hardware/gesture back in browser)
+        if (modalDepth > 0) {
+          modalDepth--;
+          if (typeof onModalPopHandler === 'function') {
+            onModalPopHandler();
+          }
+          return;
+        }
+
+        // 3. If on rootpage and user swiped back
+        if (rootGuardActive) {
+          if (typeof onRootBackHandler === 'function') {
+            onRootBackHandler();
+            // Re-arm root guard only if rootGuardActive is still true
+            if (rootGuardActive) {
+              try {
+                window.history.pushState({ sikesanRootGuard: true }, '', window.location.href);
+              } catch (e) {}
+            }
+          }
+        }
       });
 
       window.addEventListener('scroll', resetViewportScroll, { passive: true });
